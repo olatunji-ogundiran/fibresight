@@ -62,6 +62,7 @@ RX_HIGH_ALARM = -1.0
 BER_ALARM = 1e-6
 TX_SPEC = (-1.0, 2.0)
 NOW = datetime(2026, 10, 27, 8, 0, tzinfo=timezone.utc)
+NIGHT_TEST = NOW + timedelta(hours=18)   # OTDR test window tonight, 02:00 UTC
 PM_DAYS = 14
 
 
@@ -98,6 +99,16 @@ class Case:
     commissioning_loss: dict = field(default_factory=dict)
     tx_bias0: float = 40.0
     tx_eol: dict = field(default_factory=dict)
+    hard: bool = False
+    intermittent: bool = False   # bend loss follows cable temperature (worst at night)
+    day_factor: float = 1.0
+
+    def bend_factor(self, t: datetime) -> float:
+        if not self.intermittent:
+            return 1.0
+        h = t.hour + t.minute / 60.0
+        g = max(0.0, np.cos(2 * np.pi * (h - 2.0) / 24.0)) ** 3
+        return self.day_factor + (1.0 - self.day_factor) * g
 
     @property
     def fibre_length_km(self) -> float:
@@ -175,12 +186,13 @@ def _healthy_parameters(case: Case, rng: np.random.Generator) -> None:
         sc.note = "joins the original G.652.D cable to a G.655 replacement section"
 
 
-def link_loss(case: Case, wl: int, include_fault: bool = True) -> float:
-    """End-to-end optical loss A-ODF to B-ODF (both connectors included)."""
+def link_loss(case: Case, wl: int, include_fault: bool = True, t: Optional[datetime] = None) -> float:
+    """End-to-end optical loss A-ODF to B-ODF (both connectors included) at time t (default now)."""
     total = case.alpha[wl] * case.fibre_length_km
     total += sum(e.loss[wl] for e in case.elements)
     if include_fault:
-        total += sum(ev["loss"][wl] for ev in case.events)
+        f = case.bend_factor(t or NOW)
+        total += sum(ev["loss"][wl] * (f if ev["kind"] == "bend" else 1.0) for ev in case.events)
     return total
 
 
@@ -338,7 +350,7 @@ def _notes(case: Case, rng: np.random.Generator) -> None:
     case.notes = [{"time": t.strftime("%Y-%m-%d %H:%M UTC"), "entry": s} for t, s in notes]
 
 
-def generate_case(seed: int, fault_type: Optional[str] = None) -> Case:
+def generate_case(seed: int, fault_type: Optional[str] = None, hard: bool = False) -> Case:
     rng = _rng(seed)
     if fault_type is None:
         fault_type = FAULT_TYPES[seed % len(FAULT_TYPES)]
@@ -365,6 +377,10 @@ def generate_case(seed: int, fault_type: Optional[str] = None) -> Case:
                                for wl in WAVELENGTHS}
     case.att_installed_db = case.att_design_db
     _inject_fault(case, fault_type, rng)
+    case.hard = hard
+    if hard and fault_type == "macrobend" and rng.random() < 0.6:
+        case.intermittent = True
+        case.day_factor = float(rng.uniform(0.003, 0.012))
     _onset(case, rng)
     _notes(case, rng)
     return case

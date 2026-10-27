@@ -17,6 +17,7 @@ from .sim import (ATTENUATOR_VALUES, NOW, PM_DAYS, RX_HIGH_ALARM, RX_HIGH_WARN, 
                   RX_LOW_WARN, RX_OVERLOAD, RX_SENSITIVITY, TX_SPEC, Case, link_loss)
 
 CONNECTOR_IDS = ("A-ODF", "MID-PP", "B-ODF")
+OTDR_BUDGET = 3
 POWER_POINTS = ("A-TX", "B-ODF", "B-RX")
 
 
@@ -26,9 +27,11 @@ class ToolError(Exception):
 
 class ToolBox:
     def __init__(self, case: Case, workdir: str, mode: str = "standard"):
-        """mode: 'standard' (OTDR auto event table available) or 'raw' (traces only)."""
+        """mode: 'standard' (OTDR auto event table), 'raw' (traces only) or 'hard'
+        (event tables, but at most OTDR_BUDGET distinct OTDR tests per ticket)."""
         self.case = case
         self.mode = mode
+        self.otdr_runs = set()
         self.specs = [t for t in TOOL_SPECS if not (mode == "raw" and t["name"] == "otdr_event_table")]
         self.names = {t["name"] for t in self.specs}
         self.workdir = workdir
@@ -91,14 +94,14 @@ class ToolBox:
             return {"metric": metric, "resolution": f"hourly, last {n} hours", "rows": rows}
         raise ToolError("resolution must be 'daily' or 'hourly'")
 
-    def otdr_event_table(self, wavelength_nm: int, from_site: str) -> dict:
-        wl, site = self._check_otdr(wavelength_nm, from_site)
-        return otdr.event_table(self.case, wl, site)
+    def otdr_event_table(self, wavelength_nm: int, from_site: str, time: str = "now") -> dict:
+        wl, site, when = self._check_otdr(wavelength_nm, from_site, time)
+        return otdr.event_table(self.case, wl, site, when)
 
     def otdr_trace(self, wavelength_nm: int, from_site: str, start_km: float = None,
-                   end_km: float = None, points: int = 120) -> dict:
-        wl, site = self._check_otdr(wavelength_nm, from_site)
-        tr = otdr.synthesize(self.case, wl, site)
+                   end_km: float = None, points: int = 120, time: str = "now") -> dict:
+        wl, site, when = self._check_otdr(wavelength_nm, from_site, time)
+        tr = otdr.synthesize(self.case, wl, site, when=when)
         z, y = tr["distance_km"], tr["level_db"]
         lo = z[0] if start_km is None else float(start_km)
         hi = z[-1] if end_km is None else float(end_km)
@@ -119,11 +122,11 @@ class ToolBox:
                 "samples": rows}
 
     def otdr_trace_image(self, wavelength_nm: int, from_site: str, start_km: float = None,
-                         end_km: float = None) -> dict:
-        wl, site = self._check_otdr(wavelength_nm, from_site)
-        tr = otdr.synthesize(self.case, wl, site)
-        tag = f"otdr_{wl}_{site}_{start_km}_{end_km}".replace(".", "p")
-        path = images.render_trace(tr, f"OTDR {wl} nm from site {site}",
+                         end_km: float = None, time: str = "now") -> dict:
+        wl, site, when = self._check_otdr(wavelength_nm, from_site, time)
+        tr = otdr.synthesize(self.case, wl, site, when=when)
+        tag = f"otdr_{wl}_{site}_{when}_{start_km}_{end_km}".replace(".", "p")
+        path = images.render_trace(tr, f"OTDR {wl} nm from site {site} ({when})",
                                    os.path.join(self.workdir, tag + ".png"), start_km, end_km)
         return {"image_path": path, "wavelength_nm": wl, "from_site": site}
 
@@ -136,7 +139,7 @@ class ToolBox:
         return {"image_path": path, "element_id": el.id,
                 "note": "Inspection scope view of the bulkhead-side connector end face (core at centre, cladding disc, ferrule)."}
 
-    def measure_power(self, point: str) -> dict:
+    def measure_power(self, point: str) -> dict:  # measured now (08:00 UTC)
         if point not in POWER_POINTS:
             raise ToolError(f"point must be one of {list(POWER_POINTS)}")
         c = self.case
@@ -159,7 +162,7 @@ class ToolBox:
         return {"notes": self.case.notes}
 
     # ------------------------------------------------------------ helpers
-    def _check_otdr(self, wavelength_nm, from_site):
+    def _check_otdr(self, wavelength_nm, from_site, time="now"):
         try:
             wl = int(wavelength_nm)
         except (TypeError, ValueError):
@@ -169,7 +172,16 @@ class ToolBox:
         site = str(from_site).upper().replace("SITE ", "").strip()
         if site not in ("A", "B"):
             raise ToolError("from_site must be 'A' or 'B'")
-        return wl, site
+        when = str(time or "now").lower()
+        if when not in ("now", "night"):
+            raise ToolError("time must be 'now' or 'night' (scheduled test window tonight at 02:00 UTC)")
+        key = (wl, site, when)
+        if self.mode == "hard" and key not in self.otdr_runs and len(self.otdr_runs) >= OTDR_BUDGET:
+            raise ToolError(f"OTDR budget used: each OTDR test takes the live service down, and the NOC allows "
+                            f"{OTDR_BUDGET} tests per ticket. Already run: {sorted(self.otdr_runs)}. "
+                            "Results of tests already run can be viewed again.")
+        self.otdr_runs.add(key)
+        return wl, site, when
 
     def _element(self, element_id: str):
         for e in self.case.elements:
@@ -202,18 +214,21 @@ TOOL_SPECS = [
     {"name": "otdr_event_table", "description": "Run an OTDR measurement (traffic is taken down for the test) and return the automatic event table.",
      "parameters": {"type": "object", "properties": {
          "wavelength_nm": {"type": "integer", "enum": [1310, 1550]},
-         "from_site": {"type": "string", "enum": ["A", "B"]}}, "required": ["wavelength_nm", "from_site"]}},
+         "from_site": {"type": "string", "enum": ["A", "B"]},
+         "time": {"type": "string", "enum": ["now", "night"], "description": "now (08:00 UTC) or the scheduled maintenance window tonight (02:00 UTC)"}}, "required": ["wavelength_nm", "from_site"]}},
     {"name": "otdr_trace", "description": "Downsampled OTDR backscatter trace (mean and peak level per bin) for a distance window.",
      "parameters": {"type": "object", "properties": {
          "wavelength_nm": {"type": "integer", "enum": [1310, 1550]},
          "from_site": {"type": "string", "enum": ["A", "B"]},
          "start_km": {"type": "number"}, "end_km": {"type": "number"},
-         "points": {"type": "integer", "description": "number of bins, 10 to 300"}}, "required": ["wavelength_nm", "from_site"]}},
+         "points": {"type": "integer", "description": "number of bins, 10 to 300"},
+         "time": {"type": "string", "enum": ["now", "night"], "description": "now (08:00 UTC) or the scheduled maintenance window tonight (02:00 UTC)"}}, "required": ["wavelength_nm", "from_site"]}},
     {"name": "otdr_trace_image", "description": "Plot of the OTDR trace as an image, optionally zoomed to a distance window.",
      "parameters": {"type": "object", "properties": {
          "wavelength_nm": {"type": "integer", "enum": [1310, 1550]},
          "from_site": {"type": "string", "enum": ["A", "B"]},
-         "start_km": {"type": "number"}, "end_km": {"type": "number"}}, "required": ["wavelength_nm", "from_site"]}},
+         "start_km": {"type": "number"}, "end_km": {"type": "number"},
+         "time": {"type": "string", "enum": ["now", "night"], "description": "now (08:00 UTC) or the scheduled maintenance window tonight (02:00 UTC)"}}, "required": ["wavelength_nm", "from_site"]}},
     {"name": "inspect_connector", "description": "Inspection-scope image of a connector end face. Valid for connector elements only (A-ODF, MID-PP if present, B-ODF).",
      "parameters": {"type": "object", "properties": {"element_id": {"type": "string"}}, "required": ["element_id"]}},
     {"name": "measure_power", "description": "Optical power meter reading at 1550 nm at a test point: A-TX (transmitter output), B-ODF (arriving at site B, before the attenuator) or B-RX (receiver input).",

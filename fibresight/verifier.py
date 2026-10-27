@@ -13,6 +13,7 @@ import math
 from .sim import ACTION_FOR_FAULT, DISTRIBUTED_FAULTS, FAULT_TYPES, Case
 
 ROUTE_TOLERANCE_KM = 0.10
+HARD_ROUTE_TOLERANCE_KM = 0.05
 ANSWER_KEYS = {"fault_type", "element_id", "route_km", "action", "evidence"}
 
 ANSWER_SCHEMA = {
@@ -67,7 +68,8 @@ def grade(answer, case: Case) -> dict:
     act_ok = answer["action"] == truth["action"]
     if truth["fault_type"] in DISTRIBUTED_FAULTS:
         loc_err = abs(float(answer["route_km"]) - truth["route_km"]) if answer.get("route_km") is not None else None
-        loc_ok = loc_err is not None and loc_err <= ROUTE_TOLERANCE_KM
+        tol = HARD_ROUTE_TOLERANCE_KM if getattr(case, "hard", False) else ROUTE_TOLERANCE_KM
+        loc_ok = loc_err is not None and loc_err <= tol
     else:
         loc_err = None
         loc_ok = answer.get("element_id") == truth["element_id"]

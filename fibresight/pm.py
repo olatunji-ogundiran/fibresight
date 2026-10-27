@@ -50,8 +50,11 @@ def history(case: Case) -> dict:
     if ft in ("dirty_connector", "damaged_connector", "bad_splice"):
         healthy_loss -= extra   # element losses already include the fault
     loss = np.full(n, healthy_loss)
-    if ft in ("dirty_connector", "damaged_connector", "bad_splice", "macrobend"):
+    if ft in ("dirty_connector", "damaged_connector", "bad_splice"):
         loss = loss + extra * after
+    elif ft == "macrobend":
+        factor = np.array([case.bend_factor(t) for t in times])
+        loss = loss + extra * after * factor
     att = np.full(n, case.att_design_db)
     if ft == "wrong_attenuator":
         att = np.where(after, case.att_installed_db, case.att_design_db)

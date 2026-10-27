@@ -94,6 +94,11 @@ def solve(tb: ToolBox, equipment: bool = True, bidirectional: bool = True, dual_
     L = record["elements_in_route_order"][-1]["route_km"]
     alarms = tb.call("get_alarms", {})["alarms"]
     active = {a["alarm"] for a in alarms if a["cleared"] == "active"}
+    # Alarms that keep raising and clearing (mostly at night) point to an
+    # intermittent, temperature-driven loss: test in tonight's window.
+    low = [a for a in alarms if a["alarm"].startswith("RX_LOW")]
+    when = "night" if len(low) >= 3 and sum(a["cleared"] != "active" for a in low) >= 2 else "now"
+    hard = tb.mode == "hard"
 
     light_at_b = (tb.call("measure_power", {"point": "B-ODF"})["power_dbm"] is not None) if equipment else False
     if "RX_LOS" in active and not light_at_b:
@@ -102,7 +107,7 @@ def solve(tb: ToolBox, equipment: bool = True, bidirectional: bool = True, dual_
             return {"fault_type": "fibre_break", "element_id": None, "route_km": round(end_a, 3),
                     "action": "repair_break", "evidence": "OTDR end distance used as route km."}
         ta = [tb.call("otdr_event_table", {"wavelength_nm": wl, "from_site": "A"}) for wl in (1550, 1310)]
-        tbb = [tb.call("otdr_event_table", {"wavelength_nm": wl, "from_site": "B"}) for wl in (1550, 1310)]
+        tbb = [tb.call("otdr_event_table", {"wavelength_nm": wl, "from_site": "B"}) for wl in ((1550,) if hard else (1550, 1310))]
         end_a = ta[0]["events"][-1]["distance_km"]
         end_b = tbb[0]["events"][-1]["distance_km"]
         anc_a = _anchors(record, "A", _event_positions(ta))
@@ -117,7 +122,7 @@ def solve(tb: ToolBox, equipment: bool = True, bidirectional: bool = True, dual_
                 "evidence": f"RX_LOS active; OTDR ends at {end_a:.3f} km fibre from A and {end_b:.3f} km from B; mapped to route km via closure anchors."}
 
     if not equipment:
-        return _link_diagnosis(tb, record, L, bidirectional, dual_wavelength, anchors_on, inspect)
+        return _link_diagnosis(tb, record, L, bidirectional, dual_wavelength, anchors_on, inspect, when)
     tx = tb.call("measure_power", {"point": "A-TX"})["power_dbm"]
     bias = tb.call("get_pm", {"metric": "tx_bias_ma", "resolution": "daily"})["rows"]
     bias_rise = bias[-1]["max"] - bias[0]["avg"]
@@ -136,14 +141,17 @@ def solve(tb: ToolBox, equipment: bool = True, bidirectional: bool = True, dual_
         return {"fault_type": "wrong_attenuator", "element_id": "B-ATT", "route_km": None,
                 "action": "replace_attenuator",
                 "evidence": f"Attenuator measures {att_meas:.1f} dB against a design value of {design:.0f} dB."}
-    return _link_diagnosis(tb, record, L, bidirectional, dual_wavelength, anchors_on, inspect)
+    return _link_diagnosis(tb, record, L, bidirectional, dual_wavelength, anchors_on, inspect, when)
 
 
-def _link_diagnosis(tb, record, L, bidirectional, dual_wavelength, anchors_on, inspect) -> dict:
+def _link_diagnosis(tb, record, L, bidirectional, dual_wavelength, anchors_on, inspect, when="now") -> dict:
     sites = ("A", "B") if bidirectional else ("A",)
     wls = (1310, 1550) if dual_wavelength else (1550,)
-    tabs = {(wl, s): tb.call("otdr_event_table", {"wavelength_nm": wl, "from_site": s})
-            for wl in wls for s in sites}
+    plan = [(wl, s) for wl in wls for s in sites]
+    if tb.mode == "hard":  # three tests: 1550 both ends, 1310 from A
+        plan = [p for p in plan if not (p[0] == 1310 and p[1] == "B")]
+    tabs = {(wl, s): tb.call("otdr_event_table", {"wavelength_nm": wl, "from_site": s, "time": when})
+            for wl, s in plan}
     F = tabs[(1550, "A")]["events"][-1]["distance_km"] - 1.0
     # Bidirectional event list in the A frame.
     def evs(wl, s):
@@ -177,7 +185,12 @@ def _link_diagnosis(tb, record, L, bidirectional, dual_wavelength, anchors_on, i
         if a15 is None or b15 is None:
             continue  # seen from one end only: ghost or sub-threshold
         l15 = (a15["loss_db"] + b15["loss_db"]) / 2
-        l13 = (((a13["loss_db"] if a13 else 0.0) + (b13["loss_db"] if b13 else 0.0)) / 2) if dual_wavelength else None
+        if not dual_wavelength:
+            l13 = None
+        elif (1310, "B") in tabs:
+            l13 = ((a13["loss_db"] if a13 else 0.0) + (b13["loss_db"] if b13 else 0.0)) / 2
+        else:
+            l13 = a13["loss_db"] if a13 else 0.0
         refl = a15["type"] == "reflective" or b15["type"] == "reflective"
         cands.append({"pos": ev["pos"], "l1550": l15, "l1310": l13, "reflective": refl})
     worst = max(cands, key=lambda c: c["l1550"])

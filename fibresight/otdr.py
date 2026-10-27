@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import numpy as np
 
-from .sim import Case
+from .sim import NIGHT_TEST, NOW, Case
 
 RECEIVE_CORD_KM = 1.0
 OPEN_END_REFLECTANCE = -14.5
@@ -27,7 +27,11 @@ def _pulse_km(pulse_ns: float) -> float:
     return pulse_ns * 1e-9 * 2.0e8 / 2.0 / 1000.0  # spatial pulse length (one way)
 
 
-def physical_events(case: Case, wl: int, from_site: str) -> tuple:
+def test_time(when: str):
+    return NIGHT_TEST if when == "night" else NOW
+
+
+def physical_events(case: Case, wl: int, from_site: str, when: str = "now") -> tuple:
     """Events seen from one end, nearest first, plus the end position.
 
     Returns (events, end_km, end_reflectance). Each event is a dict with
@@ -43,8 +47,10 @@ def physical_events(case: Case, wl: int, from_site: str) -> tuple:
         else:
             apparent = e.loss[wl] + (e.mfd_offset[wl] if from_site == "A" else -e.mfd_offset[wl])
             evs.append({"pos_a": pos_a, "loss": apparent, "refl": None, "src": e.id})
+    f = case.bend_factor(test_time(when))
     for ev in case.events:
-        evs.append({"pos_a": ev["fibre_km"], "loss": ev["loss"][wl], "refl": None, "src": ev["kind"]})
+        scale = f if ev["kind"] == "bend" else 1.0
+        evs.append({"pos_a": ev["fibre_km"], "loss": ev["loss"][wl] * scale, "refl": None, "src": ev["kind"]})
 
     if case.break_fibre_km is not None:
         b = case.break_fibre_km
@@ -75,11 +81,11 @@ def _ghosts(events: list, end: float) -> list:
     return ghosts
 
 
-def synthesize(case: Case, wl: int, from_site: str, seed_offset: int = 0) -> dict:
+def synthesize(case: Case, wl: int, from_site: str, seed_offset: int = 0, when: str = "now") -> dict:
     """Backscatter trace in dB (5*log10 display convention) vs distance."""
     st = otdr_settings(case)
-    rng = np.random.default_rng([case.seed, wl, 1 if from_site == "A" else 2, seed_offset])
-    events, end, end_refl = physical_events(case, wl, from_site)
+    rng = np.random.default_rng([case.seed, wl, 1 if from_site == "A" else 2, seed_offset, 1 if when == "night" else 0])
+    events, end, end_refl = physical_events(case, wl, from_site, when)
     ghosts = _ghosts(events, end)
     dz = st["sample_km"]
     pulse = _pulse_km(st["pulse_ns"])
@@ -114,11 +120,11 @@ def synthesize(case: Case, wl: int, from_site: str, seed_offset: int = 0) -> dic
     return {"distance_km": z, "level_db": level, "settings": st, "end_km": end}
 
 
-def event_table(case: Case, wl: int, from_site: str) -> dict:
+def event_table(case: Case, wl: int, from_site: str, when: str = "now") -> dict:
     """What the OTDR's automatic analysis reports for this measurement."""
     st = otdr_settings(case)
-    rng = np.random.default_rng([case.seed, wl, 11 if from_site == "A" else 12])
-    events, end, end_refl = physical_events(case, wl, from_site)
+    rng = np.random.default_rng([case.seed, wl, 11 if from_site == "A" else 12, 1 if when == "night" else 0])
+    events, end, end_refl = physical_events(case, wl, from_site, when)
     ghosts = _ghosts(events, end)
     pulse = _pulse_km(st["pulse_ns"])
     dr = st["dynamic_range_db"][wl]
@@ -164,6 +170,7 @@ def event_table(case: Case, wl: int, from_site: str) -> dict:
     return {
         "wavelength_nm": wl,
         "from_site": from_site,
+        "test_time": test_time(when).strftime("%Y-%m-%d %H:%M UTC"),
         "pulse_width_ns": st["pulse_ns"],
         "group_index": 1.4682,
         "note": "Distances are fibre distances from the ODF at the shooting site. Launch and receive cords of 1.000 km were used; the receive cord ends in an open connector.",

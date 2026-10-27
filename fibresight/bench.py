@@ -40,12 +40,12 @@ def main(argv=None):
     ap.add_argument("--start", type=int, default=1000, help="first seed (held-out range starts at 1000)")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--no-images", action="store_true")
-    ap.add_argument("--mode", choices=["standard", "raw"], default="standard")
+    ap.add_argument("--mode", choices=["standard", "raw", "hard"], default="standard")
     ap.add_argument("--max-steps", type=int, default=30)
     ap.add_argument("--name", default=None)
     a = ap.parse_args(argv)
 
-    name = a.name or (f"{a.solver}" if a.solver == "expert" else f"{a.provider}_{a.mode}_{a.prompt}{'_noimg' if a.no_images else ''}")
+    name = a.name or (f"{a.solver}_{a.mode}" if a.solver == "expert" else f"{a.provider}_{a.mode}_{a.prompt}{'_noimg' if a.no_images else ''}")
     out = os.path.join("results", name)
     os.makedirs(out, exist_ok=True)
     seeds = list(range(a.start, a.start + a.n))
@@ -54,10 +54,10 @@ def main(argv=None):
         client, model = make_client(a.provider)
 
     def one(seed):
-        case = generate_case(seed)
+        case = generate_case(seed, hard=(a.mode == "hard"))
         wd = os.path.join(out, "work", str(seed))
         if a.solver == "expert":
-            ans = solve(ToolBox(case, wd))
+            ans = solve(ToolBox(case, wd, a.mode))
             g = grade(ans, case)
             res = {"seed": seed, "answer": ans, "grade": g}
         else:
