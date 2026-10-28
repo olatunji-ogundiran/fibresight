@@ -1,0 +1,1453 @@
+{
+ "seed": 1010,
+ "model": "muse-glimmer",
+ "mode": "standard",
+ "answer": {
+  "fault_type": "macrobend",
+  "route_km": 42.1,
+  "action": "relieve_bend",
+  "evidence": "RX power dropped ~3 dB on 2026-10-25 after SC-11 work; OTDR A shows 7.83 dB non-reflective loss at 43.28 km fibre distance, OTDR B shows 6.43 dB loss at 3.613 km from B, both pointing to SC-11 at 42.093 km route; timing matches closure access.",
+  "evidence_refs": [
+   {
+    "call_id": 6,
+    "quote": "day: 2026-10-25, min: -15.38, avg: -14.65, max: -12.14"
+   },
+   {
+    "call_id": 12,
+    "quote": "distance_km: 43.28, type: non-reflective, loss_db: 7.83"
+   },
+   {
+    "call_id": 14,
+    "quote": "distance_km: 3.613, type: non-reflective, loss_db: 6.43"
+   },
+   {
+    "call_id": 10,
+    "quote": "time: 2026-10-25 12:38 UTC, entry: Splicing crew re-entered closure SC-11 to add a branch cable for a new customer. Closure resealed."
+   }
+  ]
+ },
+ "view": "noc",
+ "grade": {
+  "score": 1.0,
+  "valid": true,
+  "errors": [],
+  "fault_type_ok": true,
+  "action_ok": true,
+  "location_ok": true,
+  "route_error_km": 0.007,
+  "truth": {
+   "fault_type": "macrobend",
+   "element_id": "SC-11",
+   "route_km": 42.093,
+   "action": "relieve_bend"
+  }
+ },
+ "dispatch": {
+  "score": 1.0,
+  "crew_ok": true,
+  "location_ok": true,
+  "route_error_km": 0.007,
+  "errors": []
+ },
+ "grounding": {
+  "refs": 4,
+  "grounded": 4,
+  "rate": 1.0,
+  "ungrounded": []
+ },
+ "checklist": [
+  {
+   "item": "Retrieve link record and baseline parameters",
+   "status": "done",
+   "note": "Link record retrieved: route 45.63 km, 14 elements, design loss 10.49 dB at 1550 nm, B-ATT 3 dB, RX thresholds"
+  },
+  {
+   "item": "Check alarms for 1550 nm service at site B",
+   "status": "done",
+   "note": "RX_LOW_WARNING active since 2026-10-25 13:00 UTC, not cleared"
+  },
+  {
+   "item": "Check performance monitoring history (rx_power, tx_power, pre_fec_ber)",
+   "status": "done",
+   "note": "RX dropped ~3 dB from ~-12.1 dBm baseline to ~-15.3 dBm on 25-26 Oct; TX stable ~1.6 dBm; BER degraded to ~10^-12"
+  },
+  {
+   "item": "Check site notes / field log for recent work",
+   "status": "done",
+   "note": "SC-11 accessed 2026-10-25 12:38 for branch add, resealed; flood near km37 on 23 Oct"
+  },
+  {
+   "item": "Run embedded OTDR from site A",
+   "status": "done",
+   "note": "OTDR A shows large 7.83 dB loss at 43.28 km fibre distance, near SC-11 at 42.093 km route"
+  },
+  {
+   "item": "Run embedded OTDR from site B",
+   "status": "done",
+   "note": "OTDR B shows 6.43 dB loss at 3.613 km fibre distance from B, consistent with loss at ~43 km from A"
+  },
+  {
+   "item": "Correlate OTDR events with route map elements",
+   "status": "done",
+   "note": "OTDR events correlate to SC-11: A 43.28 km fibre ~42.1 km route, B 3.613 km from B ~3.537 km route to SC-11"
+  },
+  {
+   "item": "Determine fault type, location and corrective action",
+   "status": "done",
+   "note": "Diagnosis: macrobend at SC-11 region ~42.1 km route, consistent with recent work and OTDR loss"
+  }
+ ],
+ "verification": {
+  "enabled": true,
+  "attempts": 1,
+  "escalated": false,
+  "history": [
+   {
+    "attempt": 1,
+    "answer": {
+     "fault_type": "macrobend",
+     "route_km": 42.1,
+     "action": "relieve_bend",
+     "evidence": "RX power dropped ~3 dB on 2026-10-25 after SC-11 work; OTDR A shows 7.83 dB non-reflective loss at 43.28 km fibre distance, OTDR B shows 6.43 dB loss at 3.613 km from B, both pointing to SC-11 at 42.093 km route; timing matches closure access.",
+     "evidence_refs": [
+      {
+       "call_id": 6,
+       "quote": "day: 2026-10-25, min: -15.38, avg: -14.65, max: -12.14"
+      },
+      {
+       "call_id": 12,
+       "quote": "distance_km: 43.28, type: non-reflective, loss_db: 7.83"
+      },
+      {
+       "call_id": 14,
+       "quote": "distance_km: 3.613, type: non-reflective, loss_db: 6.43"
+      },
+      {
+       "call_id": 10,
+       "quote": "time: 2026-10-25 12:38 UTC, entry: Splicing crew re-entered closure SC-11 to add a branch cable for a new customer. Closure resealed."
+      }
+     ]
+    },
+    "problems": [],
+    "review": null
+   }
+  ]
+ },
+ "steps": 18,
+ "tool_calls": 17,
+ "seconds": 173.9,
+ "usage": {
+  "prompt_tokens": 109831,
+  "completion_tokens": 9642
+ },
+ "transcript": [
+  {
+   "step": 0,
+   "content": null,
+   "reasoning": "NOC ticket: alarm raised on the A to B 1550 nm service. Diagnose it remotely so we can dispatch.\n\nWe need to find single root cause and exactly where it is. Use remote tools: alarms, performance monitoring, embedded in-service OTDR at each site, link record, field log.\n\nWe must start by writing plan with set_checklist and keep it updated.\n\nSteps:\n1. set_checklist items.\n2. get_link_record to know elements, route km, thresholds.\n3. get_alarms for service receiver at site B over last 14 days.\n4. get_pm metrics: rx_power_dbm, tx_power_dbm, tx_bias_ma, pre_fec_ber, rx_module_temp_c.\n5. get_site_notes.\n6. embedded_otdr from A and B at now or night.\n\nWe need to find fault type: dirty_connector, damaged_connector, macrobend, bad_splice, fibre_break, wrong_attenuator, tx_degradation\n\nLocation: element_id for connector, splice closure, attenuator (B-ATT) or transmitter (A-TX); give route_km for macrobend or fibre break.\n\nConnector end faces cannot be inspected remotely. For connector fault submit dirty_connector with clean_connector unless evidence shows damaged: crew inspects, cleans, replaces if damaged.\n\nWe need evidence_refs with call_id and quote.\n\nProcess: first set checklist.\n\nLet's create checklist items:\n- Retrieve link record and baseline parameters\n- Check alarms for service\n- Check performance monitoring for rx_power, tx_power, ber\n- Check site notes for recent work\n- Run embedded OTDR from site A\n- Run embedded OTDR from site B\n- Correlate loss location with route map\n- Determine fault type and action\n\nThen execute.\n\nWe need call IDs. Each tool call returns call_id? Likely system assigns. We'll need to reference them in evidence_refs.\n\nLet's start with set_checklist.",
+   "tool_calls": [
+    {
+     "name": "set_checklist",
+     "args": {
+      "items": [
+       "Retrieve link record and baseline parameters",
+       "Check alarms for 1550 nm service at site B",
+       "Check performance monitoring history (rx_power, tx_power, pre_fec_ber)",
+       "Check site notes / field log for recent work",
+       "Run embedded OTDR from site A",
+       "Run embedded OTDR from site B",
+       "Correlate OTDR events with route map elements",
+       "Determine fault type, location and corrective action"
+      ]
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Retrieve link record and baseline parameters",
+        "status": "done",
+        "note": "Link record retrieved: route 45.63 km, 14 elements, design loss 10.49 dB at 1550 nm, B-ATT 3 dB, RX thresholds"
+       },
+       {
+        "item": "Check alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_WARNING active since 2026-10-25 13:00 UTC, not cleared"
+       },
+       {
+        "item": "Check performance monitoring history (rx_power, tx_power, pre_fec_ber)",
+        "status": "done",
+        "note": "RX dropped ~3 dB from ~-12.1 dBm baseline to ~-15.3 dBm on 25-26 Oct; TX stable ~1.6 dBm; BER degraded to ~10^-12"
+       },
+       {
+        "item": "Check site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-11 accessed 2026-10-25 12:38 for branch add, resealed; flood near km37 on 23 Oct"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR A shows large 7.83 dB loss at 43.28 km fibre distance, near SC-11 at 42.093 km route"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR B shows 6.43 dB loss at 3.613 km fibre distance from B, consistent with loss at ~43 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with route map elements",
+        "status": "done",
+        "note": "OTDR events correlate to SC-11: A 43.28 km fibre ~42.1 km route, B 3.613 km from B ~3.537 km route to SC-11"
+       },
+       {
+        "item": "Determine fault type, location and corrective action",
+        "status": "done",
+        "note": "Diagnosis: macrobend at SC-11 region ~42.1 km route, consistent with recent work and OTDR loss"
+       }
+      ],
+      "call_id": 1
+     }
+    }
+   ]
+  },
+  {
+   "step": 1,
+   "content": null,
+   "reasoning": "Checklist set. Now start with link record.",
+   "tool_calls": [
+    {
+     "name": "get_link_record",
+     "args": {},
+     "result": {
+      "link": "Site A to Site B, single-mode G.652.D, route length 45.63 km (as-built route map)",
+      "elements_in_route_order": [
+       {
+        "id": "A-ODF",
+        "type": "connector (ODF/patch panel)",
+        "route_km": 0.0
+       },
+       {
+        "id": "SC-01",
+        "type": "splice closure",
+        "route_km": 4.016,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-02",
+        "type": "splice closure",
+        "route_km": 8.25,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-03",
+        "type": "splice closure",
+        "route_km": 11.443,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-04",
+        "type": "splice closure",
+        "route_km": 15.108,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "MID-PP",
+        "type": "connector (ODF/patch panel)",
+        "route_km": 16.191
+       },
+       {
+        "id": "SC-05",
+        "type": "splice closure",
+        "route_km": 18.166,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-06",
+        "type": "splice closure",
+        "route_km": 20.356,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-07",
+        "type": "splice closure",
+        "route_km": 23.682,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-08",
+        "type": "splice closure",
+        "route_km": 28.713,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-09",
+        "type": "splice closure",
+        "route_km": 33.897,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-10",
+        "type": "splice closure",
+        "route_km": 36.808,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-11",
+        "type": "splice closure",
+        "route_km": 42.093,
+        "slack_stored_m": "about 50 (as-built varies)",
+        "note": "joins the original G.652.D cable to a G.655 replacement section"
+       },
+       {
+        "id": "B-ODF",
+        "type": "connector (ODF/patch panel)",
+        "route_km": 45.63
+       }
+      ],
+      "cable": {
+       "fibre_excess_length_over_cable_pct": "1.0 to 1.8 (manufacturer spec)",
+       "slack_loops": "spare fibre is coiled at each splice closure"
+      },
+      "service": {
+       "direction": "site A transmits, site B receives, 1550 nm",
+       "A-TX": "10G 1550 nm transceiver, launch power spec -1.0 to +2.0 dBm",
+       "B-ATT": "fixed in-line attenuator at site B between ODF and receiver, design value 3 dB",
+       "B-RX": "receiver sensitivity -15.0 dBm, overload -1.0 dBm",
+       "available_attenuator_values_db": [
+        0,
+        3,
+        5,
+        7,
+        10,
+        15
+       ]
+      },
+      "commissioning_link_loss_db": {
+       "1310": 16.72,
+       "1550": 10.49,
+       "note": "A-ODF to B-ODF, bidirectional average, at commissioning"
+      },
+      "alarm_thresholds_dbm": {
+       "RX_LOW_WARNING": -13.0,
+       "RX_LOW_ALARM": -16.0,
+       "RX_LOS": -25.0,
+       "RX_HIGH_WARNING": -3.0,
+       "RX_HIGH_ALARM": -1.0
+      },
+      "answer_ids": {
+       "elements": [
+        "A-ODF",
+        "SC-01",
+        "SC-02",
+        "SC-03",
+        "SC-04",
+        "MID-PP",
+        "SC-05",
+        "SC-06",
+        "SC-07",
+        "SC-08",
+        "SC-09",
+        "SC-10",
+        "SC-11",
+        "B-ODF"
+       ],
+       "equipment": [
+        "A-TX",
+        "B-ATT"
+       ]
+      },
+      "call_id": 2
+     }
+    }
+   ]
+  },
+  {
+   "step": 2,
+   "content": null,
+   "reasoning": "Retrieve link record done.\n\nCheck alarms.\n",
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 0,
+      "status": "done",
+      "note": "Link record retrieved: route 45.63 km, 14 elements, design loss 10.49 dB at 1550 nm, B-ATT 3 dB, RX thresholds"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Retrieve link record and baseline parameters",
+        "status": "done",
+        "note": "Link record retrieved: route 45.63 km, 14 elements, design loss 10.49 dB at 1550 nm, B-ATT 3 dB, RX thresholds"
+       },
+       {
+        "item": "Check alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_WARNING active since 2026-10-25 13:00 UTC, not cleared"
+       },
+       {
+        "item": "Check performance monitoring history (rx_power, tx_power, pre_fec_ber)",
+        "status": "done",
+        "note": "RX dropped ~3 dB from ~-12.1 dBm baseline to ~-15.3 dBm on 25-26 Oct; TX stable ~1.6 dBm; BER degraded to ~10^-12"
+       },
+       {
+        "item": "Check site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-11 accessed 2026-10-25 12:38 for branch add, resealed; flood near km37 on 23 Oct"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR A shows large 7.83 dB loss at 43.28 km fibre distance, near SC-11 at 42.093 km route"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR B shows 6.43 dB loss at 3.613 km fibre distance from B, consistent with loss at ~43 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with route map elements",
+        "status": "done",
+        "note": "OTDR events correlate to SC-11: A 43.28 km fibre ~42.1 km route, B 3.613 km from B ~3.537 km route to SC-11"
+       },
+       {
+        "item": "Determine fault type, location and corrective action",
+        "status": "done",
+        "note": "Diagnosis: macrobend at SC-11 region ~42.1 km route, consistent with recent work and OTDR loss"
+       }
+      ],
+      "call_id": 3
+     }
+    }
+   ]
+  },
+  {
+   "step": 3,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_alarms",
+     "args": {},
+     "result": {
+      "now": "2026-10-27 08:00 UTC",
+      "alarms": [
+       {
+        "alarm": "RX_LOW_WARNING",
+        "severity": "minor",
+        "raised": "2026-10-25 13:00 UTC",
+        "cleared": "active",
+        "entity": "B-RX (1550 nm service from site A)"
+       }
+      ],
+      "call_id": 4
+     }
+    }
+   ]
+  },
+  {
+   "step": 4,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 1,
+      "status": "done",
+      "note": "RX_LOW_WARNING active since 2026-10-25 13:00 UTC, not cleared"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Retrieve link record and baseline parameters",
+        "status": "done",
+        "note": "Link record retrieved: route 45.63 km, 14 elements, design loss 10.49 dB at 1550 nm, B-ATT 3 dB, RX thresholds"
+       },
+       {
+        "item": "Check alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_WARNING active since 2026-10-25 13:00 UTC, not cleared"
+       },
+       {
+        "item": "Check performance monitoring history (rx_power, tx_power, pre_fec_ber)",
+        "status": "done",
+        "note": "RX dropped ~3 dB from ~-12.1 dBm baseline to ~-15.3 dBm on 25-26 Oct; TX stable ~1.6 dBm; BER degraded to ~10^-12"
+       },
+       {
+        "item": "Check site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-11 accessed 2026-10-25 12:38 for branch add, resealed; flood near km37 on 23 Oct"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR A shows large 7.83 dB loss at 43.28 km fibre distance, near SC-11 at 42.093 km route"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR B shows 6.43 dB loss at 3.613 km fibre distance from B, consistent with loss at ~43 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with route map elements",
+        "status": "done",
+        "note": "OTDR events correlate to SC-11: A 43.28 km fibre ~42.1 km route, B 3.613 km from B ~3.537 km route to SC-11"
+       },
+       {
+        "item": "Determine fault type, location and corrective action",
+        "status": "done",
+        "note": "Diagnosis: macrobend at SC-11 region ~42.1 km route, consistent with recent work and OTDR loss"
+       }
+      ],
+      "call_id": 5
+     }
+    }
+   ]
+  },
+  {
+   "step": 5,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "rx_power_dbm",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "rx_power_dbm",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": -12.23,
+        "avg": -12.13,
+        "max": -12.04
+       },
+       {
+        "day": "2026-10-14",
+        "min": -12.23,
+        "avg": -12.14,
+        "max": -12.01
+       },
+       {
+        "day": "2026-10-15",
+        "min": -12.24,
+        "avg": -12.13,
+        "max": -12.03
+       },
+       {
+        "day": "2026-10-16",
+        "min": -12.23,
+        "avg": -12.13,
+        "max": -12.0
+       },
+       {
+        "day": "2026-10-17",
+        "min": -12.24,
+        "avg": -12.13,
+        "max": -12.01
+       },
+       {
+        "day": "2026-10-18",
+        "min": -12.24,
+        "avg": -12.14,
+        "max": -12.03
+       },
+       {
+        "day": "2026-10-19",
+        "min": -12.21,
+        "avg": -12.13,
+        "max": -12.03
+       },
+       {
+        "day": "2026-10-20",
+        "min": -12.22,
+        "avg": -12.14,
+        "max": -12.04
+       },
+       {
+        "day": "2026-10-21",
+        "min": -12.27,
+        "avg": -12.13,
+        "max": -12.05
+       },
+       {
+        "day": "2026-10-22",
+        "min": -12.34,
+        "avg": -12.17,
+        "max": -12.06
+       },
+       {
+        "day": "2026-10-23",
+        "min": -12.33,
+        "avg": -12.17,
+        "max": -12.07
+       },
+       {
+        "day": "2026-10-24",
+        "min": -12.23,
+        "avg": -12.15,
+        "max": -12.06
+       },
+       {
+        "day": "2026-10-25",
+        "min": -15.38,
+        "avg": -14.65,
+        "max": -12.14
+       },
+       {
+        "day": "2026-10-26",
+        "min": -15.39,
+        "avg": -15.29,
+        "max": -15.16
+       }
+      ],
+      "call_id": 6
+     }
+    }
+   ]
+  },
+  {
+   "step": 6,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "tx_power_dbm",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "tx_power_dbm",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": 1.48,
+        "avg": 1.62,
+        "max": 1.69
+       },
+       {
+        "day": "2026-10-14",
+        "min": 1.54,
+        "avg": 1.62,
+        "max": 1.73
+       },
+       {
+        "day": "2026-10-15",
+        "min": 1.57,
+        "avg": 1.65,
+        "max": 1.72
+       },
+       {
+        "day": "2026-10-16",
+        "min": 1.54,
+        "avg": 1.63,
+        "max": 1.75
+       },
+       {
+        "day": "2026-10-17",
+        "min": 1.52,
+        "avg": 1.62,
+        "max": 1.71
+       },
+       {
+        "day": "2026-10-18",
+        "min": 1.53,
+        "avg": 1.62,
+        "max": 1.72
+       },
+       {
+        "day": "2026-10-19",
+        "min": 1.53,
+        "avg": 1.62,
+        "max": 1.69
+       },
+       {
+        "day": "2026-10-20",
+        "min": 1.51,
+        "avg": 1.63,
+        "max": 1.75
+       },
+       {
+        "day": "2026-10-21",
+        "min": 1.54,
+        "avg": 1.63,
+        "max": 1.73
+       },
+       {
+        "day": "2026-10-22",
+        "min": 1.52,
+        "avg": 1.62,
+        "max": 1.7
+       },
+       {
+        "day": "2026-10-23",
+        "min": 1.46,
+        "avg": 1.62,
+        "max": 1.73
+       },
+       {
+        "day": "2026-10-24",
+        "min": 1.55,
+        "avg": 1.64,
+        "max": 1.72
+       },
+       {
+        "day": "2026-10-25",
+        "min": 1.47,
+        "avg": 1.61,
+        "max": 1.71
+       },
+       {
+        "day": "2026-10-26",
+        "min": 1.56,
+        "avg": 1.65,
+        "max": 1.73
+       }
+      ],
+      "call_id": 7
+     }
+    }
+   ]
+  },
+  {
+   "step": 7,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "pre_fec_ber",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "pre_fec_ber",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": 1e-15,
+        "avg": 1.1e-15,
+        "max": 1.65e-15
+       },
+       {
+        "day": "2026-10-14",
+        "min": 1e-15,
+        "avg": 1.05e-15,
+        "max": 1.28e-15
+       },
+       {
+        "day": "2026-10-15",
+        "min": 1e-15,
+        "avg": 1.06e-15,
+        "max": 1.35e-15
+       },
+       {
+        "day": "2026-10-16",
+        "min": 1e-15,
+        "avg": 1.07e-15,
+        "max": 1.32e-15
+       },
+       {
+        "day": "2026-10-17",
+        "min": 1e-15,
+        "avg": 1.06e-15,
+        "max": 1.49e-15
+       },
+       {
+        "day": "2026-10-18",
+        "min": 1e-15,
+        "avg": 1.08e-15,
+        "max": 1.46e-15
+       },
+       {
+        "day": "2026-10-19",
+        "min": 1e-15,
+        "avg": 1.06e-15,
+        "max": 1.36e-15
+       },
+       {
+        "day": "2026-10-20",
+        "min": 1e-15,
+        "avg": 1.08e-15,
+        "max": 1.45e-15
+       },
+       {
+        "day": "2026-10-21",
+        "min": 1e-15,
+        "avg": 1.04e-15,
+        "max": 1.29e-15
+       },
+       {
+        "day": "2026-10-22",
+        "min": 1e-15,
+        "avg": 1.05e-15,
+        "max": 1.34e-15
+       },
+       {
+        "day": "2026-10-23",
+        "min": 1e-15,
+        "avg": 1.08e-15,
+        "max": 1.34e-15
+       },
+       {
+        "day": "2026-10-24",
+        "min": 1e-15,
+        "avg": 1.07e-15,
+        "max": 1.4e-15
+       },
+       {
+        "day": "2026-10-25",
+        "min": 1e-15,
+        "avg": 5.6e-13,
+        "max": 4.23e-12
+       },
+       {
+        "day": "2026-10-26",
+        "min": 1.38e-12,
+        "avg": 2.92e-12,
+        "max": 4.8e-12
+       }
+      ],
+      "call_id": 8
+     }
+    }
+   ]
+  },
+  {
+   "step": 8,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 2,
+      "status": "done",
+      "note": "RX dropped ~3 dB from ~-12.1 dBm baseline to ~-15.3 dBm on 25-26 Oct; TX stable ~1.6 dBm; BER degraded to ~10^-12"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Retrieve link record and baseline parameters",
+        "status": "done",
+        "note": "Link record retrieved: route 45.63 km, 14 elements, design loss 10.49 dB at 1550 nm, B-ATT 3 dB, RX thresholds"
+       },
+       {
+        "item": "Check alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_WARNING active since 2026-10-25 13:00 UTC, not cleared"
+       },
+       {
+        "item": "Check performance monitoring history (rx_power, tx_power, pre_fec_ber)",
+        "status": "done",
+        "note": "RX dropped ~3 dB from ~-12.1 dBm baseline to ~-15.3 dBm on 25-26 Oct; TX stable ~1.6 dBm; BER degraded to ~10^-12"
+       },
+       {
+        "item": "Check site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-11 accessed 2026-10-25 12:38 for branch add, resealed; flood near km37 on 23 Oct"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR A shows large 7.83 dB loss at 43.28 km fibre distance, near SC-11 at 42.093 km route"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR B shows 6.43 dB loss at 3.613 km fibre distance from B, consistent with loss at ~43 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with route map elements",
+        "status": "done",
+        "note": "OTDR events correlate to SC-11: A 43.28 km fibre ~42.1 km route, B 3.613 km from B ~3.537 km route to SC-11"
+       },
+       {
+        "item": "Determine fault type, location and corrective action",
+        "status": "done",
+        "note": "Diagnosis: macrobend at SC-11 region ~42.1 km route, consistent with recent work and OTDR loss"
+       }
+      ],
+      "call_id": 9
+     }
+    }
+   ]
+  },
+  {
+   "step": 9,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_site_notes",
+     "args": {},
+     "result": {
+      "notes": [
+       {
+        "time": "2026-10-23 06:45 UTC",
+        "entry": "Power works at site B; equipment ran on battery for 40 minutes, no traffic impact."
+       },
+       {
+        "time": "2026-10-23 14:30 UTC",
+        "entry": "Heavy rain and flooding reported along the route near km 37."
+       },
+       {
+        "time": "2026-10-24 04:00 UTC",
+        "entry": "Connector at street cabinet patch panel inspected and cleaned during routine maintenance. Passed inspection."
+       },
+       {
+        "time": "2026-10-25 12:38 UTC",
+        "entry": "Splicing crew re-entered closure SC-11 to add a branch cable for a new customer. Closure resealed."
+       }
+      ],
+      "call_id": 10
+     }
+    }
+   ]
+  },
+  {
+   "step": 10,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 3,
+      "status": "done",
+      "note": "SC-11 accessed 2026-10-25 12:38 for branch add, resealed; flood near km37 on 23 Oct"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Retrieve link record and baseline parameters",
+        "status": "done",
+        "note": "Link record retrieved: route 45.63 km, 14 elements, design loss 10.49 dB at 1550 nm, B-ATT 3 dB, RX thresholds"
+       },
+       {
+        "item": "Check alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_WARNING active since 2026-10-25 13:00 UTC, not cleared"
+       },
+       {
+        "item": "Check performance monitoring history (rx_power, tx_power, pre_fec_ber)",
+        "status": "done",
+        "note": "RX dropped ~3 dB from ~-12.1 dBm baseline to ~-15.3 dBm on 25-26 Oct; TX stable ~1.6 dBm; BER degraded to ~10^-12"
+       },
+       {
+        "item": "Check site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-11 accessed 2026-10-25 12:38 for branch add, resealed; flood near km37 on 23 Oct"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR A shows large 7.83 dB loss at 43.28 km fibre distance, near SC-11 at 42.093 km route"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR B shows 6.43 dB loss at 3.613 km fibre distance from B, consistent with loss at ~43 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with route map elements",
+        "status": "done",
+        "note": "OTDR events correlate to SC-11: A 43.28 km fibre ~42.1 km route, B 3.613 km from B ~3.537 km route to SC-11"
+       },
+       {
+        "item": "Determine fault type, location and corrective action",
+        "status": "done",
+        "note": "Diagnosis: macrobend at SC-11 region ~42.1 km route, consistent with recent work and OTDR loss"
+       }
+      ],
+      "call_id": 11
+     }
+    }
+   ]
+  },
+  {
+   "step": 11,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "embedded_otdr",
+     "args": {
+      "from_site": "A",
+      "time": "now"
+     },
+     "result": {
+      "wavelength_nm": 1625,
+      "from_site": "A",
+      "test_time": "2026-10-27 08:00 UTC",
+      "pulse_width_ns": 1000,
+      "group_index": 1.4682,
+      "note": "Distances are fibre distances from the ODF at the shooting site. Launch and receive cords of 1.000 km were used; the receive cord ends in an open connector.",
+      "fibre_attenuation_db_per_km": 0.229,
+      "events": [
+       {
+        "event": 1,
+        "distance_km": 0.008,
+        "type": "reflective",
+        "loss_db": 0.17,
+        "reflectance_db": -49.9
+       },
+       {
+        "event": 2,
+        "distance_km": 4.106,
+        "type": "non-reflective",
+        "loss_db": 0.11,
+        "reflectance_db": null
+       },
+       {
+        "event": 3,
+        "distance_km": 15.52,
+        "type": "non-reflective",
+        "loss_db": 0.07,
+        "reflectance_db": null
+       },
+       {
+        "event": 4,
+        "distance_km": 16.646,
+        "type": "reflective",
+        "loss_db": 0.2,
+        "reflectance_db": -53.5
+       },
+       {
+        "event": 5,
+        "distance_km": 20.963,
+        "type": "non-reflective",
+        "loss_db": 0.08,
+        "reflectance_db": null
+       },
+       {
+        "event": 6,
+        "distance_km": 24.393,
+        "type": "non-reflective",
+        "loss_db": 0.15,
+        "reflectance_db": null
+       },
+       {
+        "event": 7,
+        "distance_km": 29.564,
+        "type": "non-reflective",
+        "loss_db": -0.08,
+        "reflectance_db": null
+       },
+       {
+        "event": 8,
+        "distance_km": 34.883,
+        "type": "non-reflective",
+        "loss_db": 0.11,
+        "reflectance_db": null
+       },
+       {
+        "event": 9,
+        "distance_km": 43.28,
+        "type": "non-reflective",
+        "loss_db": 7.83,
+        "reflectance_db": null
+       },
+       {
+        "event": 10,
+        "distance_km": 46.905,
+        "type": "reflective",
+        "loss_db": 0.24,
+        "reflectance_db": -50.1
+       },
+       {
+        "event": 11,
+        "distance_km": 47.904,
+        "type": "end",
+        "loss_db": null,
+        "reflectance_db": -14.3
+       }
+      ],
+      "instrument": "embedded in-service OTDR (line card), 1625 nm out of band, no traffic interruption",
+      "call_id": 12
+     }
+    }
+   ]
+  },
+  {
+   "step": 12,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 4,
+      "status": "done",
+      "note": "OTDR A shows large 7.83 dB loss at 43.28 km fibre distance, near SC-11 at 42.093 km route"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Retrieve link record and baseline parameters",
+        "status": "done",
+        "note": "Link record retrieved: route 45.63 km, 14 elements, design loss 10.49 dB at 1550 nm, B-ATT 3 dB, RX thresholds"
+       },
+       {
+        "item": "Check alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_WARNING active since 2026-10-25 13:00 UTC, not cleared"
+       },
+       {
+        "item": "Check performance monitoring history (rx_power, tx_power, pre_fec_ber)",
+        "status": "done",
+        "note": "RX dropped ~3 dB from ~-12.1 dBm baseline to ~-15.3 dBm on 25-26 Oct; TX stable ~1.6 dBm; BER degraded to ~10^-12"
+       },
+       {
+        "item": "Check site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-11 accessed 2026-10-25 12:38 for branch add, resealed; flood near km37 on 23 Oct"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR A shows large 7.83 dB loss at 43.28 km fibre distance, near SC-11 at 42.093 km route"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR B shows 6.43 dB loss at 3.613 km fibre distance from B, consistent with loss at ~43 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with route map elements",
+        "status": "done",
+        "note": "OTDR events correlate to SC-11: A 43.28 km fibre ~42.1 km route, B 3.613 km from B ~3.537 km route to SC-11"
+       },
+       {
+        "item": "Determine fault type, location and corrective action",
+        "status": "done",
+        "note": "Diagnosis: macrobend at SC-11 region ~42.1 km route, consistent with recent work and OTDR loss"
+       }
+      ],
+      "call_id": 13
+     }
+    }
+   ]
+  },
+  {
+   "step": 13,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "embedded_otdr",
+     "args": {
+      "from_site": "B",
+      "time": "now"
+     },
+     "result": {
+      "wavelength_nm": 1625,
+      "from_site": "B",
+      "test_time": "2026-10-27 08:00 UTC",
+      "pulse_width_ns": 1000,
+      "group_index": 1.4682,
+      "note": "Distances are fibre distances from the ODF at the shooting site. Launch and receive cords of 1.000 km were used; the receive cord ends in an open connector.",
+      "fibre_attenuation_db_per_km": 0.233,
+      "events": [
+       {
+        "event": 1,
+        "distance_km": 0.004,
+        "type": "reflective",
+        "loss_db": 0.23,
+        "reflectance_db": -48.0
+       },
+       {
+        "event": 2,
+        "distance_km": 3.613,
+        "type": "non-reflective",
+        "loss_db": 6.43,
+        "reflectance_db": null
+       },
+       {
+        "event": 3,
+        "distance_km": 9.027,
+        "type": "non-reflective",
+        "loss_db": 0.05,
+        "reflectance_db": null
+       },
+       {
+        "event": 4,
+        "distance_km": 12.02,
+        "type": "non-reflective",
+        "loss_db": 0.06,
+        "reflectance_db": null
+       },
+       {
+        "event": 5,
+        "distance_km": 17.346,
+        "type": "non-reflective",
+        "loss_db": 0.13,
+        "reflectance_db": null
+       },
+       {
+        "event": 6,
+        "distance_km": 30.254,
+        "type": "reflective",
+        "loss_db": 0.22,
+        "reflectance_db": -54.4
+       },
+       {
+        "event": 7,
+        "distance_km": 35.16,
+        "type": "non-reflective",
+        "loss_db": 0.04,
+        "reflectance_db": null
+       },
+       {
+        "event": 8,
+        "distance_km": 42.804,
+        "type": "non-reflective",
+        "loss_db": -0.09,
+        "reflectance_db": null
+       },
+       {
+        "event": 9,
+        "distance_km": 46.893,
+        "type": "reflective",
+        "loss_db": 0.14,
+        "reflectance_db": -49.5
+       },
+       {
+        "event": 10,
+        "distance_km": 47.914,
+        "type": "end",
+        "loss_db": null,
+        "reflectance_db": -14.4
+       }
+      ],
+      "instrument": "embedded in-service OTDR (line card), 1625 nm out of band, no traffic interruption",
+      "call_id": 14
+     }
+    }
+   ]
+  },
+  {
+   "step": 14,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 5,
+      "status": "done",
+      "note": "OTDR B shows 6.43 dB loss at 3.613 km fibre distance from B, consistent with loss at ~43 km from A"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Retrieve link record and baseline parameters",
+        "status": "done",
+        "note": "Link record retrieved: route 45.63 km, 14 elements, design loss 10.49 dB at 1550 nm, B-ATT 3 dB, RX thresholds"
+       },
+       {
+        "item": "Check alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_WARNING active since 2026-10-25 13:00 UTC, not cleared"
+       },
+       {
+        "item": "Check performance monitoring history (rx_power, tx_power, pre_fec_ber)",
+        "status": "done",
+        "note": "RX dropped ~3 dB from ~-12.1 dBm baseline to ~-15.3 dBm on 25-26 Oct; TX stable ~1.6 dBm; BER degraded to ~10^-12"
+       },
+       {
+        "item": "Check site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-11 accessed 2026-10-25 12:38 for branch add, resealed; flood near km37 on 23 Oct"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR A shows large 7.83 dB loss at 43.28 km fibre distance, near SC-11 at 42.093 km route"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR B shows 6.43 dB loss at 3.613 km fibre distance from B, consistent with loss at ~43 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with route map elements",
+        "status": "done",
+        "note": "OTDR events correlate to SC-11: A 43.28 km fibre ~42.1 km route, B 3.613 km from B ~3.537 km route to SC-11"
+       },
+       {
+        "item": "Determine fault type, location and corrective action",
+        "status": "done",
+        "note": "Diagnosis: macrobend at SC-11 region ~42.1 km route, consistent with recent work and OTDR loss"
+       }
+      ],
+      "call_id": 15
+     }
+    }
+   ]
+  },
+  {
+   "step": 15,
+   "content": null,
+   "reasoning": "Correlate OTDR events with route map.\n\nWe have link record elements:\nroute km:\nA-ODF 0.0\nSC-01 4.016\nSC-02 8.25\nSC-03 11.443\nSC-04 15.108\nMID-PP 16.191\nSC-05 18.166\nSC-06 20.356\nSC-07 23.682\nSC-08 28.713\nSC-09 33.897\nSC-10 36.808\nSC-11 42.093\nB-ODF 45.63\n\nOTDR from A at 1625 nm:\ndistance km from A ODF (fibre distance). Note launch cord 1 km used, so first event at 0.008 km likely launch? Actually note distances are fibre distances from ODF at shooting site. Launch and receive cords of 1.000 km were used; receive cord ends in open connector. Hmm confusing. Might be that distance includes cords? Probably events listed are after subtracting cords? Let's assume distances as given.\n\nEvent 1 0.008 km reflective loss 0.17 dB -> A-ODF connector.\nEvent 2 4.106 km non-reflective loss 0.11 dB -> matches SC-01 at 4.016 km route. Good.\nEvent 3 15.52 km non-reflective loss 0.07 -> close to SC-04 15.108 km, maybe SC-04? Or MID-PP 16.191. Might be SC-04.\nEvent 4 16.646 km reflective loss 0.2 -> MID-PP at 16.191 route, reflective connector.\nEvent 5 20.963 km non-reflective loss 0.08 -> SC-06 at 20.356 route.\nEvent 6 24.393 km non-reflective loss 0.15 -> SC-07 at 23.682 route.\nEvent 7 29.564 km non-reflective loss -0.08 -> SC-08 at 28.713 route.\nEvent 8 34.883 km non-reflective loss 0.11 -> SC-09 at 33.897 route.\nEvent 9 43.28 km non-reflective loss 7.83 dB -> This is near SC-11 at 42.093 km route. Fibre distance 43.28 km vs route 42.093 km. Difference ~1.187 km, could be due to fibre excess length. Fibre excess length over cable pct 1.0 to 1.8. For 42 km, excess ~0.42-0.76 km. So 43.28 is about 1.19 km longer, plausible with slack. Also could be after SC-11 before B-ODF. Distance from SC-11 to B-ODF route is 45.63-42.093=3.537 km. Fibre distance from event 9 at 43.28 to end at 47.904? Wait end is 47.904 km. Hmm end is 47.904 km. The fibre length is longer than route. Let's compute total fibre length from A OTDR: end at 47.904 km. Route length 45.63 km. Excess = 2.274 km, which is about 5%. That seems high but maybe due to cords? Wait note says launch and receive cords of 1.000 km were used. That could add 2 km? Might be cords are 1 km each? Hmm confusing.\n\nAlternative: Use OTDR B. OTDR from B distances from B ODF. Event 2 distance 3.613 km non-reflective loss 6.43 dB. That corresponds to distance from B towards A. Route distance from B to SC-11 = 45.63 - 42.093 = 3.537 km. Very close to 3.613 km. So loss at SC-11 region.\n\nThus fault is at SC-11. Loss 7.83 dB from A, 6.43 dB from B, average about 7 dB. That's a massive loss.\n\nEvent type non-reflective, loss_db 7.83. That suggests a bad splice or fibre break with no reflection, or macrobend? Macrobend is typically non-reflective, loss maybe a few dB. Bad splice can be high loss. Fibre break is typically reflective? Actually a clean break is reflective? A fibre break with gap gives high reflectance. A bad splice is non-reflective.\n\nGiven recent work at SC-11 on 2026-10-25 12:38 to add branch cable, resealed. Alarm raised 2026-10-25 13:00. So timing matches.\n\nLoss 7.83 dB at 43.28 km fibre distance, corresponding to SC-11 at 42.093 km route. So fault at SC-11.\n\nPossible fault types: bad_splice, fibre_break, macrobend, dirty_connector, damaged_connector, wrong_attenuator, tx_degradation.\n\nWe have a splice closure with a non-reflective high loss event. Could be bad splice, or fibre break due to macrobend? Macrobend typically causes loss but not 7.8 dB? Could be a fibre break with macrobend.\n\nThe route km for macrobend/fibre break is distance from site A on as-built route map. For SC-11, the element id is SC-11. For a bad splice, fault type is bad_splice, element_id = SC-11? Or is bad_splice at splice closure element. The list of fault types includes bad_splice. Element_id required for faults at a connector, splice closure, attenuator or transmitter. So SC-11 is a splice closure. So we can use element_id SC-11 with fault_type bad_splice, action resplice.\n\nAlternative could be fibre_break at route_km ~42.09? The OTDR event is at 43.28 km fibre distance, but route km is 42.093. The tool requires route_km for macrobend or fibre break. Could be fibre_break at 42.09 km. But the event is non-reflective loss 7.83 dB. A fibre break typically shows as a large loss with maybe reflection. But could be a break with no reflection? Hmm.\n\nGiven the work was adding a branch cable, likely a bad splice or maybe a fibre was bent sharply causing macrobend. But 7.8 dB is large for macrobend alone, might be a break.\n\nLet's check OTDR from B: event 2 at 3.613 km non-reflective loss 6.43 dB. If the fibre is broken, you'd expect the loss to be high. The difference between 7.83 and 6.43 could be due to measurement uncertainty or different wavelength attenuation.\n\nGiven the notes: Splicing crew re-entered closure SC-11 to add a branch cable. Closure resealed. That's a strong indicator of bad splice.\n\nFault type options: bad_splice. Action: resplice.\n\nCould also be fibre_break. Which is more accurate? The OTDR event is non-reflective, loss_db 7.83. That is characteristic of a bad splice or a fibre break with no reflection? Typically a fibre break with air gap is reflective. A bad splice is non-reflective. So bad_splice fits.\n\nCheck the checklist: need to correlate OTDR events with route map elements. Let's compute distance mapping.\n\nFrom A OTDR, event 9 at 43.28 km. Route km of SC-11 is 42.093. The difference is ~1.187 km. Fibre excess length 1.0-1.8% over cable. For 42 km, excess is 0.42-0.756 km. Plus slack stored ~50m per closure. Might be enough. Could also be that OTDR distance includes launch cord? The note says distances are fibre distances from ODF at shooting site. Launch and receive cords of 1.000 km were used. Hmm maybe the first 1 km is cord? But first event at 0.008 km, so not.\n\nAlternative interpretation: the OTDR measures fibre distance, not route distance. For mapping, we need to give route_km for macrobend/fibre break. For bad_splice at SC-11, we give element_id SC-11.\n\nThe evidence: RX power dropped from -12.1 dBm average to -15.29 dBm avg on 26 Oct, loss ~3.2 dB. Actually expected loss increase from 10.49 dB to ~13.7 dB, ~3.2 dB. OTDR shows 7.8 dB loss at SC-11. But RX power drop is only ~3 dB. Hmm discrepancy. Wait launch power is ~1.6 dBm. Commissioning loss 10.49 dB. So expected RX = 1.6 - 10.49 - 3 dB attenuator? Wait B-ATT is 3 dB in-line attenuator at site B between ODF and receiver. Is that included in commissioning loss? Commissioning link loss db note says A-ODF to B-ODF, bidirectional average, at commissioning. That probably includes everything up to B-ODF, not including B-ATT? The attenuator is at site B between ODF and receiver. So RX power = TX - link loss - attenuator. Baseline RX ~ -12.13 dBm. TX ~1.62 dBm. So total loss to receiver = 1.62 - (-12.13)=13.75 dB. Link loss 10.49 + attenuator 3 =13.49 dB. Close. Good.\n\nNow current RX avg -15.29 dBm. TX avg 1.65 dBm. So total loss = 16.94 dB. Increase = 3.19 dB. That's less than OTDR loss 7.8 dB. Why?\n\nMaybe OTDR measures at 1625 nm, loss at 1550 might be different. Also OTDR loss event is at the splice, but maybe the loss is 7.8 dB at 1625 nm, but at 1550 maybe less? Could be. Also the OTDR loss reading includes the splice loss plus maybe some other? Hmm.\n\nAlternative: The large loss could be a macrobend causing excess loss at 1625 nm more than 1550? Actually macrobend loss increases at longer wavelength? Hmm.\n\nLet's also consider B-ATT wrong attenuator. If attenuator changed from 3 dB to 10 dB, increase would be 7 dB. That would cause RX drop ~7 dB, but we see ~3 dB. So not.\n\nTx degradation? TX stable.\n\nDirty connector? Could be at MID-PP or B-ODF. But OTDR shows loss at 43.28 km, not at connector.\n\nCould be fibre break causing increased loss but some bypass? Hmm.\n\nMaybe the OTDR loss of 7.83 dB is the total loss from that point to end? No, event loss_db is the loss at that event.\n\nCheck OTDR A events: after event 9 at 43.28 km loss 7.83 dB, next event 10 at 46.905 km reflective loss 0.24 dB, then end at 47.904 km. So total fibre length from A to B is ~47.9 km fibre, which includes launch/receive cords? Hmm.\n\nIf we compute fibre attenuation: fibre attenuation 0.229 dB/km. Over ~47.9 km, that's ~11 dB. Plus splice losses. Hmm.\n\nAlternative explanation: The 7.83 dB loss could be a macrobend with high loss at 1625 nm, but at 1550 loss is less. Or maybe it's a bad splice with 7.83 dB loss at 1625 nm, which would be ~7 dB at 1550. Then RX should drop ~7 dB, but it dropped only ~3 dB. Something off.\n\nWait maybe the RX power monitoring is after the attenuator. Could the attenuator be changed? Let's check PM for RX power hourly? Might have drop partially due to TX power variation? TX stable.\n\nAnother possibility: The OTDR event at 43.28 km is a fibre break with high loss, but the service is still passing through? Could be the OTDR is seeing a different fibre? No.\n\nCheck OTDR B event 2 at 3.613 km loss 6.43 dB. That's from B towards A. So distance from B to loss is 3.613 km fibre. Route distance B to SC-11 is 3.537 km. So close.\n\nIf loss is 6.43 dB, RX drop should be ~6.43 dB. But we see ~3 dB drop.\n\nMaybe the link has two fibres? Or the OTDR is measuring at 1625 nm, loss at 1625 is higher than at 1550. For a bad splice, loss is wavelength independent. For a macrobend, loss increases with wavelength? Actually macrobend loss increases at shorter wavelengths? Hmm.\n\nMacrobend loss is higher at longer wavelengths? I recall bend loss increases at longer wavelengths? Might be opposite.\n\nAlternatively, maybe the OTDR is measuring a different fibre strand? Unlikely.\n\nCheck the commissioning loss: 10.49 dB at 1550. Current link loss can be estimated from TX and RX: TX 1.65 dBm, RX -15.29 dBm, attenuator 3 dB, so link loss = 1.65 +15.29 -3 =13.94 dB. Increase from 10.49 =3.45 dB. So actual increase is ~3.45 dB.\n\nOTDR shows 7.83 dB loss at SC-11. Could be that the OTDR event loss is the cumulative loss from that point onward? No.\n\nMaybe the OTDR event loss_db is the incremental loss at that event, not the total. So loss is 7.83 dB.\n\nCould there be two faults? No, single root cause.\n\nAlternative interpretation: The large loss event at 43.28 km is actually the end of the fibre? Wait end is at 47.904 km. So 43.28 km is before end.\n\nCould be that the splice closure SC-11 joins original G.652.D cable to G.655 replacement section. Note in link record: SC-11 joins original G.652.D cable to a G.655 replacement section. Might be mode field mismatch causing high loss at 1625 nm but less at 1550? Possibly.\n\nBut the timing of work at SC-11 on 25 Oct matches alarm.\n\nAnother possibility: The OTDR is in-service at 1625 nm, but the service is at 1550 nm. The loss measured at 1625 may be different due to macrobend wavelength dependence. A macrobend loss is stronger at longer wavelengths. So a macrobend causing 7.8 dB at 1625 could cause ~3-4 dB at 1550. That fits! Yes! Macrobend loss increases with wavelength. So a macrobend at 1625 shows higher loss than at 1550. That would explain discrepancy.\n\nAlso event type non-reflective, loss_db 7.83 at 1625, which could correspond to ~3 dB at 1550. Macrobend is non-reflective.\n\nAlso site notes: heavy rain and flooding reported near km 37 on 23 Oct. That could cause cable movement, maybe macrobend. Also SC-11 accessed on 25 Oct. Could be during re-entry, slack fibre was pulled causing a macrobend.\n\nRoute km for macrobend is 42.093? Actually macrobend location could be at ~43.28 km fibre distance, which corresponds to ~42.1 km route. But macrobend could be within SC-11 closure, slack stored. The route_km for macrobend could be ~42.093? Or maybe slightly beyond? The OTDR distance 43.28 km fibre corresponds to route km ~42.1. Could give route_km 42.1.\n\nIf fault type is macrobend, element_id not required, route_km required. Action is relieve_bend.\n\nAlternative fault type bad_splice would give ~7.8 dB loss at 1550 too, not matching RX drop.\n\nMacrobend fits better with wavelength-dependent loss.\n\nAlso note: SC-11 slack stored about 50 m. During re-entry, maybe fibre was bent sharply.\n\nOTDR from B shows loss at 3.613 km, which matches distance to SC-11.\n\nThus fault type macrobend at route_km approx 42.1 km (or 42.093?). Might be 42.5? Let's compute more precisely.\n\nWe have fibre distance from A to event = 43.28 km. Fibre attenuation 0.229 dB/km. The route distance to SC-11 is 42.093 km. Fibre excess 1.0-1.8% => fibre distance = route * (1+excess). 42.093 *1.018 =42.87 km. 42.093*1.01=42.514 km. So expected fibre distance ~42.5-42.9 km. Actual 43.28 km is a bit higher, maybe includes extra slack.\n\nCould be macrobend at 42.093 km route.\n\nAlternatively, could be fibre_break. Fibre break would be non-reflective? Actually a break with no reflection is possible if it's a macrobend.\n\nThe fault type options include macrobend and fibre_break. Which is correct?\n\nGiven the work involved resealing closure, and flood nearby, macrobend is plausible.\n\nThe OTDR event is non-reflective loss 7.83 dB. A macrobend is non-reflective. A fibre break is usually reflective? Might be non-reflective if it's a gradual break.\n\nThe evidence suggests sudden loss increase on 25 Oct after SC-11 access. That's likely a bad splice or macrobend caused by handling.\n\nBad splice loss is typically 0.1-0.5 dB, not 7.8 dB. 7.8 dB is too high for a splice. Could be a fibre break.\n\nFibre break at SC-11 could cause ~7 dB loss at 1625, ~3 dB at 1550? No, break loss is wavelength independent.\n\nMacrobend loss is wavelength dependent.\n\nThus macrobend is most plausible.\n\nAlso the field log mentions connector at street cabinet patch panel inspected and cleaned on 24 Oct. That's MID-PP? Street cabinet patch panel maybe MID-PP. That connector was cleaned.\n\nHeavy rain near km 37 on 23 Oct. That's near SC-10 at 36.808 km and SC-09 at 33.897 km. Could cause flooding, but OTDR shows loss at 43 km.\n\nThe timing matches SC-11 work.\n\nThus diagnosis: macrobend at approx route km 42.1 (SC-11 area). Route km from site A: maybe 42.09 or 42.1? The OTDR event distance 43.28 km fibre. We need route_km. Might be 42.09. Use route_km 42.09.\n\nOr could be 42.1 km.\n\nThe checklist says correlate OTDR events with route map elements. Could give route_km = 42.09.\n\nThe fault type macrobend, route_km 42.1? The tool expects number. Could give 42.1.\n\nAction relieve_bend.\n\nLet's also check OTDR from B distance 3.613 km from B. Route distance from B to SC-11 is 3.537 km. So close.\n\nWe could give route_km 42.09.\n\nEvidence refs need call_id and quote.\n\nWe need at least two measurements that match tool outputs.\n\nPotential evidence:\n- RX power daily min avg: from call_id 6, quote \"avg\": -15.29 for day 2026-10-26 (or min -15.39)\n- TX power stable: call_id 7 quote \"avg\": 1.65\n- Alarms: call_id 4 quote \"RX_LOW_WARNING\"\n- OTDR A loss: call_id 12 quote \"loss_db\": 7.83 at distance_km 43.28\n- Site notes: call_id 10 quote \"Splicing crew re-entered closure SC-11 to add a branch cable for a new customer. Closure resealed.\"\n- OTDR B loss: call_id 14 quote \"loss_db\": 6.43 at distance_km 3.613\n\nNeed to submit diagnosis with fault_type, element_id or route_km, action, evidence, evidence_refs.\n\nFault_type = macrobend\nroute_km = ? maybe 42.1? Let's compute more precisely using fibre distance conversion.\n\nWe could approximate route_km = 42.093 (SC-11 location). The OTDR event at 43.28 km fibre. Let's see if we can compute route km from fibre distance. Fibre attenuation 0.229 dB/km. The total fibre length from A to end is 47.904 km. Route length 45.63 km. Ratio = 47.904/45.63 = 1.0499 ~4.99% excess. That's higher than spec 1-1.8%. Maybe includes cords. Hmm.\n\nAlternative: The distance from A to SC-11 route 42.093 km. Fibre distance = 43.28 km. Ratio 1.028. That's ~2.8% excess, plausible.\n\nIf we use ratio 1.028, route_km = 43.28/1.028 = 42.11 km. Good.\n\nThus route_km ~42.1.\n\nI'll submit route_km 42.1.\n\nIf they expect exactly SC-11 element_id for bad_splice, but macrobend requires route_km.\n\nLet's check the fault type options again: dirty_connector, damaged_connector, macrobend, bad_splice, fibre_break, wrong_attenuator, tx_degradation.\n\nMacrobend action relieve_bend.\n\nCould also be fibre_break with action repair_break. Which is more likely? A macrobend caused by mishandling of slack during SC-11 re-entry. Slack stored about 50 m. Could create a tight bend.\n\nA bad splice would be resplice.\n\nGiven the loss is non-reflective, both macrobend and bad splice fit. But bad splice loss of 7.8 dB is huge. Typical bad splice is maybe >0.5 dB but 7.8 dB is extreme.\n\nFibre break would be repair_break. A break could be caused by handling.\n\nI think macrobend is best fit due to wavelength dependence explaining RX drop vs OTDR loss.\n\nAlso the OTDR event loss is 7.83 dB at 1625 nm, but RX drop at 1550 is ~3.2 dB. That ratio suggests wavelength dependent loss, characteristic of macrobend.\n\nThus final diagnosis: macrobend at route_km ~42.1 km (SC-11 closure area).\n\nProvide evidence_refs with call_ids:\ncall_id 6 quote \"avg\": -15.29 for day 2026-10-26\ncall_id 7 quote \"avg\": 1.65 for day 2026-10-26 (TX stable)\ncall_id 12 quote \"loss_db\": 7.83 at distance_km 43.28\ncall_id 14 quote \"loss_db\": 6.43 at distance_km 3.613\ncall_id 10 quote \"Splicing crew re-entered closure SC-11 to add a branch cable for a new customer. Closure resealed.\"\ncall_id 4 quote \"RX_LOW_WARNING\"\n\nNeed at least two measurements. Provide multiple.\n\nNow update checklist items.\n\nLet's mark correlate done and determine done.\n\n",
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 6,
+      "status": "done",
+      "note": "OTDR events correlate to SC-11: A 43.28 km fibre ~42.1 km route, B 3.613 km from B ~3.537 km route to SC-11"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Retrieve link record and baseline parameters",
+        "status": "done",
+        "note": "Link record retrieved: route 45.63 km, 14 elements, design loss 10.49 dB at 1550 nm, B-ATT 3 dB, RX thresholds"
+       },
+       {
+        "item": "Check alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_WARNING active since 2026-10-25 13:00 UTC, not cleared"
+       },
+       {
+        "item": "Check performance monitoring history (rx_power, tx_power, pre_fec_ber)",
+        "status": "done",
+        "note": "RX dropped ~3 dB from ~-12.1 dBm baseline to ~-15.3 dBm on 25-26 Oct; TX stable ~1.6 dBm; BER degraded to ~10^-12"
+       },
+       {
+        "item": "Check site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-11 accessed 2026-10-25 12:38 for branch add, resealed; flood near km37 on 23 Oct"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR A shows large 7.83 dB loss at 43.28 km fibre distance, near SC-11 at 42.093 km route"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR B shows 6.43 dB loss at 3.613 km fibre distance from B, consistent with loss at ~43 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with route map elements",
+        "status": "done",
+        "note": "OTDR events correlate to SC-11: A 43.28 km fibre ~42.1 km route, B 3.613 km from B ~3.537 km route to SC-11"
+       },
+       {
+        "item": "Determine fault type, location and corrective action",
+        "status": "done",
+        "note": "Diagnosis: macrobend at SC-11 region ~42.1 km route, consistent with recent work and OTDR loss"
+       }
+      ],
+      "call_id": 16
+     }
+    }
+   ]
+  },
+  {
+   "step": 16,
+   "content": null,
+   "reasoning": "We have OTDR A event 9 at 43.28 km with loss 7.83 dB non-reflective. Event 10 at 46.905 km reflective 0.24 dB. The route km for SC-11 is 42.093. Fibre distance 43.28 is about 1.2 km beyond, maybe due to excess length 1-1.8% and slack. The loss 7.83 dB is huge. OTDR B event 2 at 3.613 km loss 6.43 dB. Distance from B ODF 45.63 km - 42.093 = 3.537 km, close.\n\nSo fault at SC-11. The splice closure was accessed 2026-10-25 12:38 to add branch. Alarm raised 13:00. Loss increased.\n\nPossible fault types: bad_splice, macrobend, fibre_break. Loss is non-reflective large ~7 dB. Could be bad splice? Non-reflective loss could be macrobend or fibre break with no reflection? Fibre break would be reflective? Usually break is reflective. Macrobend is non-reflective. Bad splice is non-reflective but typically <0.2 dB. 7.83 dB is too large for splice.\n\nMaybe fibre break? But OTDR shows non-reflective. Could be macrobend due to slack loop being pulled or cable damaged during work. Or fibre break with angled? Hmm.\n\nLink record shows SC-11 joins original G.652.D cable to G.655 replacement section. Could be wrong attenuator? No.\n\nAlso note flood near km37 on 23 Oct. SC-11 at 42.093 km. Not near 37.\n\nThe loss measured ~7.8 dB from A, ~6.4 dB from B. Slight difference due to measurement.\n\nCould be bad_splice? Loss 7.8 dB is huge.\n\nMaybe fibre break? Event is non-reflective, loss 7.83 dB. Could be macrobend causing high loss.\n\nThe fault types allowed: dirty_connector, damaged_connector, macrobend, bad_splice, fibre_break, wrong_attenuator, tx_degradation.\n\nConnector at SC-11? SC-11 is splice closure, not connector. MID-PP is connector.\n\nCould be fibre break at route km ~42.1? OTDR shows event at 43.28 km fibre distance. Route km approx 42.09. Could give route_km.\n\nIf macrobend, location is route_km. Macrobend is non-reflective high loss.\n\nIf fibre break, also route_km.\n\nThe event is non-reflective, loss 7.83 dB. That suggests macrobend rather than break (break often reflective). Also bad splice would be small.\n\nThe note: SC-11 resealed after adding branch. Could have caused macrobend from excess slack being mis-coiled.\n\nAlternatively could be bad splice due to re-entry. But 7.8 dB is huge.\n\nGiven OTDR loss is non-reflective, likely macrobend. Could also be fibre break with no reflection? Usually break is reflective.\n\nAlso need to consider fibre excess length. Fibre distance 43.28 vs route 42.093 difference ~1.187 km. Excess length 1-1.8% of 42 km ~0.42-0.76 km plus slack. Could be plausible.\n\nThe event distance from B: 3.613 km fibre, route distance from B is 45.63-42.093=3.537 km. Difference 0.076 km.\n\nThe loss is high.\n\nI think diagnosis is macrobend at route_km ~42.1? The OTDR shows 43.28 km fibre distance. Should we give route_km? The instruction: give route_km for macrobend or fibre break. So need distance from site A on as-built route map.\n\nWe have route_km for SC-11 =42.093. The OTDR event at 43.28 km fibre. Maybe give route_km 42.1? Might be 42.093 or 43.28? Instruction says give route_km (distance from site A on as-built route map). So use route km.\n\nIf fault is at SC-11, route_km 42.093. Or more precise using OTDR distance converted? Could be around 42.1 km.\n\nPerhaps we can give route_km 42.1 (approx). Might be better to give 42.09.\n\nAlternative: Could be bad_splice at SC-11. But bad_splice fault type requires element_id. Element_id is SC-11. Action would be resplice. Could be bad splice causing 7.8 dB loss.\n\nWhich is more plausible? A splice closure opened for branch addition. Could have damaged fibre leading to macrobend or break. The loss is non-reflective, suggests macrobend not break.\n\nCheck OTDR from A: event 9 at 43.28 km loss 7.83 dB non-reflective. Event 10 at 46.905 km reflective loss 0.24 dB. That's the B-ODF? Wait B-ODF is at 45.63 km route. Fibre distance to B-ODF maybe ~47? Hmm.\n\nFrom A, end at 47.904 km. So total fibre length ~47.9 km. Route 45.63 km. Excess ~2.27 km which is about 5% maybe high. Hmm.\n\nBut event 9 at 43.28 km then event 10 at 46.905 km. That's 3.625 km between events. That's weird.\n\nMaybe event 9 is the fault, event 10 is the B-ODF connector? Actually B-ODF at 45.63 km route, fibre ~? Could be 46.905.\n\nSo fault is between SC-11 and B-ODF? Wait SC-11 at 42.093 route. 43.28 km fibre is just after SC-11. Then next event at 46.905 km is B-ODF? That would be 3.6 km of fibre with high loss 7.83 dB at start. That suggests loss is localized at 43.28 km, then fibre continues to 46.905 km with normal attenuation.\n\nSo fault is at ~43.28 km fibre.\n\nMaybe the distance is fibre distance, not route km. Need convert to route km. Roughly route km = fibre distance / (1 + excess). Excess ~1-1.8% plus slack. Hard.\n\nSimpler: Use element SC-11. Could be bad_splice at SC-11.\n\nBut fault type options: macrobend requires route_km, bad_splice requires element_id.\n\nWhich is more appropriate? A splice closure with recent work could cause bad splice. Loss 7.83 dB is too high for a single splice, but could be multiple bad splices? Or a fibre break inside closure.\n\nThe OTDR event is non-reflective. Bad splice is typically non-reflective, but loss >1 dB is bad. 7.8 dB is extreme.\n\nMacrobend also non-reflective, high loss.\n\nThe instruction: Connector end faces cannot be inspected remotely. For a connector fault submit dirty_connector with clean_connector unless evidence shows it is damaged.\n\nWe have no connector.\n\nGiven recent work at SC-11, likely crew damaged fibre causing macrobend in slack loop.\n\nI think macrobend at route_km ~42.1 km (SC-11). Could provide route_km 42.1 or 43.28? Might need exact route_km. The link record gives SC-11 route_km 42.093. Could use 42.09.\n\nBut OTDR shows loss at 43.28 km fibre distance. Convert to route km: 43.28 / 1.025 approx 42.25. Close.\n\nI think submit diagnosis: fault_type macrobend, route_km 42.09 (or 43.28?). Might be safer to give route_km ~42.1.\n\nLet's see evidence: RX power dropped to -15.38 dBm min on 25 Oct (call_id 6). TX stable 1.61 avg (call_id7). OTDR A loss 7.83 dB at 43.28 km (call_id12). OTDR B loss 6.43 dB at 3.613 km (call_id14). Site notes SC-11 accessed 2026-10-25 12:38 (call_id10). Alarm raised 13:00 (call_id4).\n\nAction for macrobend is relieve_bend.\n\nAlternatively could be fibre_break at route_km. Fibre break action is repair_break. Which is more likely? Non-reflective suggests macrobend.\n\nCould also be bad_splice at SC-11 with action resplice. Element_id SC-11. That also fits recent work.\n\nLet's think about OTDR signature: non-reflective loss 7.83 dB. Macrobend typically shows gradual loss, not abrupt? Could be abrupt.\n\nBad splice would be small loss.\n\nFibre break would be reflective spike.\n\nSo macrobend is best.\n\nLet's check OTDR from B: event 2 at 3.613 km loss 6.43 dB non-reflective. That's consistent.\n\nSo final diagnosis: macrobend at route_km ~42.1 km (approx 43.28 km fibre distance). Might use 42.1.\n\nThe submit_diagnosis requires fault_type, element_id or route_km, action, evidence, evidence_refs.\n\nWe need at least two measurements.\n\nProvide evidence_refs with call_id and quote.\n\nCall_id 6: RX min -15.38 on 2026-10-25.\nCall_id 12: loss_db 7.83 at distance_km 43.28.\nCall_id 14: loss_db 6.43 at distance_km 3.613.\nCall_id 10: SC-11 accessed.\n\nNeed quotes exact.\n\nFrom call_id 6 output: rows include {\"day\":\"2026-10-25\",\"min\":-15.38,\"avg\":-14.65,\"max\":-12.14}. Quote could be \"min\": -15.38.\n\nCall_id 12: event 9 distance_km 43.28 loss_db 7.83. Quote: \"distance_km\": 43.28, \"loss_db\": 7.83.\n\nCall_id 14: event 2 distance_km 3.613 loss_db 6.43.\n\nCall_id 4: alarm raised 2026-10-25 13:00.\n\nWe can use those.\n\nThe route_km: maybe give 42.1. Let's use 42.09 as per link record.\n\nInstruction says give route_km for macrobend. Could be 42.1.\n\nI'll give route_km 42.09.\n\nAction: relieve_bend.\n\nEvidence: RX drop after SC-11 work, OTDR shows ~7 dB non-reflective loss at location consistent with SC-11.\n\nLet's update checklist final item.",
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 7,
+      "status": "done",
+      "note": "Diagnosis: macrobend at SC-11 region ~42.1 km route, consistent with recent work and OTDR loss"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Retrieve link record and baseline parameters",
+        "status": "done",
+        "note": "Link record retrieved: route 45.63 km, 14 elements, design loss 10.49 dB at 1550 nm, B-ATT 3 dB, RX thresholds"
+       },
+       {
+        "item": "Check alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_WARNING active since 2026-10-25 13:00 UTC, not cleared"
+       },
+       {
+        "item": "Check performance monitoring history (rx_power, tx_power, pre_fec_ber)",
+        "status": "done",
+        "note": "RX dropped ~3 dB from ~-12.1 dBm baseline to ~-15.3 dBm on 25-26 Oct; TX stable ~1.6 dBm; BER degraded to ~10^-12"
+       },
+       {
+        "item": "Check site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-11 accessed 2026-10-25 12:38 for branch add, resealed; flood near km37 on 23 Oct"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR A shows large 7.83 dB loss at 43.28 km fibre distance, near SC-11 at 42.093 km route"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR B shows 6.43 dB loss at 3.613 km fibre distance from B, consistent with loss at ~43 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with route map elements",
+        "status": "done",
+        "note": "OTDR events correlate to SC-11: A 43.28 km fibre ~42.1 km route, B 3.613 km from B ~3.537 km route to SC-11"
+       },
+       {
+        "item": "Determine fault type, location and corrective action",
+        "status": "done",
+        "note": "Diagnosis: macrobend at SC-11 region ~42.1 km route, consistent with recent work and OTDR loss"
+       }
+      ],
+      "call_id": 17
+     }
+    }
+   ]
+  },
+  {
+   "step": 17,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "submit_diagnosis",
+     "args": {
+      "fault_type": "macrobend",
+      "route_km": 42.1,
+      "action": "relieve_bend",
+      "evidence": "RX power dropped ~3 dB on 2026-10-25 after SC-11 work; OTDR A shows 7.83 dB non-reflective loss at 43.28 km fibre distance, OTDR B shows 6.43 dB loss at 3.613 km from B, both pointing to SC-11 at 42.093 km route; timing matches closure access.",
+      "evidence_refs": [
+       {
+        "call_id": 6,
+        "quote": "day: 2026-10-25, min: -15.38, avg: -14.65, max: -12.14"
+       },
+       {
+        "call_id": 12,
+        "quote": "distance_km: 43.28, type: non-reflective, loss_db: 7.83"
+       },
+       {
+        "call_id": 14,
+        "quote": "distance_km: 3.613, type: non-reflective, loss_db: 6.43"
+       },
+       {
+        "call_id": 10,
+        "quote": "time: 2026-10-25 12:38 UTC, entry: Splicing crew re-entered closure SC-11 to add a branch cable for a new customer. Closure resealed."
+       }
+      ]
+     },
+     "result": {
+      "status": "accepted",
+      "checks": "all passed"
+     }
+    }
+   ]
+  }
+ ]
+}

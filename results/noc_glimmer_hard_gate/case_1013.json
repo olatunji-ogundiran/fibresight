@@ -1,0 +1,1303 @@
+{
+ "seed": 1013,
+ "model": "muse-glimmer",
+ "mode": "hard",
+ "answer": {
+  "fault_type": "wrong_attenuator",
+  "element_id": "B-ATT",
+  "action": "replace_attenuator",
+  "evidence": "RX power fell ~10 dB from -12.5 dBm to -22.5 dBm on 2026-10-23 while TX power remained ~1.5 dBm; site log shows receiver replaced and attenuator refitted from spares box at 2026-10-23 03:44 UTC, alarms raised at 05:00 UTC. OTDR shows no fibre break, only minor splice events. Design attenuator is 5 dB, indicating a higher value was installed.",
+  "evidence_refs": [
+   {
+    "call_id": 10,
+    "quote": "Receiver module at site B replaced under RMA. Attenuator refitted from spares box."
+   },
+   {
+    "call_id": 6,
+    "quote": "\"day\": \"2026-10-23\", \"min\": -22.55, \"avg\": -22.45, \"max\": -22.36"
+   },
+   {
+    "call_id": 7,
+    "quote": "\"day\": \"2026-10-23\", \"min\": 1.41, \"avg\": 1.52, \"max\": 1.61"
+   }
+  ]
+ },
+ "view": "noc",
+ "grade": {
+  "score": 1.0,
+  "valid": true,
+  "errors": [],
+  "fault_type_ok": true,
+  "action_ok": true,
+  "location_ok": true,
+  "route_error_km": null,
+  "truth": {
+   "fault_type": "wrong_attenuator",
+   "element_id": "B-ATT",
+   "route_km": 36.25,
+   "action": "replace_attenuator"
+  }
+ },
+ "dispatch": {
+  "score": 1.0,
+  "crew_ok": true,
+  "location_ok": true,
+  "route_error_km": null,
+  "errors": []
+ },
+ "grounding": {
+  "refs": 3,
+  "grounded": 3,
+  "rate": 1.0,
+  "ungrounded": []
+ },
+ "checklist": [
+  {
+   "item": "Get link record for route map, elements, design loss and thresholds",
+   "status": "done",
+   "note": "Link record retrieved: 36.25 km, elements SC-01 to SC-07, MID-PP at 16.654 km, B-ATT 5 dB design, commissioning loss 8.51 dB @1550"
+  },
+  {
+   "item": "Retrieve alarms for 1550 nm service at site B",
+   "status": "done",
+   "note": "RX_LOW_ALARM and PRE_FEC_BER_HIGH active since 2026-10-23 05:00 UTC"
+  },
+  {
+   "item": "Get performance monitoring for rx_power_dbm, tx_power_dbm, pre_fec_ber",
+   "status": "done",
+   "note": "RX power dropped from ~-12.5 dBm to ~-22.5 dBm from 2026-10-23; TX stable ~1.5 dBm; pre-FEC BER rose to ~0.01"
+  },
+  {
+   "item": "Read site notes / field log for recent work",
+   "status": "done",
+   "note": "SC-05 re-entered 2026-10-14, flooding near km25 2026-10-21, B receiver replaced and attenuator refitted 2026-10-23 03:44 UTC"
+  },
+  {
+   "item": "Run embedded OTDR from site A",
+   "status": "done",
+   "note": "OTDR from A shows event at 22.776 km with loss -0.74 dB (negative indicates gain anomaly), other splices normal"
+  },
+  {
+   "item": "Run embedded OTDR from site B",
+   "status": "done",
+   "note": "OTDR from B shows event at 14.284 km from B with loss 0.91 dB; corresponds to ~22 km from A"
+  },
+  {
+   "item": "Correlate OTDR events with link record and PM to locate fault",
+   "status": "done",
+   "note": "Correlated power drop ~10 dB with attenuator refit; OTDR shows no fibre break, only pre-existing splice anomaly at SC-05"
+  }
+ ],
+ "verification": {
+  "enabled": true,
+  "attempts": 1,
+  "escalated": false,
+  "history": [
+   {
+    "attempt": 1,
+    "answer": {
+     "fault_type": "wrong_attenuator",
+     "element_id": "B-ATT",
+     "action": "replace_attenuator",
+     "evidence": "RX power fell ~10 dB from -12.5 dBm to -22.5 dBm on 2026-10-23 while TX power remained ~1.5 dBm; site log shows receiver replaced and attenuator refitted from spares box at 2026-10-23 03:44 UTC, alarms raised at 05:00 UTC. OTDR shows no fibre break, only minor splice events. Design attenuator is 5 dB, indicating a higher value was installed.",
+     "evidence_refs": [
+      {
+       "call_id": 10,
+       "quote": "Receiver module at site B replaced under RMA. Attenuator refitted from spares box."
+      },
+      {
+       "call_id": 6,
+       "quote": "\"day\": \"2026-10-23\", \"min\": -22.55, \"avg\": -22.45, \"max\": -22.36"
+      },
+      {
+       "call_id": 7,
+       "quote": "\"day\": \"2026-10-23\", \"min\": 1.41, \"avg\": 1.52, \"max\": 1.61"
+      }
+     ]
+    },
+    "problems": [],
+    "review": null
+   }
+  ]
+ },
+ "steps": 17,
+ "tool_calls": 16,
+ "seconds": 143.0,
+ "usage": {
+  "prompt_tokens": 97185,
+  "completion_tokens": 8153
+ },
+ "transcript": [
+  {
+   "step": 0,
+   "content": null,
+   "reasoning": "NOC ticket: alarm raised on the A to B 1550 nm service. Diagnose it remotely so we can dispatch.\n\nWe need to find single root cause and exactly where it is. Use remote tools: alarms, performance monitoring, embedded in-service OTDR at each site, link record, field log.\n\nWe need to set checklist first.\n\nLet's set checklist items.\n\nPlan:\n1. Get link record for topology, elements, distances, design loss, thresholds.\n2. Get alarms for service at site B receiver.\n3. Get PM for rx_power_dbm, tx_power_dbm, pre_fec_ber, etc.\n4. Get site notes/field log.\n5. Run embedded OTDR from A and from B now.\nMaybe also tonight? Could be needed.\n\nUpdate checklist after each.\n\nLet's start with set_checklist.",
+   "tool_calls": [
+    {
+     "name": "set_checklist",
+     "args": {
+      "items": [
+       "Get link record for route map, elements, design loss and thresholds",
+       "Retrieve alarms for 1550 nm service at site B",
+       "Get performance monitoring for rx_power_dbm, tx_power_dbm, pre_fec_ber",
+       "Read site notes / field log for recent work",
+       "Run embedded OTDR from site A",
+       "Run embedded OTDR from site B",
+       "Correlate OTDR events with link record and PM to locate fault"
+      ]
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record for route map, elements, design loss and thresholds",
+        "status": "done",
+        "note": "Link record retrieved: 36.25 km, elements SC-01 to SC-07, MID-PP at 16.654 km, B-ATT 5 dB design, commissioning loss 8.51 dB @1550"
+       },
+       {
+        "item": "Retrieve alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_ALARM and PRE_FEC_BER_HIGH active since 2026-10-23 05:00 UTC"
+       },
+       {
+        "item": "Get performance monitoring for rx_power_dbm, tx_power_dbm, pre_fec_ber",
+        "status": "done",
+        "note": "RX power dropped from ~-12.5 dBm to ~-22.5 dBm from 2026-10-23; TX stable ~1.5 dBm; pre-FEC BER rose to ~0.01"
+       },
+       {
+        "item": "Read site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-05 re-entered 2026-10-14, flooding near km25 2026-10-21, B receiver replaced and attenuator refitted 2026-10-23 03:44 UTC"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR from A shows event at 22.776 km with loss -0.74 dB (negative indicates gain anomaly), other splices normal"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR from B shows event at 14.284 km from B with loss 0.91 dB; corresponds to ~22 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with link record and PM to locate fault",
+        "status": "done",
+        "note": "Correlated power drop ~10 dB with attenuator refit; OTDR shows no fibre break, only pre-existing splice anomaly at SC-05"
+       }
+      ],
+      "call_id": 1
+     }
+    }
+   ]
+  },
+  {
+   "step": 1,
+   "content": null,
+   "reasoning": "Checklist set. Start with link record.",
+   "tool_calls": [
+    {
+     "name": "get_link_record",
+     "args": {},
+     "result": {
+      "link": "Site A to Site B, single-mode G.652.D, route length 36.25 km (as-built route map)",
+      "elements_in_route_order": [
+       {
+        "id": "A-ODF",
+        "type": "connector (ODF/patch panel)",
+        "route_km": 0.0
+       },
+       {
+        "id": "SC-01",
+        "type": "splice closure",
+        "route_km": 5.811,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-02",
+        "type": "splice closure",
+        "route_km": 9.525,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-03",
+        "type": "splice closure",
+        "route_km": 14.782,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "MID-PP",
+        "type": "connector (ODF/patch panel)",
+        "route_km": 16.654
+       },
+       {
+        "id": "SC-04",
+        "type": "splice closure",
+        "route_km": 19.956,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-05",
+        "type": "splice closure",
+        "route_km": 22.261,
+        "slack_stored_m": "about 50 (as-built varies)",
+        "note": "joins the original G.652.D cable to a G.655 replacement section"
+       },
+       {
+        "id": "SC-06",
+        "type": "splice closure",
+        "route_km": 27.166,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-07",
+        "type": "splice closure",
+        "route_km": 32.821,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "B-ODF",
+        "type": "connector (ODF/patch panel)",
+        "route_km": 36.25
+       }
+      ],
+      "cable": {
+       "fibre_excess_length_over_cable_pct": "1.0 to 1.8 (manufacturer spec)",
+       "slack_loops": "spare fibre is coiled at each splice closure"
+      },
+      "service": {
+       "direction": "site A transmits, site B receives, 1550 nm",
+       "A-TX": "10G 1550 nm transceiver, launch power spec -1.0 to +2.0 dBm",
+       "B-ATT": "fixed in-line attenuator at site B between ODF and receiver, design value 5 dB",
+       "B-RX": "receiver sensitivity -15.0 dBm, overload -1.0 dBm",
+       "available_attenuator_values_db": [
+        0,
+        3,
+        5,
+        7,
+        10,
+        15
+       ]
+      },
+      "commissioning_link_loss_db": {
+       "1310": 13.56,
+       "1550": 8.51,
+       "note": "A-ODF to B-ODF, bidirectional average, at commissioning"
+      },
+      "alarm_thresholds_dbm": {
+       "RX_LOW_WARNING": -13.0,
+       "RX_LOW_ALARM": -16.0,
+       "RX_LOS": -25.0,
+       "RX_HIGH_WARNING": -3.0,
+       "RX_HIGH_ALARM": -1.0
+      },
+      "answer_ids": {
+       "elements": [
+        "A-ODF",
+        "SC-01",
+        "SC-02",
+        "SC-03",
+        "MID-PP",
+        "SC-04",
+        "SC-05",
+        "SC-06",
+        "SC-07",
+        "B-ODF"
+       ],
+       "equipment": [
+        "A-TX",
+        "B-ATT"
+       ]
+      },
+      "call_id": 2
+     }
+    }
+   ]
+  },
+  {
+   "step": 2,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 0,
+      "status": "done",
+      "note": "Link record retrieved: 36.25 km, elements SC-01 to SC-07, MID-PP at 16.654 km, B-ATT 5 dB design, commissioning loss 8.51 dB @1550"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record for route map, elements, design loss and thresholds",
+        "status": "done",
+        "note": "Link record retrieved: 36.25 km, elements SC-01 to SC-07, MID-PP at 16.654 km, B-ATT 5 dB design, commissioning loss 8.51 dB @1550"
+       },
+       {
+        "item": "Retrieve alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_ALARM and PRE_FEC_BER_HIGH active since 2026-10-23 05:00 UTC"
+       },
+       {
+        "item": "Get performance monitoring for rx_power_dbm, tx_power_dbm, pre_fec_ber",
+        "status": "done",
+        "note": "RX power dropped from ~-12.5 dBm to ~-22.5 dBm from 2026-10-23; TX stable ~1.5 dBm; pre-FEC BER rose to ~0.01"
+       },
+       {
+        "item": "Read site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-05 re-entered 2026-10-14, flooding near km25 2026-10-21, B receiver replaced and attenuator refitted 2026-10-23 03:44 UTC"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR from A shows event at 22.776 km with loss -0.74 dB (negative indicates gain anomaly), other splices normal"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR from B shows event at 14.284 km from B with loss 0.91 dB; corresponds to ~22 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with link record and PM to locate fault",
+        "status": "done",
+        "note": "Correlated power drop ~10 dB with attenuator refit; OTDR shows no fibre break, only pre-existing splice anomaly at SC-05"
+       }
+      ],
+      "call_id": 3
+     }
+    }
+   ]
+  },
+  {
+   "step": 3,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_alarms",
+     "args": {},
+     "result": {
+      "now": "2026-10-27 08:00 UTC",
+      "alarms": [
+       {
+        "alarm": "RX_LOW_ALARM",
+        "severity": "major",
+        "raised": "2026-10-23 05:00 UTC",
+        "cleared": "active",
+        "entity": "B-RX (1550 nm service from site A)"
+       },
+       {
+        "alarm": "PRE_FEC_BER_HIGH",
+        "severity": "major",
+        "raised": "2026-10-23 05:00 UTC",
+        "cleared": "active",
+        "entity": "B-RX (1550 nm service from site A)"
+       }
+      ],
+      "call_id": 4
+     }
+    }
+   ]
+  },
+  {
+   "step": 4,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 1,
+      "status": "done",
+      "note": "RX_LOW_ALARM and PRE_FEC_BER_HIGH active since 2026-10-23 05:00 UTC"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record for route map, elements, design loss and thresholds",
+        "status": "done",
+        "note": "Link record retrieved: 36.25 km, elements SC-01 to SC-07, MID-PP at 16.654 km, B-ATT 5 dB design, commissioning loss 8.51 dB @1550"
+       },
+       {
+        "item": "Retrieve alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_ALARM and PRE_FEC_BER_HIGH active since 2026-10-23 05:00 UTC"
+       },
+       {
+        "item": "Get performance monitoring for rx_power_dbm, tx_power_dbm, pre_fec_ber",
+        "status": "done",
+        "note": "RX power dropped from ~-12.5 dBm to ~-22.5 dBm from 2026-10-23; TX stable ~1.5 dBm; pre-FEC BER rose to ~0.01"
+       },
+       {
+        "item": "Read site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-05 re-entered 2026-10-14, flooding near km25 2026-10-21, B receiver replaced and attenuator refitted 2026-10-23 03:44 UTC"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR from A shows event at 22.776 km with loss -0.74 dB (negative indicates gain anomaly), other splices normal"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR from B shows event at 14.284 km from B with loss 0.91 dB; corresponds to ~22 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with link record and PM to locate fault",
+        "status": "done",
+        "note": "Correlated power drop ~10 dB with attenuator refit; OTDR shows no fibre break, only pre-existing splice anomaly at SC-05"
+       }
+      ],
+      "call_id": 5
+     }
+    }
+   ]
+  },
+  {
+   "step": 5,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "rx_power_dbm",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "rx_power_dbm",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": -12.58,
+        "avg": -12.48,
+        "max": -12.37
+       },
+       {
+        "day": "2026-10-14",
+        "min": -12.55,
+        "avg": -12.48,
+        "max": -12.35
+       },
+       {
+        "day": "2026-10-15",
+        "min": -12.56,
+        "avg": -12.47,
+        "max": -12.37
+       },
+       {
+        "day": "2026-10-16",
+        "min": -12.57,
+        "avg": -12.45,
+        "max": -12.35
+       },
+       {
+        "day": "2026-10-17",
+        "min": -12.59,
+        "avg": -12.47,
+        "max": -12.36
+       },
+       {
+        "day": "2026-10-18",
+        "min": -12.57,
+        "avg": -12.46,
+        "max": -12.36
+       },
+       {
+        "day": "2026-10-19",
+        "min": -12.56,
+        "avg": -12.46,
+        "max": -12.33
+       },
+       {
+        "day": "2026-10-20",
+        "min": -12.61,
+        "avg": -12.48,
+        "max": -12.4
+       },
+       {
+        "day": "2026-10-21",
+        "min": -12.58,
+        "avg": -12.47,
+        "max": -12.33
+       },
+       {
+        "day": "2026-10-22",
+        "min": -22.54,
+        "avg": -13.73,
+        "max": -12.39
+       },
+       {
+        "day": "2026-10-23",
+        "min": -22.55,
+        "avg": -22.45,
+        "max": -22.36
+       },
+       {
+        "day": "2026-10-24",
+        "min": -22.56,
+        "avg": -22.47,
+        "max": -22.35
+       },
+       {
+        "day": "2026-10-25",
+        "min": -22.58,
+        "avg": -22.48,
+        "max": -22.39
+       },
+       {
+        "day": "2026-10-26",
+        "min": -22.56,
+        "avg": -22.49,
+        "max": -22.4
+       }
+      ],
+      "call_id": 6
+     }
+    }
+   ]
+  },
+  {
+   "step": 6,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "tx_power_dbm",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "tx_power_dbm",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": 1.41,
+        "avg": 1.52,
+        "max": 1.6
+       },
+       {
+        "day": "2026-10-14",
+        "min": 1.44,
+        "avg": 1.55,
+        "max": 1.61
+       },
+       {
+        "day": "2026-10-15",
+        "min": 1.42,
+        "avg": 1.54,
+        "max": 1.64
+       },
+       {
+        "day": "2026-10-16",
+        "min": 1.4,
+        "avg": 1.52,
+        "max": 1.6
+       },
+       {
+        "day": "2026-10-17",
+        "min": 1.41,
+        "avg": 1.51,
+        "max": 1.67
+       },
+       {
+        "day": "2026-10-18",
+        "min": 1.45,
+        "avg": 1.52,
+        "max": 1.6
+       },
+       {
+        "day": "2026-10-19",
+        "min": 1.46,
+        "avg": 1.52,
+        "max": 1.62
+       },
+       {
+        "day": "2026-10-20",
+        "min": 1.4,
+        "avg": 1.5,
+        "max": 1.57
+       },
+       {
+        "day": "2026-10-21",
+        "min": 1.37,
+        "avg": 1.52,
+        "max": 1.67
+       },
+       {
+        "day": "2026-10-22",
+        "min": 1.44,
+        "avg": 1.51,
+        "max": 1.67
+       },
+       {
+        "day": "2026-10-23",
+        "min": 1.41,
+        "avg": 1.52,
+        "max": 1.61
+       },
+       {
+        "day": "2026-10-24",
+        "min": 1.42,
+        "avg": 1.53,
+        "max": 1.65
+       },
+       {
+        "day": "2026-10-25",
+        "min": 1.42,
+        "avg": 1.53,
+        "max": 1.61
+       },
+       {
+        "day": "2026-10-26",
+        "min": 1.42,
+        "avg": 1.5,
+        "max": 1.59
+       }
+      ],
+      "call_id": 7
+     }
+    }
+   ]
+  },
+  {
+   "step": 7,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "pre_fec_ber",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "pre_fec_ber",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": 1e-15,
+        "avg": 1.08e-15,
+        "max": 1.37e-15
+       },
+       {
+        "day": "2026-10-14",
+        "min": 1e-15,
+        "avg": 1.1e-15,
+        "max": 1.56e-15
+       },
+       {
+        "day": "2026-10-15",
+        "min": 1e-15,
+        "avg": 1.08e-15,
+        "max": 1.36e-15
+       },
+       {
+        "day": "2026-10-16",
+        "min": 1e-15,
+        "avg": 1.07e-15,
+        "max": 1.53e-15
+       },
+       {
+        "day": "2026-10-17",
+        "min": 1e-15,
+        "avg": 1.03e-15,
+        "max": 1.15e-15
+       },
+       {
+        "day": "2026-10-18",
+        "min": 1e-15,
+        "avg": 1.1e-15,
+        "max": 1.45e-15
+       },
+       {
+        "day": "2026-10-19",
+        "min": 1e-15,
+        "avg": 1.09e-15,
+        "max": 1.32e-15
+       },
+       {
+        "day": "2026-10-20",
+        "min": 1e-15,
+        "avg": 1.03e-15,
+        "max": 1.24e-15
+       },
+       {
+        "day": "2026-10-21",
+        "min": 1e-15,
+        "avg": 1.07e-15,
+        "max": 1.4e-15
+       },
+       {
+        "day": "2026-10-22",
+        "min": 1e-15,
+        "avg": 4.43e-14,
+        "max": 0.012
+       },
+       {
+        "day": "2026-10-23",
+        "min": 0.00662,
+        "avg": 0.00993,
+        "max": 0.0135
+       },
+       {
+        "day": "2026-10-24",
+        "min": 0.00805,
+        "avg": 0.0108,
+        "max": 0.0141
+       },
+       {
+        "day": "2026-10-25",
+        "min": 0.00726,
+        "avg": 0.0103,
+        "max": 0.0151
+       },
+       {
+        "day": "2026-10-26",
+        "min": 0.00747,
+        "avg": 0.0107,
+        "max": 0.0162
+       }
+      ],
+      "call_id": 8
+     }
+    }
+   ]
+  },
+  {
+   "step": 8,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 2,
+      "status": "done",
+      "note": "RX power dropped from ~-12.5 dBm to ~-22.5 dBm from 2026-10-23; TX stable ~1.5 dBm; pre-FEC BER rose to ~0.01"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record for route map, elements, design loss and thresholds",
+        "status": "done",
+        "note": "Link record retrieved: 36.25 km, elements SC-01 to SC-07, MID-PP at 16.654 km, B-ATT 5 dB design, commissioning loss 8.51 dB @1550"
+       },
+       {
+        "item": "Retrieve alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_ALARM and PRE_FEC_BER_HIGH active since 2026-10-23 05:00 UTC"
+       },
+       {
+        "item": "Get performance monitoring for rx_power_dbm, tx_power_dbm, pre_fec_ber",
+        "status": "done",
+        "note": "RX power dropped from ~-12.5 dBm to ~-22.5 dBm from 2026-10-23; TX stable ~1.5 dBm; pre-FEC BER rose to ~0.01"
+       },
+       {
+        "item": "Read site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-05 re-entered 2026-10-14, flooding near km25 2026-10-21, B receiver replaced and attenuator refitted 2026-10-23 03:44 UTC"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR from A shows event at 22.776 km with loss -0.74 dB (negative indicates gain anomaly), other splices normal"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR from B shows event at 14.284 km from B with loss 0.91 dB; corresponds to ~22 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with link record and PM to locate fault",
+        "status": "done",
+        "note": "Correlated power drop ~10 dB with attenuator refit; OTDR shows no fibre break, only pre-existing splice anomaly at SC-05"
+       }
+      ],
+      "call_id": 9
+     }
+    }
+   ]
+  },
+  {
+   "step": 9,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_site_notes",
+     "args": {},
+     "result": {
+      "notes": [
+       {
+        "time": "2026-10-14 09:00 UTC",
+        "entry": "Splicing crew re-entered closure SC-05 to add a branch cable for a new customer. Closure resealed."
+       },
+       {
+        "time": "2026-10-21 16:30 UTC",
+        "entry": "Heavy rain and flooding reported along the route near km 25."
+       },
+       {
+        "time": "2026-10-23 03:44 UTC",
+        "entry": "Receiver module at site B replaced under RMA. Attenuator refitted from spares box."
+       }
+      ],
+      "call_id": 10
+     }
+    }
+   ]
+  },
+  {
+   "step": 10,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 3,
+      "status": "done",
+      "note": "SC-05 re-entered 2026-10-14, flooding near km25 2026-10-21, B receiver replaced and attenuator refitted 2026-10-23 03:44 UTC"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record for route map, elements, design loss and thresholds",
+        "status": "done",
+        "note": "Link record retrieved: 36.25 km, elements SC-01 to SC-07, MID-PP at 16.654 km, B-ATT 5 dB design, commissioning loss 8.51 dB @1550"
+       },
+       {
+        "item": "Retrieve alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_ALARM and PRE_FEC_BER_HIGH active since 2026-10-23 05:00 UTC"
+       },
+       {
+        "item": "Get performance monitoring for rx_power_dbm, tx_power_dbm, pre_fec_ber",
+        "status": "done",
+        "note": "RX power dropped from ~-12.5 dBm to ~-22.5 dBm from 2026-10-23; TX stable ~1.5 dBm; pre-FEC BER rose to ~0.01"
+       },
+       {
+        "item": "Read site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-05 re-entered 2026-10-14, flooding near km25 2026-10-21, B receiver replaced and attenuator refitted 2026-10-23 03:44 UTC"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR from A shows event at 22.776 km with loss -0.74 dB (negative indicates gain anomaly), other splices normal"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR from B shows event at 14.284 km from B with loss 0.91 dB; corresponds to ~22 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with link record and PM to locate fault",
+        "status": "done",
+        "note": "Correlated power drop ~10 dB with attenuator refit; OTDR shows no fibre break, only pre-existing splice anomaly at SC-05"
+       }
+      ],
+      "call_id": 11
+     }
+    }
+   ]
+  },
+  {
+   "step": 11,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "embedded_otdr",
+     "args": {
+      "from_site": "A",
+      "time": "now"
+     },
+     "result": {
+      "wavelength_nm": 1625,
+      "from_site": "A",
+      "test_time": "2026-10-27 08:00 UTC",
+      "pulse_width_ns": 1000,
+      "group_index": 1.4682,
+      "note": "Distances are fibre distances from the ODF at the shooting site. Launch and receive cords of 1.000 km were used; the receive cord ends in an open connector.",
+      "fibre_attenuation_db_per_km": 0.242,
+      "events": [
+       {
+        "event": 1,
+        "distance_km": 0.005,
+        "type": "reflective",
+        "loss_db": 0.36,
+        "reflectance_db": -48.7
+       },
+       {
+        "event": 2,
+        "distance_km": 5.903,
+        "type": "non-reflective",
+        "loss_db": -0.07,
+        "reflectance_db": null
+       },
+       {
+        "event": 3,
+        "distance_km": 9.726,
+        "type": "non-reflective",
+        "loss_db": -0.18,
+        "reflectance_db": null
+       },
+       {
+        "event": 4,
+        "distance_km": 15.114,
+        "type": "non-reflective",
+        "loss_db": 0.06,
+        "reflectance_db": null
+       },
+       {
+        "event": 5,
+        "distance_km": 17.028,
+        "type": "reflective",
+        "loss_db": 0.22,
+        "reflectance_db": -50.0
+       },
+       {
+        "event": 6,
+        "distance_km": 22.776,
+        "type": "non-reflective",
+        "loss_db": -0.74,
+        "reflectance_db": null
+       },
+       {
+        "event": 7,
+        "distance_km": 27.815,
+        "type": "non-reflective",
+        "loss_db": -0.07,
+        "reflectance_db": null
+       },
+       {
+        "event": 8,
+        "distance_km": 33.587,
+        "type": "non-reflective",
+        "loss_db": 0.09,
+        "reflectance_db": null
+       },
+       {
+        "event": 9,
+        "distance_km": 37.065,
+        "type": "reflective",
+        "loss_db": 0.19,
+        "reflectance_db": -50.5
+       },
+       {
+        "event": 10,
+        "distance_km": 38.078,
+        "type": "end",
+        "loss_db": null,
+        "reflectance_db": -13.6
+       }
+      ],
+      "instrument": "embedded in-service OTDR (line card), 1625 nm out of band, no traffic interruption",
+      "call_id": 12
+     }
+    }
+   ]
+  },
+  {
+   "step": 12,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "embedded_otdr",
+     "args": {
+      "from_site": "B",
+      "time": "now"
+     },
+     "result": {
+      "wavelength_nm": 1625,
+      "from_site": "B",
+      "test_time": "2026-10-27 08:00 UTC",
+      "pulse_width_ns": 1000,
+      "group_index": 1.4682,
+      "note": "Distances are fibre distances from the ODF at the shooting site. Launch and receive cords of 1.000 km were used; the receive cord ends in an open connector.",
+      "fibre_attenuation_db_per_km": 0.238,
+      "events": [
+       {
+        "event": 1,
+        "distance_km": 0.007,
+        "type": "reflective",
+        "loss_db": 0.2,
+        "reflectance_db": -49.5
+       },
+       {
+        "event": 2,
+        "distance_km": 3.486,
+        "type": "non-reflective",
+        "loss_db": -0.05,
+        "reflectance_db": null
+       },
+       {
+        "event": 3,
+        "distance_km": 9.252,
+        "type": "non-reflective",
+        "loss_db": 0.06,
+        "reflectance_db": null
+       },
+       {
+        "event": 4,
+        "distance_km": 14.284,
+        "type": "non-reflective",
+        "loss_db": 0.91,
+        "reflectance_db": null
+       },
+       {
+        "event": 5,
+        "distance_km": 16.669,
+        "type": "non-reflective",
+        "loss_db": 0.05,
+        "reflectance_db": null
+       },
+       {
+        "event": 6,
+        "distance_km": 20.042,
+        "type": "reflective",
+        "loss_db": 0.2,
+        "reflectance_db": -49.8
+       },
+       {
+        "event": 7,
+        "distance_km": 27.345,
+        "type": "non-reflective",
+        "loss_db": 0.25,
+        "reflectance_db": null
+       },
+       {
+        "event": 8,
+        "distance_km": 31.161,
+        "type": "non-reflective",
+        "loss_db": 0.22,
+        "reflectance_db": null
+       },
+       {
+        "event": 9,
+        "distance_km": 37.066,
+        "type": "reflective",
+        "loss_db": 0.37,
+        "reflectance_db": -50.2
+       },
+       {
+        "event": 10,
+        "distance_km": 38.077,
+        "type": "end",
+        "loss_db": null,
+        "reflectance_db": -14.1
+       }
+      ],
+      "instrument": "embedded in-service OTDR (line card), 1625 nm out of band, no traffic interruption",
+      "call_id": 13
+     }
+    }
+   ]
+  },
+  {
+   "step": 13,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 4,
+      "status": "done",
+      "note": "OTDR from A shows event at 22.776 km with loss -0.74 dB (negative indicates gain anomaly), other splices normal"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record for route map, elements, design loss and thresholds",
+        "status": "done",
+        "note": "Link record retrieved: 36.25 km, elements SC-01 to SC-07, MID-PP at 16.654 km, B-ATT 5 dB design, commissioning loss 8.51 dB @1550"
+       },
+       {
+        "item": "Retrieve alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_ALARM and PRE_FEC_BER_HIGH active since 2026-10-23 05:00 UTC"
+       },
+       {
+        "item": "Get performance monitoring for rx_power_dbm, tx_power_dbm, pre_fec_ber",
+        "status": "done",
+        "note": "RX power dropped from ~-12.5 dBm to ~-22.5 dBm from 2026-10-23; TX stable ~1.5 dBm; pre-FEC BER rose to ~0.01"
+       },
+       {
+        "item": "Read site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-05 re-entered 2026-10-14, flooding near km25 2026-10-21, B receiver replaced and attenuator refitted 2026-10-23 03:44 UTC"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR from A shows event at 22.776 km with loss -0.74 dB (negative indicates gain anomaly), other splices normal"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR from B shows event at 14.284 km from B with loss 0.91 dB; corresponds to ~22 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with link record and PM to locate fault",
+        "status": "done",
+        "note": "Correlated power drop ~10 dB with attenuator refit; OTDR shows no fibre break, only pre-existing splice anomaly at SC-05"
+       }
+      ],
+      "call_id": 14
+     }
+    }
+   ]
+  },
+  {
+   "step": 14,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 5,
+      "status": "done",
+      "note": "OTDR from B shows event at 14.284 km from B with loss 0.91 dB; corresponds to ~22 km from A"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record for route map, elements, design loss and thresholds",
+        "status": "done",
+        "note": "Link record retrieved: 36.25 km, elements SC-01 to SC-07, MID-PP at 16.654 km, B-ATT 5 dB design, commissioning loss 8.51 dB @1550"
+       },
+       {
+        "item": "Retrieve alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_ALARM and PRE_FEC_BER_HIGH active since 2026-10-23 05:00 UTC"
+       },
+       {
+        "item": "Get performance monitoring for rx_power_dbm, tx_power_dbm, pre_fec_ber",
+        "status": "done",
+        "note": "RX power dropped from ~-12.5 dBm to ~-22.5 dBm from 2026-10-23; TX stable ~1.5 dBm; pre-FEC BER rose to ~0.01"
+       },
+       {
+        "item": "Read site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-05 re-entered 2026-10-14, flooding near km25 2026-10-21, B receiver replaced and attenuator refitted 2026-10-23 03:44 UTC"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR from A shows event at 22.776 km with loss -0.74 dB (negative indicates gain anomaly), other splices normal"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR from B shows event at 14.284 km from B with loss 0.91 dB; corresponds to ~22 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with link record and PM to locate fault",
+        "status": "done",
+        "note": "Correlated power drop ~10 dB with attenuator refit; OTDR shows no fibre break, only pre-existing splice anomaly at SC-05"
+       }
+      ],
+      "call_id": 15
+     }
+    }
+   ]
+  },
+  {
+   "step": 15,
+   "content": null,
+   "reasoning": "We have data. Let's correlate.\n\nLink record: elements route km:\nA-ODF 0\nSC-01 5.811\nSC-02 9.525\nSC-03 14.782\nMID-PP 16.654\nSC-04 19.956\nSC-05 22.261\nSC-06 27.166\nSC-07 32.821\nB-ODF 36.25\n\nOTDR from A:\nevent distances (fibre distance from ODF at shooting site, launch/receive cords 1 km used?). Note says distances are fibre distances from ODF at shooting site. Launch and receive cords of 1.000 km were used; receive cord ends in open connector.\n\nEvent 1 distance 0.005 km reflective loss 0.36 dB -> likely A-ODF connector? Maybe launch.\n\nEvent 2 5.903 km non-reflective loss -0.07 dB -> corresponds to SC-01 at 5.811 km good.\n\nEvent 3 9.726 km non-reflective loss -0.18 -> SC-02 at 9.525 good.\n\nEvent 4 15.114 km non-reflective loss 0.06 -> SC-03 at 14.782, but distance 15.114 ~ maybe MID-PP? Actually MID-PP at 16.654. Hmm.\n\nEvent 5 17.028 km reflective loss 0.22 -> MID-PP at 16.654, reflective connector ~17 km good.\n\nEvent 6 22.776 km non-reflective loss -0.74 dB -> SC-05 is at 22.261 km. That's near. Loss negative -0.74 indicates gain? Could be measurement artifact due to macrobend? Actually negative loss can be due to gain or error. Might be a macrobend causing loss increase? Wait OTDR shows loss_db = -0.74 meaning the trace goes up? Let's think: Usually loss positive means attenuation. Negative means apparent gain. Could be due to a bend causing reflection? Might be a macrobend.\n\nEvent 7 27.815 km non-reflective loss -0.07 -> SC-06 at 27.166 km good.\n\nEvent 8 33.587 km non-reflective loss 0.09 -> SC-07 at 32.821 km.\n\nEvent 9 37.065 km reflective loss 0.19 -> B-ODF? Expect 36.25. 37.065 ~ 36.25 +1 km cord? Hmm.\n\nOTDR from B:\nDistances from B ODF outward.\n\nEvent 1 0.007 km reflective -> B-ODF\n\nEvent 2 3.486 km non-reflective loss -0.05 -> This is distance from B towards A. Total length ~36.25. So distance from A = 36.25 - 3.486 = 32.764 -> SC-07 at 32.821 good.\n\nEvent 3 9.252 km -> from A = 36.25 - 9.252 = 26.998 -> SC-06 at 27.166 good.\n\nEvent 4 14.284 km loss 0.91 dB -> from A = 36.25 -14.284 =21.966 -> SC-05 at 22.261. Loss 0.91 dB! That's high. Expected splice loss ~0.05-0.1 dB. So 0.91 dB is significant.\n\nEvent 5 16.669 km loss 0.05 -> from A = 19.581 -> SC-04 at 19.956 close.\n\nEvent 6 20.042 km reflective loss 0.2 -> from A = 16.208 -> MID-PP at 16.654 good.\n\nEvent 7 27.345 km non-reflective loss 0.25 -> from A = 8.905 -> SC-02 at 9.525 maybe.\n\nEvent 8 31.161 km non-reflective loss 0.22 -> from A =5.089 -> SC-01 at 5.811.\n\nEvent 9 37.066 km reflective loss 0.37 -> A-ODF.\n\nSo the anomalous event is around SC-05. From B OTDR, event at 14.284 km from B with loss 0.91 dB. From A OTDR, event at 22.776 km with loss -0.74 dB. That's the same location but opposite direction shows loss? Hmm negative loss from A maybe due to macrobend causing different measurement.\n\nWait maybe the negative loss from A is due to a macrobend causing a \"gain\" artifact? Actually macrobend typically causes increased loss and may show as a drop. Negative loss could be due to a reflection? Could be a dirty connector causing reflection? No.\n\nBetter consider site notes: SC-05 re-entered 2026-10-14 to add branch. Flooding near km25 on 2026-10-21. Receiver replaced and attenuator refitted 2026-10-23 03:44 UTC. Alarm raised 2026-10-23 05:00 UTC.\n\nRX power dropped from -12.5 to -22.5 dBm (~10 dB drop). TX stable.\n\nLink loss at commissioning 8.51 dB. Design attenuator 5 dB. TX ~1.5 dBm. So expected RX = TX - link loss - attenuator? Wait attenuator at site B between ODF and receiver. So RX at receiver = TX - fibre loss - connector losses - attenuator. Commissioning loss 8.51 dB probably includes fibre+ splices+ connectors but not attenuator? The link record says commissioning link loss 8.51 dB @1550 note A-ODF to B-ODF bidirectional average. So fibre loss between ODFs is 8.51 dB. Then attenuator 5 dB added, so total expected RX = 1.5 -8.51 -5 = -12.01 dBm. Matches observed ~-12.5 before fault. Good.\n\nNow after fault, RX ~ -22.5 dBm, so additional ~10 dB loss. TX unchanged. So extra loss ~10 dB in fibre.\n\nOTDR from B shows 0.91 dB extra at SC-05 location. That's only ~0.9 dB, not 10 dB.\n\nCould be attenuator wrong. Site notes: attenuator refitted from spares box on 2026-10-23 03:44. Alarm raised 05:00. Could be wrong attenuator installed: design 5 dB, maybe installed 15 dB? That would add 10 dB extra loss. RX drop ~10 dB matches. Pre-FEC BER high due to low power.\n\nOTDR would not see attenuator loss? Attenuator is at site B between ODF and receiver. OTDR from B starts at ODF, launch cord 1 km, so attenuator is after ODF? Actually attenuator is between ODF and receiver. OTDR from B is connected to line equipment? The embedded OTDR is at site B line card, probably before attenuator? Hmm.\n\nThe OTDR from B event 1 at 0.007 km reflective loss 0.2 dB -> that's B-ODF connector. Attenuator would be before receiver but after ODF? If OTDR is in line card before attenuator? Might be after attenuator? Let's think: Service path: A-TX -> fibre -> B-ODF -> B-ATT -> B-RX. OTDR built into line equipment at site B, probably at the transceiver side? Embedded OTDR in line card, tests at 1625 nm out of band. Likely it tests the fibre path up to the far end, so it sees fibre, not attenuator? Might be before attenuator.\n\nAlternative: Wrong attenuator causes ~10 dB loss, matches power drop. OTDR would not show it because attenuator is at B side, before receiver but maybe after OTDR tap? Hmm.\n\nCheck OTDR from B: the first event at 0.007 km is reflective with loss 0.2 dB. That could be the connector at B-ODF. Attenuator would be a non-reflective loss event close to start, maybe at ~0.01 km? Not seen.\n\nBetter check PM: RX power dropped to -22.5 dBm. If attenuator changed from 5 dB to 15 dB, that's +10 dB loss, RX becomes -22 dBm. Perfect.\n\nSite notes confirm attenuator refitted from spares box on 2026-10-23 03:44 UTC, alarm raised at 05:00 UTC. That's 1h16m later. Fits.\n\nCould also be dirty connector at B-ODF? That would cause some loss but OTDR from B shows reflective event at 0.007 km with loss 0.2 dB, reflectance -49.5 dB. From A OTDR event at 37.065 km reflective loss 0.19 dB reflectance -50.5 dB. That's fine.\n\nOTDR from A shows event at 22.776 km with loss -0.74 dB. Hmm negative. Could be a macrobend near SC-05 causing loss? Actually flooding near km25 on 2026-10-21. SC-05 is at 22.261 km. Flooding near km25 could cause macrobend or fibre break? OTDR from B shows loss 0.91 dB at that location, which is high for a splice. Could be bad splice due to water ingress or macrobend.\n\nWait the loss from B is 0.91 dB at 14.284 km from B, which corresponds to SC-05. From A, the loss at that same location is -0.74 dB. That discrepancy suggests something odd. Maybe the OTDR from A sees an apparent gain due to a macrobend causing a reflection? Or the negative loss is an artifact of a macrobend.\n\nLet's compute distance from A to SC-05: 22.261 km. OTDR from A shows event at 22.776 km, close. Loss -0.74 dB. Negative loss could mean the trace rises, typical of a macrobend where the OTDR sees a loss then a recovery? Or a bad splice with reflection? Hmm.\n\nAlternative explanation: The fibre break or macrobend near km25 due to flooding. SC-05 is at 22.26, SC-06 at 27.166. Flooding near km25 is between SC-05 and SC-06, around 25 km. OTDR from A event 6 at 22.776 km, event 7 at 27.815 km. No event at 25 km. OTDR from B event 4 at 14.284 km (22.966 km from A), event 5 at 16.669 km (19.581 km from A). No event between.\n\nCould be a macrobend causing ~10 dB loss, but OTDR may not show clearly? Macrobend causes gradual loss.\n\nWait RX power dropped 10 dB, but OTDR shows only 0.91 dB extra at SC-05. Could be combination of bad splice + wrong attenuator? Need single root cause.\n\nProblem states: find the single root cause and exactly where it is. Fault types allowed: dirty_connector, damaged_connector, macrobend, bad_splice, fibre_break, wrong_attenuator, tx_degradation.\n\nEvidence: attenuator refitted from spares box just before alarm. That is strong clue for wrong_attenuator. Attenuator values available: 0,3,5,7,10,15. Design 5 dB. If replaced with 15 dB, that's +10 dB loss. RX power drop from -12.5 to -22.5 = -10 dB. Exactly.\n\nTX power stable, so not TX degradation.\n\nOTDR from A shows event at 22.776 km loss -0.74 dB. Hmm maybe that's the bad splice? But loss negative.\n\nLet's re-examine OTDR data more carefully. From A:\nEvent 6 distance 22.776 km non-reflective loss_db -0.74. The loss_db field may be the loss of the event itself? Negative suggests apparent gain. Could be due to a macrobend causing a \"hump\"?\n\nFrom B:\nEvent 4 distance 14.284 km non-reflective loss_db 0.91. That's from B towards A. Distance from B =14.284. Fibre length to A is 36.25. So location from A = 36.25 -14.284 =21.966 km. That's very close to SC-05 at 22.261 km (difference 0.295 km = 295 m). Could be within tolerance.\n\nLoss 0.91 dB is high for a splice. Normal splice loss <0.1 dB. So bad splice at SC-05.\n\nBut would a bad splice cause 10 dB RX drop? 0.91 dB no.\n\nWait maybe the OTDR loss_db is cumulative? No.\n\nLet's compute expected RX with bad splice: extra 0.91 dB loss => RX would drop from -12.5 to -13.4 dB, not -22.5.\n\nSo bad splice alone insufficient.\n\nWrong attenuator fits power drop perfectly.\n\nWhy does OTDR show loss at SC-05? Could be coincidental: SC-05 was re-entered on 2026-10-14. Could have a bad splice causing 0.91 dB loss, but alarm started 2026-10-23, not 2026-10-14. Could have degraded over time due to flooding? Flooding 2026-10-21 near km25, could cause macrobend.\n\nWait RX power history: On 2026-10-22, min -22.54, avg -13.73, max -12.39. So intermittent drop started on 22nd. Then 23rd full drop. So degradation began 22nd. Flooding 21st. Could be macrobend causing intermittent then permanent.\n\nBut attenuator refit 23rd 03:44, alarm 05:00. Timing perfect.\n\nAlso pre-FEC BER high due to low power.\n\nOTDR negative loss -0.74 at 22.776 km could be an artifact of the wrong attenuator? No.\n\nLet's think about OTDR measurement: The embedded OTDR at site A shoots towards B. The path includes fibre to B-ODF, then to B-ATT? If OTDR is after the transmitter, it will see fibre all the way to B-ODF and maybe beyond? The attenuator is at B between ODF and receiver. If OTDR is launched from A, it goes to B-ODF, then the attenuator is before the receiver, but the OTDR pulse will reflect at the end of fibre (open connector). The attenuator is in line, so the OTDR will see its loss as a non-reflective event close to the end. The event at 37.065 km reflective loss 0.19 dB is B-ODF? Wait from A, total fibre distance to B-ODF is 36.25 km. OTDR shows event at 37.065 km reflective loss 0.19 dB. That's about 0.815 km beyond. Hmm launch cord 1 km. So maybe the 1 km cord adds. So distance to B-ODF is about 37 km -1 km cord? Not clear.\n\nAlternative interpretation: The OTDR from A shows event 9 at 37.065 km reflective loss 0.19 dB, reflectance -50.5 dB. Event 10 at 38.078 km end loss null reflectance -13.6 dB. So end is at 38.078 km. That's about 36.25 + ~1.8 km cord? Hard.\n\nGiven the strong temporal correlation with attenuator refit, and power drop matching exactly 10 dB, I think fault is wrong_attenuator at B-ATT.\n\nCheck attenuator values: design 5 dB, available 0,3,5,7,10,15. If installed 15 dB, that's +10 dB. RX drop 10 dB. Could also be 7 dB (+2 dB) no.\n\nCould be 10 dB installed? That would be +5 dB, RX would be -17.5 dB, not -22.5.\n\nSo 15 dB fits.\n\nThe site notes say \"Attenuator refitted from spares box.\" Could be wrong value.\n\nOTDR shows no significant change in fibre loss, just a 0.91 dB at SC-05 which could be pre-existing due to splice re-entry. But main fault is attenuator.\n\nThe checklist says correlate OTDR events with link record and PM to locate fault. The OTDR events at SC-05 might be a red herring or indicate a bad splice, but the power drop is too large.\n\nWait the PM shows RX power on 2026-10-22 min -22.54, avg -13.73, max -12.39. So intermittent drops started before attenuator refit. Could be flooding causing intermittent macrobend starting 21st, then attenuator refit made it permanent? Hmm.\n\nAlternative root cause: macrobend at route_km ~25 due to flooding. OTDR from A shows event at 22.776 km with negative loss -0.74. Could be macrobend causing apparent gain? From B shows loss 0.91 dB at ~22 km. Might be a macrobend causing ~10 dB loss? But OTDR loss value is 0.91 dB, not 10 dB.\n\nMaybe the OTDR loss_db field is the incremental loss at that event, not total. A macrobend could cause a gradual loss over several km, not a discrete event. OTDR may not capture gradual loss as event.\n\nCheck fibre attenuation: 0.242 dB/km. Over 36.25 km, fibre loss = 8.77 dB. Plus splices ~0.05 each *7 =0.35. Total ~9.1 dB. Commissioning loss 8.51 dB, close.\n\nIf macrobend causes 10 dB extra loss, OTDR would show a drop in trace level at that location. The event loss might be negative due to measurement artifact.\n\nHmm.\n\nLet's examine OTDR from A event distances vs link record:\n\nSC-01 at 5.811 km -> event 2 at 5.903 km good.\n\nSC-02 at 9.525 -> event 3 at 9.726 km good.\n\nSC-03 at 14.782 -> event 4 at 15.114 km good (diff 0.332 km).\n\nMID-PP at 16.654 -> event 5 at 17.028 km reflective good.\n\nSC-04 at 19.956 -> event? Next is event 6 at 22.776 km. That's SC-05 at 22.261 km. So SC-04 missing? Maybe event 4 at 15.114 is SC-03, event 5 at 17.028 is MID-PP, event 6 at 22.776 is SC-05, meaning SC-04 at 19.956 is missing? Could be low loss not detected.\n\nSC-06 at 27.166 -> event 7 at 27.815 km good.\n\nSC-07 at 32.821 -> event 8 at 33.587 km good.\n\nSo the OTDR shows no extra loss except at SC-05 where loss is -0.74 dB (negative). That could be measurement error due to macrobend causing reflection? Or could be a bad splice with low loss?\n\nFrom B OTDR:\nDistance from B:\nB-ODF 0\nSC-07 at 32.821 -> distance from B = 36.25-32.821=3.429 km -> event 2 at 3.486 km good.\nSC-06 at 27.166 -> distance =9.084 km -> event 3 at 9.252 km good.\nSC-05 at 22.261 -> distance =13.989 km -> event 4 at 14.284 km good, loss 0.91 dB high.\nSC-04 at 19.956 -> distance =16.294 km -> event 5 at 16.669 km good.\nMID-PP at 16.654 -> distance =19.596 km -> event 6 at 20.042 km reflective good.\n\nSo SC-05 shows high loss 0.91 dB from B side, but negative loss from A side. Could be a reflection causing measurement discrepancy? Might be a damaged connector? But SC-05 is splice closure, not connector.\n\nMaybe the fault is a bad splice at SC-05 due to water ingress after flooding, causing ~10 dB loss? But OTDR shows only 0.91 dB.\n\nCould be a fibre break with a macrobend causing intermittent loss, OTDR sees apparent gain?\n\nWait the OTDR from A event 6 loss -0.74 dB. Negative loss means the trace level increases after the event. That can happen with a macrobend causing mode coupling? Or could be a reflection from a connector causing an artifact.\n\nAlternative interpretation: The fault is wrong attenuator, and the OTDR anomaly at SC-05 is pre-existing bad splice due to re-entry on 2026-10-14. The bad splice loss 0.91 dB is present but not enough to cause alarm (RX would still be about -13.4 dBm, above alarm threshold -16). The alarm is due to wrong attenuator.\n\nBut problem states single root cause. Could be wrong attenuator is root cause.\n\nCheck alarm thresholds: RX_LOW_ALARM -16.0 dBm. With extra 10 dB loss, RX -22.5 triggers alarm. With just 0.91 dB bad splice, RX would be -13.4, no alarm.\n\nSo root cause is wrong attenuator.\n\nThe site notes say attenuator refitted from spares box. That's a strong clue.\n\nThus fault_type = wrong_attenuator, element_id = B-ATT, action = replace_attenuator.\n\nEvidence: RX power dropped ~10 dB, TX stable, attenuator refitted just before alarm.\n\nEvidence refs needed: call_id for PM rx_power_dbm (call_id 6), TX power (call_id 7), alarms (call_id 4), site notes (call_id 10). Need at least two measurements.\n\nWe need to cite values. Example: rx_power daily avg on 2026-10-22 avg -13.73 dBm, on 2026-10-23 avg -22.45 dBm. That's from call_id 6.\n\nTX power avg stable ~1.52 dBm call_id 7.\n\nSite notes call_id 10 shows attenuator refitted 2026-10-23 03:44.\n\nAlarms call_id 4 shows RX_LOW_ALARM raised 2026-10-23 05:00.\n\nProvide evidence_refs with call_id and quote.\n\nWe must also close checklist item 6.\n\nUpdate checklist item 6 to done.",
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 6,
+      "status": "done",
+      "note": "Correlated power drop ~10 dB with attenuator refit; OTDR shows no fibre break, only pre-existing splice anomaly at SC-05"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record for route map, elements, design loss and thresholds",
+        "status": "done",
+        "note": "Link record retrieved: 36.25 km, elements SC-01 to SC-07, MID-PP at 16.654 km, B-ATT 5 dB design, commissioning loss 8.51 dB @1550"
+       },
+       {
+        "item": "Retrieve alarms for 1550 nm service at site B",
+        "status": "done",
+        "note": "RX_LOW_ALARM and PRE_FEC_BER_HIGH active since 2026-10-23 05:00 UTC"
+       },
+       {
+        "item": "Get performance monitoring for rx_power_dbm, tx_power_dbm, pre_fec_ber",
+        "status": "done",
+        "note": "RX power dropped from ~-12.5 dBm to ~-22.5 dBm from 2026-10-23; TX stable ~1.5 dBm; pre-FEC BER rose to ~0.01"
+       },
+       {
+        "item": "Read site notes / field log for recent work",
+        "status": "done",
+        "note": "SC-05 re-entered 2026-10-14, flooding near km25 2026-10-21, B receiver replaced and attenuator refitted 2026-10-23 03:44 UTC"
+       },
+       {
+        "item": "Run embedded OTDR from site A",
+        "status": "done",
+        "note": "OTDR from A shows event at 22.776 km with loss -0.74 dB (negative indicates gain anomaly), other splices normal"
+       },
+       {
+        "item": "Run embedded OTDR from site B",
+        "status": "done",
+        "note": "OTDR from B shows event at 14.284 km from B with loss 0.91 dB; corresponds to ~22 km from A"
+       },
+       {
+        "item": "Correlate OTDR events with link record and PM to locate fault",
+        "status": "done",
+        "note": "Correlated power drop ~10 dB with attenuator refit; OTDR shows no fibre break, only pre-existing splice anomaly at SC-05"
+       }
+      ],
+      "call_id": 16
+     }
+    }
+   ]
+  },
+  {
+   "step": 16,
+   "content": null,
+   "reasoning": "We have data. Let's analyze.\n\nLink record: design attenuator B-ATT 5 dB. Commissioning loss 8.51 dB @1550. TX spec -1 to +2 dBm, typical ~1.5 dBm. Receiver sensitivity -15 dBm. RX_LOW_ALARM threshold -16.0 dBm.\n\nPM: rx_power daily avg before 2026-10-22 ~ -12.48 dBm. On 2026-10-22 min -22.54 avg -13.73 max -12.39 -> intermittent drop. From 2026-10-23 onward avg ~ -22.45 dBm. So drop about 10 dB.\n\nTX power stable ~1.52 dBm avg. So transmitter ok.\n\nPre-FEC BER went up to ~0.01 after.\n\nSite notes: 2026-10-23 03:44 UTC receiver module at site B replaced under RMA. Attenuator refitted from spares box.\n\nAlarms raised 2026-10-23 05:00 UTC, about 1h16m after attenuator refit. That matches timing.\n\nSo fault likely wrong attenuator installed. Design is 5 dB. Attenuator values available: 0,3,5,7,10,15. If they fitted 15 dB instead of 5 dB, extra 10 dB loss. RX power drop about 10 dB (~-12.5 to -22.5). Indeed.\n\nCould also be dirty connector at B-ODF? But attenuator refit points to attenuator.\n\nOTDR events: from A at 22.776 km loss -0.74 dB. That is around SC-05? SC-05 is at 22.261 km per link record. So ~22.776 km matches. Loss -0.74 dB is weird negative. OTDR from B at 14.284 km from B -> total 36.25 - 14.284 = 21.966 km from A. So ~22 km. Loss 0.91 dB at that event. That is high for splice (expected ~0.05). Might be macrobend? The site notes flooding near km25 on 2026-10-21. That could cause macrobend.\n\nBut the power drop is exactly ~10 dB, and timing matches attenuator refit. OTDR from A and B show no fibre break (end at ~38 km due to launch cord). The negative loss could be due to splice gain anomaly? Possibly a bad splice? But loss is -0.74 dB (gain). Might be OTDR artifact.\n\nWait: OTDR event at 22.776 km with loss_db -0.74. That's non-reflective. Could be a macrobend causing loss? Usually loss positive. Negative suggests measurement error? Hmm.\n\nLet's compute expected RX power: TX ~1.5 dBm. Link loss commissioning 8.51 dB. Attenuator 5 dB. So expected RX = 1.5 - 8.51 -5 = -12.01 dBm. Matches observed ~-12.5 dBm. After fault, RX ~ -22.5 dBm. So extra loss ~10.5 dB. If attenuator changed from 5 to 15 dB, extra 10 dB. Good.\n\nAlternatively, could be dirty connector at B-ODF or MID-PP? But OTDR from B shows first reflective at 0.007 km loss 0.2 dB (B-ODF). That's normal. Reflective at 20.042 km from B? That's 16.208 km from A? Wait 36.25-20.042=16.208. That's near MID-PP at 16.654 km. Reflective loss 0.2 dB.\n\nSo OTDR doesn't show large loss.\n\nMacrobend at ~22 km would cause loss, but OTDR from B shows loss 0.91 dB at 14.284 km from B (~21.966 km from A). That's only ~0.9 dB. Not 10 dB.\n\nCould be combination? But single root cause required. Attenuator refit from spares box suggests wrong attenuator installed. Evidence: site notes 2026-10-23 03:44 attenuator refitted. RX power drops after 05:00. TX stable.\n\nCheck alarm thresholds: RX_LOW_ALARM -16.0 dBm. RX at -22.5 triggers alarm.\n\nThus fault_type = wrong_attenuator. element_id = B-ATT. action = replace_attenuator.\n\nEvidence refs need call_id and quote.\n\nWe have call_id 10 for site notes: entry \"Receiver module at site B replaced under RMA. Attenuator refitted from spares box.\" Quote exactly.\n\nCall_id 6 for rx_power: rows show day 2026-10-23 min -22.55 avg -22.45 max -22.36. Use quote \"avg\": -22.45\n\nCall_id 7 for tx_power: day 2026-10-23 avg 1.52. Quote \"avg\": 1.52\n\nMaybe also alarm call_id 4: alarm raised 2026-10-23 05:00 UTC.\n\nLink record call_id 2 shows B-ATT design value 5 dB. Quote \"B-ATT\": \"fixed in-line attenuator at site B between ODF and receiver, design value 5 dB\"\n\nWe need at least two measurements. Use rx power and site notes.\n\nEvidence: Power drop ~10 dB after attenuator refit, TX unchanged.\n\nLet's submit.\n\nCheck fault_type enum: wrong_attenuator. element_id B-ATT. action replace_attenuator.\n\nRoute_km not needed.\n\nEvidence string.\n\nEvidence_refs: need call_id and quote.\n\nProvide two refs:\n\ncall_id 10 quote \"Attenuator refitted from spares box.\" maybe full entry.\n\ncall_id 6 quote \"avg\": -22.45\n\ncall_id 7 quote \"avg\": 1.52\n\nProvide maybe three.\n\nSubmit diagnosis.",
+   "tool_calls": [
+    {
+     "name": "submit_diagnosis",
+     "args": {
+      "fault_type": "wrong_attenuator",
+      "element_id": "B-ATT",
+      "action": "replace_attenuator",
+      "evidence": "RX power fell ~10 dB from -12.5 dBm to -22.5 dBm on 2026-10-23 while TX power remained ~1.5 dBm; site log shows receiver replaced and attenuator refitted from spares box at 2026-10-23 03:44 UTC, alarms raised at 05:00 UTC. OTDR shows no fibre break, only minor splice events. Design attenuator is 5 dB, indicating a higher value was installed.",
+      "evidence_refs": [
+       {
+        "call_id": 10,
+        "quote": "Receiver module at site B replaced under RMA. Attenuator refitted from spares box."
+       },
+       {
+        "call_id": 6,
+        "quote": "\"day\": \"2026-10-23\", \"min\": -22.55, \"avg\": -22.45, \"max\": -22.36"
+       },
+       {
+        "call_id": 7,
+        "quote": "\"day\": \"2026-10-23\", \"min\": 1.41, \"avg\": 1.52, \"max\": 1.61"
+       }
+      ]
+     },
+     "result": {
+      "status": "accepted",
+      "checks": "all passed"
+     }
+    }
+   ]
+  }
+ ]
+}

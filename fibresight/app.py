@@ -118,7 +118,7 @@ REVIEWERS = {"spark-1.3": ("muse-spark-1.3", "Muse Spark 1.3"), "wonder": ("muse
 
 @app.get("/api/run")
 def run(seed: int, mode: str = "standard", model: str = "spark-open", sam: bool = True, view: str = "noc",
-        reviewer: str = "spark-1.3"):
+        reviewer: str = "wonder"):
     if model not in MODELS:
         raise HTTPException(400, "unknown model")
     if view not in ("noc", "field"):
