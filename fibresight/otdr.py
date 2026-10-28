@@ -14,13 +14,13 @@ from .sim import NIGHT_TEST, NOW, Case
 
 RECEIVE_CORD_KM = 1.0
 OPEN_END_REFLECTANCE = -14.5
-BACKSCATTER_1NS = {1310: -79.5, 1550: -81.5}
+BACKSCATTER_1NS = {1310: -79.5, 1550: -81.5, 1625: -82.0}
 
 
 def otdr_settings(case: Case) -> dict:
     if case.fibre_length_km <= 25.0:
-        return {"pulse_ns": 100, "sample_km": 0.005, "dynamic_range_db": {1310: 26.0, 1550: 28.0}}
-    return {"pulse_ns": 1000, "sample_km": 0.02, "dynamic_range_db": {1310: 36.0, 1550: 38.0}}
+        return {"pulse_ns": 100, "sample_km": 0.005, "dynamic_range_db": {1310: 26.0, 1550: 28.0, 1625: 27.0}}
+    return {"pulse_ns": 1000, "sample_km": 0.02, "dynamic_range_db": {1310: 36.0, 1550: 38.0, 1625: 37.0}}
 
 
 def _pulse_km(pulse_ns: float) -> float:

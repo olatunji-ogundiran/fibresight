@@ -383,4 +383,19 @@ def generate_case(seed: int, fault_type: Optional[str] = None, hard: bool = Fals
         case.day_factor = float(rng.uniform(0.003, 0.012))
     _onset(case, rng)
     _notes(case, rng)
+    _add_1625(case, rng)
     return case
+
+
+def _add_1625(case: Case, rng: np.random.Generator) -> None:
+    """Values at 1625 nm, the out-of-band wavelength used by embedded
+    (in-service) OTDRs. Bends lose much more at 1625 than at 1550."""
+    case.alpha[1625] = case.alpha[1550] + float(rng.uniform(0.02, 0.035))
+    for e in case.elements:
+        e.loss[1625] = e.loss[1550] + (float(rng.uniform(0.0, 0.02)) if e.kind == "connector" else 0.0)
+        e.mfd_offset[1625] = e.mfd_offset[1550] * 1.1
+    for ev in case.events:
+        if ev["kind"] == "bend":
+            ev["loss"][1625] = ev["loss"][1550] * float(rng.uniform(1.6, 2.4))
+        else:
+            ev["loss"][1625] = ev["loss"][1550]

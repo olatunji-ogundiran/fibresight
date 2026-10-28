@@ -102,6 +102,20 @@ class ToolBox:
         wl, site, when = self._check_otdr(wavelength_nm, from_site, time)
         return otdr.event_table(self.case, wl, site, when)
 
+    def embedded_otdr(self, from_site: str, time: str = "now") -> dict:
+        """In-service OTDR built into the line equipment at each site: 1625 nm
+        out-of-band through a WDM filter, so traffic is not interrupted and
+        it does not use the NOC's OTDR test budget."""
+        site = str(from_site).upper().replace("SITE ", "").strip()
+        if site not in ("A", "B"):
+            raise ToolError("from_site must be 'A' or 'B'")
+        when = str(time or "now").lower()
+        if when not in ("now", "night"):
+            raise ToolError("time must be 'now' or 'night'")
+        out = otdr.event_table(self.case, 1625, site, when)
+        out["instrument"] = "embedded in-service OTDR (line card), 1625 nm out of band, no traffic interruption"
+        return out
+
     def otdr_trace(self, wavelength_nm: int, from_site: str, start_km: float = None,
                    end_km: float = None, points: int = 120, time: str = "now") -> dict:
         wl, site, when = self._check_otdr(wavelength_nm, from_site, time)
@@ -271,6 +285,10 @@ SEGMENT_SPEC = {"name": "segment_endface",
                 "description": "Run Meta SAM 3.1 on a connector end-face image: detects particles (dark spots) and scratches (dark lines), grades them by zone and returns a PASS/FAIL verdict plus an annotated image.",
                 "parameters": {"type": "object", "properties": {"element_id": {"type": "string"}}, "required": ["element_id"]}}
 TOOL_SPECS += [
+    {"name": "embedded_otdr", "description": "Event table from the OTDR built into the line equipment at site A or B. Tests in service at 1625 nm (out of band), so it does not interrupt traffic and does not count against the OTDR test budget. Lower resolution than a handheld OTDR.",
+     "parameters": {"type": "object", "properties": {
+         "from_site": {"type": "string", "enum": ["A", "B"]},
+         "time": {"type": "string", "enum": ["now", "night"], "description": "now (08:00 UTC) or tonight's window (02:00 UTC)"}}, "required": ["from_site"]}},
     {"name": "set_checklist", "description": "Write the investigation plan as a checklist of checks you will make (call this first).",
      "parameters": {"type": "object", "properties": {"items": {"type": "array", "items": {"type": "string"}}}, "required": ["items"]}},
     {"name": "update_checklist", "description": "Mark a checklist item done, skipped or failed, with a short note of the finding.",
