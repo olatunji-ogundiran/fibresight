@@ -1,0 +1,697 @@
+{
+ "summary": {
+  "run": "baseten_hard_base",
+  "solver": "agent",
+  "model": "meta-models/muse-spark-open-1026",
+  "prompt": "base",
+  "seeds": [
+   1000,
+   1027
+  ],
+  "n": 28,
+  "score": 1.0,
+  "by_fault": {
+   "bad_splice": "4/4",
+   "damaged_connector": "4/4",
+   "dirty_connector": "4/4",
+   "fibre_break": "4/4",
+   "macrobend": "4/4",
+   "tx_degradation": "4/4",
+   "wrong_attenuator": "4/4"
+  }
+ },
+ "rows": [
+  {
+   "seed": 1000,
+   "fault_type": "tx_degradation",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "tx_degradation",
+    "element_id": "A-TX",
+    "route_km": null,
+    "action": "replace_transmitter",
+    "evidence": "TX power falling: daily avg 1.78 dBm (13th) to -1.21 dBm (26th), now measured -1.84 dBm vs spec -1 to +2; TX bias rising 43.0 mA (13th) to 71.97 mA (22nd) then saturating ~72.8 mA indicating APC limit, RX tracks TX drop (RX avg -11.1 to -14.1, hourly -11.89 to -14.68). Direct power meter link loss A-TX to B-ODF = 7.66 dB (-1.84 to -9.50) equal to commissioning 7.61 dB at 1550nm, ruling out fibre. OTDR from A shows event at 18.9km with 0.71 dB @1550 vs 0.31 dB @1310 (\u03940.4 dB) and OTDR from B shows gainer -0.64 dB at 15.86km \u2013 same SC-05 G.652.D/G.655 splice (route 18.514km), i.e. backscatter coefficient mismatch, not a fault. B-RX -14.6 dBm = B-ODF -5 dB attenuator correct, connectors inspected clean, BER rising with low power, temperature stable."
+   },
+   "truth": {
+    "fault_type": "tx_degradation",
+    "element_id": "A-TX",
+    "route_km": 0.0,
+    "action": "replace_transmitter"
+   },
+   "error": null,
+   "tool_calls": 23,
+   "usage": {
+    "prompt_tokens": 86648,
+    "completion_tokens": 9629
+   }
+  },
+  {
+   "seed": 1001,
+   "fault_type": "dirty_connector",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "dirty_connector",
+    "element_id": "B-ODF",
+    "route_km": null,
+    "action": "clean_connector",
+    "evidence": "Rx_power dropped ~2.8dB on 2026-10-23 13:00 (daily avg -11.74 to -14.5, RX_LOW_WARNING) coinciding with site notes patching at B-ODF 11:43. Tx power/bias stable (0.98dBm/36mA) and A-TX 0.83dBm normal; link loss A-TX to B-ODF 8.22dB vs commissioning 5.41dB = +2.81dB excess; B-ODF to B-RX 7.1dB = design 7dB attenuator correct. OTDR 1550 from A shows B-ODF loss 2.92dB (1310 2.8dB) and from B 2.9dB both >normal <0.5, reflectance -34.9dB degraded. Inspection image B-ODF shows multiple black contamination spots/veil, while A-ODF and MID-PP clean. SC-01 0.9dB/0.52dB vs -0.81dB gain from B is G.652.D/G.655 mismatch (bidirectional avg 0.045dB) not bend/splice fault (bend would be same both directions and 1550>>1310)."
+   },
+   "truth": {
+    "fault_type": "dirty_connector",
+    "element_id": "B-ODF",
+    "route_km": 22.51,
+    "action": "clean_connector"
+   },
+   "error": null,
+   "tool_calls": 20,
+   "usage": {
+    "prompt_tokens": 48519,
+    "completion_tokens": 8871
+   }
+  },
+  {
+   "seed": 1002,
+   "fault_type": "damaged_connector",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "damaged_connector",
+    "element_id": "MID-PP",
+    "route_km": null,
+    "action": "replace_connector",
+    "evidence": "Rx power dropped -11.6 to -15.0 dBm at 2026-10-25 11:00 after patching work at MID-PP (site notes 10:23). A-TX 0.76 dBm normal, B-ODF -11.9 dBm => link loss 12.66 dB vs 9.32 dB design (+3.34 dB). B-RX -15.04 = B-ODF -3.14 dB confirms 3 dB B-ATT correct. OTDR from A at 26.06-26.07 km (fiber; route km 25.325 MID-PP) shows 3.72 dB @1550 and 4.01 dB @1310 reflective loss -24.9 dB, same from B at 12.58 km (3.73 dB) - wavelength independent, ruling out macrobend. Connector inspection at MID-PP shows intersecting scratches across ferrule/core; cleaning on 2026-10-26 gave no improvement. All other splices <0.3 dB."
+   },
+   "truth": {
+    "fault_type": "damaged_connector",
+    "element_id": "MID-PP",
+    "route_km": 25.325,
+    "action": "replace_connector"
+   },
+   "error": null,
+   "tool_calls": 18,
+   "usage": {
+    "prompt_tokens": 48401,
+    "completion_tokens": 8907
+   }
+  },
+  {
+   "seed": 1003,
+   "fault_type": "macrobend",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "macrobend",
+    "element_id": null,
+    "route_km": 18.254,
+    "action": "relieve_bend",
+    "evidence": "Alarms RX_LOW_WARNING start 2026-10-19 01:00-04:00 nightly after SC-05 re-entered 2026-10-18. Daily RX Power avg -10.64dBm before, -11.23dBm after with min -13.4dBm. Hourly shows diurnal 2.8dB dip at ~02:00 UTC. TX power stable ~1.4dBm (spec -1 to +2) and day link loss A-TX 1.19dBm to B-ODF -3.5dBm =4.69dB equals commissioning 4.72dB, B-ODF to B-RX delta 7.18dB matches B-ATT 7dB, so TX/attenuator/connectors OK. OTDR 1550 from A now (08:00) at ~18.75km fibre (SC-05 route 18.254km) loss -0.16dB (gainer) and 1310 now same -0.16dB; OTDR 1550 night (02:00) same location loss +2.59dB. 1550 loss >>1310 loss proves bend, not splice. Night trace shows step drop -5.74 vs -3.13 =2.6dB, matching RX dip. Temperature-correlated bend in slack at SC-05."
+   },
+   "truth": {
+    "fault_type": "macrobend",
+    "element_id": "SC-05",
+    "route_km": 18.254,
+    "action": "relieve_bend"
+   },
+   "error": null,
+   "tool_calls": 18,
+   "usage": {
+    "prompt_tokens": 46314,
+    "completion_tokens": 10234
+   }
+  },
+  {
+   "seed": 1004,
+   "fault_type": "bad_splice",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "bad_splice",
+    "element_id": "SC-03",
+    "route_km": null,
+    "action": "resplice",
+    "evidence": "RX power dropped ~1.3dB on 2026-10-24 08:00 (daily avg -12.1 to -13.4 dBm, hourly confirms) coinciding with crew re-entry of SC-03 (10.723 route km) at 06:52. OTDR from A shows non-reflective loss 1.33 dB @1550nm at 10.99 km fibre (1.31 dB @1310nm, essentially equal, ruling out macrobend) and from B 1.30 dB at 4.24 km fibre - same physical splice. Link loss A-TX (1.36 dBm) to B-ODF (-3.23 dBm) =4.59 dB vs commissioning 3.39 dB (+1.2 dB). TX power/bias stable, B-ODF to B-RX delta 10.1 dB matches design 10 dB attenuator, connector inspections clean at A-ODF/B-ODF, no wavelength-dependent excess loss."
+   },
+   "truth": {
+    "fault_type": "bad_splice",
+    "element_id": "SC-03",
+    "route_km": 10.723,
+    "action": "resplice"
+   },
+   "error": null,
+   "tool_calls": 19,
+   "usage": {
+    "prompt_tokens": 38128,
+    "completion_tokens": 8540
+   }
+  },
+  {
+   "seed": 1005,
+   "fault_type": "fibre_break",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "fibre_break",
+    "element_id": null,
+    "route_km": 17.7,
+    "action": "repair_break",
+    "evidence": "TX normal 0.46 dBm (spec -1 to +2), B-ODF/B-RX no light <-50 dBm, RX_LOS from 2026-10-17 22:00 with avg -40 dBm. OTDR A 1550 nm end at fibre 18.20 km (non-reflective, level -4.8 dB to noise -37 dB), OTDR A 1310 nm same end at 18.19 km, OTDR B 1550 nm end at fibre 13.16 km (sum 31.36 km matches total fibre). Both wavelengths show abrupt drop to noise, no reflectance peak -> break not bend (bend would be 1550>>1310). Calibrated to route map using SC-01 3.176f/3.088r, SC-02 8.33f/8.094r, SC-03 14.057f/13.668r and SC-04 11.331f from B/10.996r, interpolation SC-03-SC-04 gives route ~13.668+(18.203-14.057)/1.027 = 17.7 km, i.e. between SC-03 (13.668) and SC-04 (19.484), consistent with road works note around km 20."
+   },
+   "truth": {
+    "fault_type": "fibre_break",
+    "element_id": null,
+    "route_km": 17.713,
+    "action": "repair_break"
+   },
+   "error": null,
+   "tool_calls": 19,
+   "usage": {
+    "prompt_tokens": 63857,
+    "completion_tokens": 12081
+   }
+  },
+  {
+   "seed": 1006,
+   "fault_type": "wrong_attenuator",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "wrong_attenuator",
+    "element_id": "B-ATT",
+    "route_km": null,
+    "action": "replace_attenuator",
+    "evidence": "RX power dropped ~10 dB on 2026-10-19 (daily avg -11.2 to -21.2 dBm, RX_LOW_ALARM) coinciding with site note \"Attenuator refitted from spares box\" on 2026-10-19 12:22. Power meter: A-TX +0.92 dBm normal, B-ODF -11.08 dBm = link loss 12.0 dB matches commissioning 12.12 dB (fibre healthy), B-RX -21.3 dBm = 10.2 dB drop across attenuator vs design 0 dB. TX power/bias stable (avg ~1.18 dBm /36 mA). OTDR 1310/1550 from A and B shows all splices/connectors <0.25 dB, no bend (1310 vs 1550 similar) and no break. Wrong 10 dB attenuator installed."
+   },
+   "truth": {
+    "fault_type": "wrong_attenuator",
+    "element_id": "B-ATT",
+    "route_km": 51.46,
+    "action": "replace_attenuator"
+   },
+   "error": null,
+   "tool_calls": 16,
+   "usage": {
+    "prompt_tokens": 54186,
+    "completion_tokens": 8591
+   }
+  },
+  {
+   "seed": 1007,
+   "fault_type": "tx_degradation",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "tx_degradation",
+    "element_id": "A-TX",
+    "route_km": null,
+    "action": "replace_transmitter",
+    "evidence": "TX power PM fell 4.2 dB in 72h (0.22 to -3.98 dBm) while bias ~71mA flat, RX power fell same 4.4 dB (-10.88 to -15.26 dBm) triggering RX_LOW_WARNING. Power meter: A-TX -4.16 dBm out-of-spec (-1 to +2 dBm), link loss A-TX to B-ODF =10.98 dB vs commissioning 10.93 dB unchanged, B-ATT 0 dB correct. OTDR 1550/1310 from A/B shows fibre atten 0.182 dB/km normal, splice losses bidirectional avg <0.2 dB (SC-06 G.652/G.655 gainer -0.56dB A->B /0.7dB B->A avg 0.07dB), no wavelength-dependent bend loss, end-to-end fibre 52.16km vs route 50.85km normal. BER rise follows RX drop. Root cause is laser/power degradation at A-TX, not plant."
+   },
+   "truth": {
+    "fault_type": "tx_degradation",
+    "element_id": "A-TX",
+    "route_km": 0.0,
+    "action": "replace_transmitter"
+   },
+   "error": null,
+   "tool_calls": 16,
+   "usage": {
+    "prompt_tokens": 73904,
+    "completion_tokens": 9347
+   }
+  },
+  {
+   "seed": 1008,
+   "fault_type": "dirty_connector",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "dirty_connector",
+    "element_id": "A-ODF",
+    "route_km": null,
+    "action": "clean_connector",
+    "evidence": "RX power dropped ~3.4 dB from -12.1 to -15.6 avg on 2026-10-19 08:00 immediately after site A ODF patching work 06:47, Tx power/bias unchanged (1.6 dBm). Power meter A-TX 1.32 dBm to B-ODF -10.49 dBm =11.81 dB vs commissioning 8.4 dB (+3.4 dB). OTDR 1550 from A shows reflective event 0.01 km loss 3.68 dB reflectance -34.3 dB, confirmed from B 37.77 km loss 3.69 dB -35.1 dB; 1310 same loss 3.4 dB => not wavelength-selective bend. Inspect A-ODF shows contamination blobs on core/cladding, while B-ODF/MID-PP clean with -49 dB reflectance. B-ATT 5.13 dB correct."
+   },
+   "truth": {
+    "fault_type": "dirty_connector",
+    "element_id": "A-ODF",
+    "route_km": 0.0,
+    "action": "clean_connector"
+   },
+   "error": null,
+   "tool_calls": 19,
+   "usage": {
+    "prompt_tokens": 35457,
+    "completion_tokens": 6379
+   }
+  },
+  {
+   "seed": 1009,
+   "fault_type": "damaged_connector",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "damaged_connector",
+    "element_id": "A-ODF",
+    "route_km": null,
+    "action": "replace_connector",
+    "evidence": "OTDR from A shows 1.95dB loss at event 1 (-0.006km) with high reflectance -21.2dB at 1550nm (2.07dB/-18.9dB at 1310nm) and from B shows 1.96dB/-21.0dB at 49.574km (same A-ODF). Commissioning loss 10.26dB vs measured A-TX to B-ODF 11.87dB (0.8 to -11.07dBm) = +1.6dB extra, matching PM drop ~1.7dB on 2026-10-21 (avg -12.5 to -14.2dBm, RX_LOW_WARNING 09:00) correlating with patching work 07:42 at A-ODF. Wavelength-independent high loss excludes macrobend. B-ODF is clean (0.18dB/-55.2dB, scope clean) while A-ODF scope shows intersecting scratches/cracks and cleaning on 10-22 gave no improvement. Tx stable ~1.07dBm, B-ATT correct 3.2dB, splice losses normal (SC-03 bidirectional avg ~0.02dB confirms G652/G655 mismatch gain -0.77dB vs 0.81dB)."
+   },
+   "truth": {
+    "fault_type": "damaged_connector",
+    "element_id": "A-ODF",
+    "route_km": 0.0,
+    "action": "replace_connector"
+   },
+   "error": null,
+   "tool_calls": 17,
+   "usage": {
+    "prompt_tokens": 56384,
+    "completion_tokens": 19525
+   }
+  },
+  {
+   "seed": 1010,
+   "fault_type": "macrobend",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "macrobend",
+    "element_id": null,
+    "route_km": 42.09,
+    "action": "relieve_bend",
+    "evidence": "OTDR from A: non-reflective loss at fibre 43.30 km is 0.72 dB day (08:00) vs 3.86 dB night (02:00) at 1550 nm, vs 0.44 dB at 1310 nm - wavelength and temperature dependent macrobend, no reflectance. PM rx_power -12.1 dBm day, dips to -15.3 dBm 23-06 UTC daily since 2026-10-19 triggering RX_LOW_WARNING, Tx stable 1.62 dBm avg/1.51 dBm measured, B-ODF -8.99 dBm (link loss 10.5 dB day = commissioning 10.49 dB) B-RX -12.12 dBm proves B-ATT 3 dB correct. Fibre 43.3 km maps to route ~42.1 km (SC-11 route_km 42.093) between SC-10 (fibre 37.89 km / route 36.808) and B-ODF (46.91/45.63). Onset immediately after SC-11 re-entry 2026-10-19 01:38 to add branch - slack coil bend."
+   },
+   "truth": {
+    "fault_type": "macrobend",
+    "element_id": "SC-11",
+    "route_km": 42.093,
+    "action": "relieve_bend"
+   },
+   "error": null,
+   "tool_calls": 17,
+   "usage": {
+    "prompt_tokens": 84702,
+    "completion_tokens": 18107
+   }
+  },
+  {
+   "seed": 1011,
+   "fault_type": "bad_splice",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "bad_splice",
+    "element_id": "SC-03",
+    "route_km": null,
+    "action": "resplice",
+    "evidence": "Daily RX power stable -12.2 dBm until 2026-10-21 then step to -13.6 dBm (PM daily, RX_LOW_WARNING from 2026-10-22) coincident with site note re-entry of SC-03 on 2026-10-21 23:28. Power: A-TX 1.51 dBm normal, B-ODF -8.49 dBm => A-ODF to B-ODF loss 10.0 dB vs commissioning 8.61 dB (+1.39 dB excess). B-ODF to B-RX 5.1 dB => B-ATT 5dB correct. OTDR 1550 from A: non-reflective 1.38 dB at 13.944 km fibre (route km 13.659 SC-03), same 1.38 dB at 1310 => not a bend (wavelength independent). OTDR from B confirms 1.40 dB at 27.466 km (same splice). Trace images show identical ~1.4 dB step at both wavelengths. TX power/bias stable, connectors clean on scope. Fault is bad splice at SC-03."
+   },
+   "truth": {
+    "fault_type": "bad_splice",
+    "element_id": "SC-03",
+    "route_km": 13.659,
+    "action": "resplice"
+   },
+   "error": null,
+   "tool_calls": 19,
+   "usage": {
+    "prompt_tokens": 43821,
+    "completion_tokens": 7087
+   }
+  },
+  {
+   "seed": 1012,
+   "fault_type": "fibre_break",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "fibre_break",
+    "element_id": null,
+    "route_km": 19.49,
+    "action": "repair_break",
+    "evidence": "RX_LOS critical since 2026-10-23 14:00, PM rx_power stable -12dBm then -40dBm floor from 23rd, B-ODF/B-RX no light (<-50dBm) while A-TX +0.59dBm (spec -1 to +2) and TX PM stable. OTDR 1550 from A end at fibre 20.055km reflectance -24.8dB, from B end at fibre 20.042km, sum 40.10km \u2248 total fibre length (route 38.97km +1-1.8% excess + slack). Calibrated to route: 20.055 *38.97/40.097\u224819.49km between SC-05 (18.392km) and SC-06 (22.568km), matching road works at ~km19. 1310 vs 1550 loss identical (0.07-0.08dB at SC-05, same end distance 20.056km at 1310) = wavelength-independent, and trace shows reflective peak +1.5dB then noise floor, not bend/splice step. TX/bias normal, connectors normal."
+   },
+   "truth": {
+    "fault_type": "fibre_break",
+    "element_id": null,
+    "route_km": 19.472,
+    "action": "repair_break"
+   },
+   "error": null,
+   "tool_calls": 15,
+   "usage": {
+    "prompt_tokens": 27576,
+    "completion_tokens": 10730
+   }
+  },
+  {
+   "seed": 1013,
+   "fault_type": "wrong_attenuator",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "wrong_attenuator",
+    "element_id": "B-ATT",
+    "route_km": null,
+    "action": "replace_attenuator",
+    "evidence": "B-ODF power -7.28 dBm vs A-TX 1.33 dBm = 8.61 dB link loss matches commissioning 8.51 dB (1550 nm), proving fibre plant OK. B-RX -22.46 dBm gives B-ATT loss 15.18 dB vs design 5 dB (10 dB excess). Rx avg dropped from -12.48 to -22.45 dBm on 2026-10-22/23 (-10 dB). Alarms RX_LOW_ALARM and PRE_FEC_BER_HIGH raised 2026-10-23 05:00 immediately after site note 03:44 Receiver module replaced and attenuator refitted from spares box. Tx power/bias stable (~1.5 dBm/40mA) and OTDR A->B 1550/1310 shows only expected G.652/G.655 gainer at SC-05 (-0.68 dB A->B, +0.85 dB B->A) no bend/break."
+   },
+   "truth": {
+    "fault_type": "wrong_attenuator",
+    "element_id": "B-ATT",
+    "route_km": 36.25,
+    "action": "replace_attenuator"
+   },
+   "error": null,
+   "tool_calls": 20,
+   "usage": {
+    "prompt_tokens": 67845,
+    "completion_tokens": 10903
+   }
+  },
+  {
+   "seed": 1014,
+   "fault_type": "tx_degradation",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "tx_degradation",
+    "element_id": "A-TX",
+    "route_km": null,
+    "action": "replace_transmitter",
+    "evidence": "A-TX power fell from nominal ~+1.3 dBm (Oct13-24) to -2.24 dBm measured 2026-10-27 08:00, out of spec (-1 to +2 dBm), while Tx bias rose continuously from ~42mA to ~68mA plateau (current limit) Oct13-Oct26. Rx_power tracks Tx decline exactly (-11.4 to -14.88 dBm). Link loss A-TX to B-ODF = 7.48 dB matches commissioning 7.44 dB, B-ODF (-9.72) to B-RX (-14.88)=5.16 dB matches design B-ATT 5 dB, proving fibre plant OK. OTDR 1550/1310 from A and B shows all splice losses 0.04-0.12 dB and fibre attenuation 0.194-0.335 dB/km normal, no macrobend/wavelength-dependent loss or break. SC-06 crew at 2026-10-25 13:00 occurred after decline started ~05:00, unrelated."
+   },
+   "truth": {
+    "fault_type": "tx_degradation",
+    "element_id": "A-TX",
+    "route_km": 0.0,
+    "action": "replace_transmitter"
+   },
+   "error": null,
+   "tool_calls": 18,
+   "usage": {
+    "prompt_tokens": 48295,
+    "completion_tokens": 10786
+   }
+  },
+  {
+   "seed": 1015,
+   "fault_type": "dirty_connector",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "dirty_connector",
+    "element_id": "B-ODF",
+    "route_km": null,
+    "action": "clean_connector",
+    "evidence": "RX power fell ~1.9 dB on 2026-10-18/19 from -11.9 dBm avg to -13.8 dBm (RX_LOW_WARNING 2026-10-19 02:00) coinciding with patching at B-ODF 2026-10-19 01:08. TX stable ~1.1 dBm, measured A-TX 0.89 dBm. B-ODF power -10.76 dBm => link loss 11.65 dB vs commissioning 9.69 dB (+1.96 dB). B-ODF to B-RX 3.05 dB = correct B-ATT 3dB. OTDR 1550 A: event 9 at 40.672 km (B-ODF) loss 2.19 dB reflectance -30.5 dB; 1310 A: 2.30 dB -31.2 dB; OTDR B 1550: event 1 at -0.001 km loss 2.17 dB -30.2 dB vs normal connectors -49 dB (A-ODF, MID-PP 0.31-0.35 dB). Similar loss at 1310/1550 excludes macrobend. Inspection: B-ODF shows multiple dirt particles on core/cladding, A-ODF and MID-PP clean."
+   },
+   "truth": {
+    "fault_type": "dirty_connector",
+    "element_id": "B-ODF",
+    "route_km": 39.62,
+    "action": "clean_connector"
+   },
+   "error": null,
+   "tool_calls": 18,
+   "usage": {
+    "prompt_tokens": 34111,
+    "completion_tokens": 8529
+   }
+  },
+  {
+   "seed": 1016,
+   "fault_type": "damaged_connector",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "damaged_connector",
+    "element_id": "MID-PP",
+    "route_km": null,
+    "action": "replace_connector",
+    "evidence": "Rx power avg -11.7 dBm before 2026-10-18, -14.3 dBm after = 2.6 dB drop, matching A-TX 0.94 dBm to B-ODF -7.22 dBm loss 8.16 dB vs commissioning 5.49 dB (+2.67 dB). OTDR from A 8.788 km and from B 13.381 km both show reflective loss 2.86 dB/2.85 dB at MID-PP (route km 8.522). Loss identical at 1310 nm (2.86 dB) and 1550 nm (2.86 dB) excludes macrobend. Site notes patching at MID-PP 2026-10-18 06:14 then cleaning 2026-10-19 had no improvement. Inspection of MID-PP shows crossed scratches over core and chipped ferrule: damaged, not dirty. B-ATT measured 7.1 dB correct, Tx normal 0.94 dBm."
+   },
+   "truth": {
+    "fault_type": "damaged_connector",
+    "element_id": "MID-PP",
+    "route_km": 8.522,
+    "action": "replace_connector"
+   },
+   "error": null,
+   "tool_calls": 15,
+   "usage": {
+    "prompt_tokens": 28379,
+    "completion_tokens": 7446
+   }
+  },
+  {
+   "seed": 1017,
+   "fault_type": "macrobend",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "macrobend",
+    "element_id": null,
+    "route_km": 31.6,
+    "action": "relieve_bend",
+    "evidence": "OTDR 1550nm from A night (02:00) shows 1.77dB non-reflective event at fibre 32.551km absent in daytime OTDR (08:00) \u2013 trace shows step loss 32.56-32.66km without reflectance, classic bend. Fibre 32.551km maps to route ~31.6km (between SC-08 30.628km and SC-09 33.648km, ~1km beyond SC-08). Daytime power B-ODF -8.53dBm link loss 8.71dB vs commissioning 8.64dB normal, B-ATT 3.08dB correct, A-TX 0.18dBm and TX bias stable ruling out TX. Hourly RX power dips 1.8dB to -13.4dBm at 01:00-03:00 daily (vs -11.6dBm day) triggering RX_LOW_WARNING 01:00-04:00 since 2026-10-20, matching OTDR loss magnitude and diurnal temperature dependence."
+   },
+   "truth": {
+    "fault_type": "macrobend",
+    "element_id": null,
+    "route_km": 31.594,
+    "action": "relieve_bend"
+   },
+   "error": null,
+   "tool_calls": 17,
+   "usage": {
+    "prompt_tokens": 58725,
+    "completion_tokens": 16632
+   }
+  },
+  {
+   "seed": 1018,
+   "fault_type": "bad_splice",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "bad_splice",
+    "element_id": "SC-03",
+    "route_km": null,
+    "action": "resplice",
+    "evidence": "Rx power dropped 2.7dB at 2026-10-24 15:00 (-10.84 to -13.55) immediately after crew re-entered SC-03 at 14:33. OTDR from A shows non-reflective loss 2.70 dB at 11.796 km fibre (2.56 dB at 1310 nm from A, 2.70 dB at 1550 nm from A/B) ~ SC-03 (route km 11.441). Similar loss at both wavelengths excludes macrobend. A-ODF to B-ODF loss rose from commissioning 4.49 dB to 7.22 dB (0.57 - (-6.65)) = +2.73 dB. Tx power/bias stable, B-ATT correct (6.94 dB vs 7 dB design), connectors normal."
+   },
+   "truth": {
+    "fault_type": "bad_splice",
+    "element_id": "SC-03",
+    "route_km": 11.441,
+    "action": "resplice"
+   },
+   "error": null,
+   "tool_calls": 18,
+   "usage": {
+    "prompt_tokens": 38375,
+    "completion_tokens": 6403
+   }
+  },
+  {
+   "seed": 1019,
+   "fault_type": "fibre_break",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "fibre_break",
+    "element_id": null,
+    "route_km": 16.53,
+    "action": "repair_break",
+    "evidence": "RX_LOS active from 2026-10-22 22:00, RX power -40 dBm (daily PM min -40), TX power stable ~1.17 dBm (A-TX 0.94 dBm) and bias normal so TX ok. B-ODF/B-RX power no light (<-50 dBm). OTDR 1550 nm from A end at 16.982 km fibre (reflectance -26.7 dB) with large reflective peak then noise floor; OTDR 1310 nm from A same end at 16.994 km (wavelength independent). OTDR 1550 nm from B end at 10.274 km fibre. Sum 27.256 km equals total fibre length (route 26.58 km + 1-1.8% excess + ~50m slack x6 closures). Mapping fibre to route via known elements (SC-01 2.947/2.883, SC-04 12.745/12.379, MID-PP 13.929/13.526, SC-05 derived 17.892/17.424) gives factor ~1.027, so break route_km ~16.5 km (16.53 km interpolated between MID-PP 13.526 and SC-05 17.424, 0.91 km fibre beyond SC-05). Corroborated by road works note at km 17 on 2026-10-22 21:57. Not macrobend (1310 also broken) nor bad splice/dirty connector (end reflection, total loss)."
+   },
+   "truth": {
+    "fault_type": "fibre_break",
+    "element_id": null,
+    "route_km": 16.54,
+    "action": "repair_break"
+   },
+   "error": null,
+   "tool_calls": 16,
+   "usage": {
+    "prompt_tokens": 38612,
+    "completion_tokens": 8193
+   }
+  },
+  {
+   "seed": 1020,
+   "fault_type": "wrong_attenuator",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "wrong_attenuator",
+    "element_id": "B-ATT",
+    "route_km": null,
+    "action": "replace_attenuator",
+    "evidence": "RX power avg -12.3 dBm until 2026-10-24 18:00 then -2.3 dBm (+10 dB) with RX_HIGH_WARNING active. Site note 2026-10-24 18:16: RX module replaced and attenuator refitted from spares. Power meter: A-TX +1.39 dBm, B-ODF -2.22 dBm => link loss 3.61 dB matches commissioning 3.59 dB (TX normal, fibre healthy). B-RX -2.46 dBm => B-ATT loss ~0.24 dB vs design 10 dB, so 0 dB (or missing) attenuator installed causing overload risk. OTDR 1550/1310 from A and B shows expected splice/connector losses and fibre attenuation (0.19 dB/km @1550, 0.33 @1310) no excess 1550 loss => no bend/break/dirty connector."
+   },
+   "truth": {
+    "fault_type": "wrong_attenuator",
+    "element_id": "B-ATT",
+    "route_km": 15.47,
+    "action": "replace_attenuator"
+   },
+   "error": null,
+   "tool_calls": 13,
+   "usage": {
+    "prompt_tokens": 33149,
+    "completion_tokens": 6360
+   }
+  },
+  {
+   "seed": 1021,
+   "fault_type": "tx_degradation",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "tx_degradation",
+    "element_id": "A-TX",
+    "route_km": null,
+    "action": "replace_transmitter",
+    "evidence": "TX power at A-TX -2.5 dBm below spec -1 to +2 dBm and historic ~+2.17 dBm; TX bias rose from ~43 mA (Oct13) to ~76 mA (Oct26-27) then clamped while TX power fell 4.5 dB over 3 days, classic APC-limited degradation. Link loss A-TX to B-ODF = 11.02 dB vs commissioning 10.84 dB at 1550nm, B-ATT loss 3.05 dB matches design 3 dB, so Rx low (-16.44 dBm, RX_LOW_ALARM) is explained solely by TX drop. OTDR 1550/1310 A/B show no high-loss event (<0.2 dB splices, apparent gains -0.82dB at SC-04 G.652/G.655 mismatch) and no wavelength-dependent excess loss. Connector scopes A-ODF/B-ODF clean. Pre-FEC BER rose with RX fall."
+   },
+   "truth": {
+    "fault_type": "tx_degradation",
+    "element_id": "A-TX",
+    "route_km": 0.0,
+    "action": "replace_transmitter"
+   },
+   "error": null,
+   "tool_calls": 20,
+   "usage": {
+    "prompt_tokens": 51129,
+    "completion_tokens": 7703
+   }
+  },
+  {
+   "seed": 1022,
+   "fault_type": "dirty_connector",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "dirty_connector",
+    "element_id": "B-ODF",
+    "route_km": null,
+    "action": "clean_connector",
+    "evidence": "RX drop ~1.66 dB on 2026-10-19 14:31 after patching at B-ODF: pre-drop avg -12.07 dBm to -13.73 dBm. TX stable 1.48 dBm (PM ~1.64). B-ODF power -8.6 dBm => link loss 10.08 dB vs commissioning 8.42 dB (+1.66). B-RX -13.77 => attenuator 5.17 dB matches design 5 dB (not wrong attenuator). OTDR 1550 from A/B shows B-ODF loss 1.82 dB (reflectance -28.3 dB) vs normal 0.31-0.33 dB at A-ODF/MID-PP; 1310 shows 1.74 dB (no wavelength dependence, not macrobend). Inspection scope B-ODF shows multiple black contamination spots over core/cladding, while A-ODF and MID-PP are clean. Coincides with site notes patching at B ODF."
+   },
+   "truth": {
+    "fault_type": "dirty_connector",
+    "element_id": "B-ODF",
+    "route_km": 37.88,
+    "action": "clean_connector"
+   },
+   "error": null,
+   "tool_calls": 20,
+   "usage": {
+    "prompt_tokens": 45920,
+    "completion_tokens": 9707
+   }
+  },
+  {
+   "seed": 1023,
+   "fault_type": "damaged_connector",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "damaged_connector",
+    "element_id": "B-ODF",
+    "route_km": null,
+    "action": "replace_connector",
+    "evidence": "Link loss A-TX to B-ODF 7.44 dB vs commissioning 4.86 dB = +2.58 dB. RX PM dropped from -10.9 avg to -13.4 dBm on 20-21 Oct coinciding with patching at B-ODF. OTDR from A (1550) event 7 at B-ODF 18.97km loss 2.84dB refl -24.8dB and from B event1 loss 2.82dB refl -23.3dB; 1310 similar 3.06dB \u2013 not wavelength dependent vs bend. OTDR B->A SC-04 apparent high loss 0.89dB but averages with A->B -0.88dB to ~0dB due to G.652/G.655 mismatch, not fault. Inspection scope B-ODF shows crossing scratches/chip over core, A-ODF and MID-PP clean; cleaning log reports no improvement after click cleaner."
+   },
+   "truth": {
+    "fault_type": "damaged_connector",
+    "element_id": "B-ODF",
+    "route_km": 18.52,
+    "action": "replace_connector"
+   },
+   "error": null,
+   "tool_calls": 18,
+   "usage": {
+    "prompt_tokens": 52471,
+    "completion_tokens": 7278
+   }
+  },
+  {
+   "seed": 1024,
+   "fault_type": "macrobend",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "macrobend",
+    "element_id": null,
+    "route_km": 18.577,
+    "action": "relieve_bend",
+    "evidence": "Rx hourly PM shows ~2.1dB extra loss peaked at 02:00 UTC (e.g. -13.92 to -13.97 at 02:00 vs -11.86 day, RX_LOW_WARNING 00:00-05:00 daily from 2026-10-22/23) after SC-04 re-entry on 2026-10-22 20:12; commissioning 8.02dB vs 8.10dB measured at 08:00 (TX 1.31dBm, B-ODF -6.79dBm) but night loss +2dB. OTDR 1550 from B shows 0.93dB drop at ~17.71km fibre (SC-04, route 18.577) and from A apparent gain -0.76dB at 19.04km (same closure) \u2013 calculated true loss 0.085dB + D=0.845dB backscatter, vs 1310 A gain only -0.40dB / loss 0.04-0.08dB elsewhere \u2013 strong wavelength dependence (1550 >>1310). OTDR traces confirm steep bend loss at that location (B: -3.89 to -4.84 over 0.12km). Slack coils stored at SC-04 were disturbed; diurnal temperature dependence typical of macrobend. Connector faces clean, attenuator correct (5.05dB), TX normal."
+   },
+   "truth": {
+    "fault_type": "macrobend",
+    "element_id": "SC-04",
+    "route_km": 18.577,
+    "action": "relieve_bend"
+   },
+   "error": null,
+   "tool_calls": 20,
+   "usage": {
+    "prompt_tokens": 120842,
+    "completion_tokens": 24325
+   }
+  },
+  {
+   "seed": 1025,
+   "fault_type": "bad_splice",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "bad_splice",
+    "element_id": "SC-02",
+    "route_km": null,
+    "action": "resplice",
+    "evidence": "RX power fell from avg -11.05 dBm to -13.4 dBm on 2026-10-19/20 triggering RX_LOW_WARNING (-13.0 dBm); Tx stable ~1.3 dBm (measured 1.13 dBm). Measured A-ODF to B-ODF loss = 1.13 - (-6.25) = 7.38 dB vs commission 5.03 dB = +2.35 dB excess. Attenuator B-ATT measures 7.03 dB (design 7 dB) so not fault. OTDR 1550 nm from A shows non-reflective loss 2.35 dB at fibre 9.68 km (= SC-02, route 9.469 km), and from B shows 2.36 dB at 12.17 km (= same location), and 1310 nm from A shows 2.47 dB at 9.68 km. Similar loss at 1310/1550 excludes macrobend, non-reflective excludes connector, points to splice. Site notes show splicing crew re-entered SC-02 2026-10-20 00:23 UTC exactly when PM drop occurred. Other closures normal loss 0.06-0.11 dB."
+   },
+   "truth": {
+    "fault_type": "bad_splice",
+    "element_id": "SC-02",
+    "route_km": 9.469,
+    "action": "resplice"
+   },
+   "error": null,
+   "tool_calls": 15,
+   "usage": {
+    "prompt_tokens": 30403,
+    "completion_tokens": 6471
+   }
+  },
+  {
+   "seed": 1026,
+   "fault_type": "fibre_break",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "fibre_break",
+    "element_id": null,
+    "route_km": 13.35,
+    "action": "repair_break",
+    "evidence": "RX_LOS active 2026-10-24 23:00, RX power -40 dBm (hourly) vs normal -12.48 dBm, TX power normal 1.24 dBm (spec -1 to +2, PM avg ~1.43 dBm stable) and B-ODF power no light (<-50 dBm) proves loss in outside plant not TX/ATT. OTDR 1550 nm from A: end at 13.732 km fibre (trace drops at ~13.72 km from -2.27 dB to noise -38 dB), from B: end at 25.201 km fibre (drop at ~25.21 km); sum 38.933 km = total fibre length. Route length 37.84 km, ratio route/fibre =0.972. Route location =13.732*0.972\u224813.35 km (or using slack correction (13.732-0.15)/1.0183\u224813.34 km) between SC-03 (10.148 km) and SC-04 (15.193 km), matching site note road works at ~km13. 1310 nm OTDR also ends at 13.719 km with same level, no 1550>1310 excess loss, ruling out macrobend. SC-01 gain -0.75 dB at 2.586 km fibre (2.531 km route) is G.652/G.655 mismatch as documented, not fault."
+   },
+   "truth": {
+    "fault_type": "fibre_break",
+    "element_id": null,
+    "route_km": 13.303,
+    "action": "repair_break"
+   },
+   "error": null,
+   "tool_calls": 17,
+   "usage": {
+    "prompt_tokens": 47245,
+    "completion_tokens": 10893
+   }
+  },
+  {
+   "seed": 1027,
+   "fault_type": "wrong_attenuator",
+   "score": 1.0,
+   "answer": {
+    "fault_type": "wrong_attenuator",
+    "element_id": "B-ATT",
+    "route_km": null,
+    "action": "replace_attenuator",
+    "evidence": "Rx power dropped ~5 dB on 2026-10-22 (daily avg -12.5 to -17.5 dBm) coinciding with site note \"Attenuator refitted from spares box\" and triggering RX_LOW_ALARM. Measured A-TX 2.09 dBm to B-ODF -7.43 dBm = 9.52 dB link loss matches commissioning 9.38 dB at 1550 nm, proving fibre plant ok. B-ODF (-7.43 dBm) to B-RX (-17.49 dBm) shows 10.06 dB loss vs design 5 dB for B-ATT; available values include 10 dB. Tx bias/power stable, OTDR shows no macrobend (similar loss at 1310/1550, fibre attenuation normal) and connector inspections clean."
+   },
+   "truth": {
+    "fault_type": "wrong_attenuator",
+    "element_id": "B-ATT",
+    "route_km": 42.52,
+    "action": "replace_attenuator"
+   },
+   "error": null,
+   "tool_calls": 18,
+   "usage": {
+    "prompt_tokens": 58449,
+    "completion_tokens": 8551
+   }
+  }
+ ]
+}

@@ -26,13 +26,16 @@ class ToolError(Exception):
 
 
 class ToolBox:
-    def __init__(self, case: Case, workdir: str, mode: str = "standard"):
+    def __init__(self, case: Case, workdir: str, mode: str = "standard", vision_client=None):
         """mode: 'standard' (OTDR auto event table), 'raw' (traces only) or 'hard'
         (event tables, but at most OTDR_BUDGET distinct OTDR tests per ticket)."""
         self.case = case
         self.mode = mode
         self.otdr_runs = set()
         self.specs = [t for t in TOOL_SPECS if not (mode == "raw" and t["name"] == "otdr_event_table")]
+        self.vision_client = vision_client  # Meta Model API client: enables SAM 3.1 segmentation
+        if vision_client is not None:
+            self.specs = self.specs + [SEGMENT_SPEC]
         self.names = {t["name"] for t in self.specs}
         self.workdir = workdir
         os.makedirs(workdir, exist_ok=True)
@@ -139,6 +142,16 @@ class ToolBox:
         return {"image_path": path, "element_id": el.id,
                 "note": "Inspection scope view of the bulkhead-side connector end face (core at centre, cladding disc, ferrule)."}
 
+    def segment_endface(self, element_id: str) -> dict:
+        if self.vision_client is None:
+            raise ToolError("segment_endface is not available in this mode")
+        from .vision import segment_endface
+        raw = self.inspect_connector(element_id)["image_path"]
+        out = segment_endface(self.vision_client, raw, os.path.join(self.workdir, f"sam_{element_id}.png"))
+        out["image_path"] = out.pop("annotated_image_path")
+        out["element_id"] = element_id
+        return out
+
     def measure_power(self, point: str) -> dict:  # measured now (08:00 UTC)
         if point not in POWER_POINTS:
             raise ToolError(f"point must be one of {list(POWER_POINTS)}")
@@ -236,4 +249,7 @@ TOOL_SPECS = [
     {"name": "get_site_notes", "description": "Field engineering log entries for the link over the last two weeks.",
      "parameters": {"type": "object", "properties": {}}},
 ]
-TOOL_NAMES = {t["name"] for t in TOOL_SPECS}
+SEGMENT_SPEC = {"name": "segment_endface",
+                "description": "Run Meta SAM 3.1 on a connector end-face image: detects particles (dark spots) and scratches (dark lines), grades them by zone and returns a PASS/FAIL verdict plus an annotated image.",
+                "parameters": {"type": "object", "properties": {"element_id": {"type": "string"}}, "required": ["element_id"]}}
+TOOL_NAMES = {t["name"] for t in TOOL_SPECS} | {"segment_endface"}

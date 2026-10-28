@@ -1,0 +1,2128 @@
+{
+ "seed": 1004,
+ "model": "meta-models/muse-spark-open-1026",
+ "mode": "hard",
+ "answer": {
+  "fault_type": "bad_splice",
+  "element_id": "SC-03",
+  "route_km": null,
+  "action": "resplice",
+  "evidence": "RX power dropped ~1.3dB on 2026-10-24 08:00 (daily avg -12.1 to -13.4 dBm, hourly confirms) coinciding with crew re-entry of SC-03 (10.723 route km) at 06:52. OTDR from A shows non-reflective loss 1.33 dB @1550nm at 10.99 km fibre (1.31 dB @1310nm, essentially equal, ruling out macrobend) and from B 1.30 dB at 4.24 km fibre - same physical splice. Link loss A-TX (1.36 dBm) to B-ODF (-3.23 dBm) =4.59 dB vs commissioning 3.39 dB (+1.2 dB). TX power/bias stable, B-ODF to B-RX delta 10.1 dB matches design 10 dB attenuator, connector inspections clean at A-ODF/B-ODF, no wavelength-dependent excess loss."
+ },
+ "grade": {
+  "score": 1.0,
+  "valid": true,
+  "errors": [],
+  "fault_type_ok": true,
+  "action_ok": true,
+  "location_ok": true,
+  "route_error_km": null,
+  "truth": {
+   "fault_type": "bad_splice",
+   "element_id": "SC-03",
+   "route_km": 10.723,
+   "action": "resplice"
+  }
+ },
+ "steps": 5,
+ "tool_calls": 19,
+ "seconds": 45.6,
+ "usage": {
+  "prompt_tokens": 38128,
+  "completion_tokens": 8540
+ },
+ "transcript": [
+  {
+   "step": 0,
+   "content": null,
+   "reasoning": "Need to investigate. Start with link record, alarms, PM, site notes.",
+   "tool_calls": [
+    {
+     "name": "get_link_record",
+     "args": {},
+     "result": {
+      "link": "Site A to Site B, single-mode G.652.D, route length 14.82 km (as-built route map)",
+      "elements_in_route_order": [
+       {
+        "id": "A-ODF",
+        "type": "connector (ODF/patch panel)",
+        "route_km": 0.0
+       },
+       {
+        "id": "SC-01",
+        "type": "splice closure",
+        "route_km": 3.877,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-02",
+        "type": "splice closure",
+        "route_km": 8.6,
+        "slack_stored_m": "about 50 (as-built varies)",
+        "note": "joins the original G.652.D cable to a G.655 replacement section"
+       },
+       {
+        "id": "SC-03",
+        "type": "splice closure",
+        "route_km": 10.723,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-04",
+        "type": "splice closure",
+        "route_km": 12.986,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "B-ODF",
+        "type": "connector (ODF/patch panel)",
+        "route_km": 14.82
+       }
+      ],
+      "cable": {
+       "fibre_excess_length_over_cable_pct": "1.0 to 1.8 (manufacturer spec)",
+       "slack_loops": "spare fibre is coiled at each splice closure"
+      },
+      "service": {
+       "direction": "site A transmits, site B receives, 1550 nm",
+       "A-TX": "10G 1550 nm transceiver, launch power spec -1.0 to +2.0 dBm",
+       "B-ATT": "fixed in-line attenuator at site B between ODF and receiver, design value 10 dB",
+       "B-RX": "receiver sensitivity -15.0 dBm, overload -1.0 dBm",
+       "available_attenuator_values_db": [
+        0,
+        3,
+        5,
+        7,
+        10,
+        15
+       ]
+      },
+      "commissioning_link_loss_db": {
+       "1310": 5.55,
+       "1550": 3.39,
+       "note": "A-ODF to B-ODF, bidirectional average, at commissioning"
+      },
+      "alarm_thresholds_dbm": {
+       "RX_LOW_WARNING": -13.0,
+       "RX_LOW_ALARM": -16.0,
+       "RX_LOS": -25.0,
+       "RX_HIGH_WARNING": -3.0,
+       "RX_HIGH_ALARM": -1.0
+      },
+      "answer_ids": {
+       "elements": [
+        "A-ODF",
+        "SC-01",
+        "SC-02",
+        "SC-03",
+        "SC-04",
+        "B-ODF"
+       ],
+       "equipment": [
+        "A-TX",
+        "B-ATT"
+       ]
+      }
+     }
+    },
+    {
+     "name": "get_alarms",
+     "args": {},
+     "result": {
+      "now": "2026-10-27 08:00 UTC",
+      "alarms": [
+       {
+        "alarm": "RX_LOW_WARNING",
+        "severity": "minor",
+        "raised": "2026-10-24 08:00 UTC",
+        "cleared": "active",
+        "entity": "B-RX (1550 nm service from site A)"
+       }
+      ]
+     }
+    },
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "rx_power_dbm",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "rx_power_dbm",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": -12.23,
+        "avg": -12.11,
+        "max": -11.95
+       },
+       {
+        "day": "2026-10-14",
+        "min": -12.2,
+        "avg": -12.1,
+        "max": -12.02
+       },
+       {
+        "day": "2026-10-15",
+        "min": -12.22,
+        "avg": -12.1,
+        "max": -11.89
+       },
+       {
+        "day": "2026-10-16",
+        "min": -12.24,
+        "avg": -12.1,
+        "max": -12.01
+       },
+       {
+        "day": "2026-10-17",
+        "min": -12.25,
+        "avg": -12.1,
+        "max": -12.0
+       },
+       {
+        "day": "2026-10-18",
+        "min": -12.3,
+        "avg": -12.11,
+        "max": -11.99
+       },
+       {
+        "day": "2026-10-19",
+        "min": -12.17,
+        "avg": -12.1,
+        "max": -11.97
+       },
+       {
+        "day": "2026-10-20",
+        "min": -12.18,
+        "avg": -12.1,
+        "max": -11.99
+       },
+       {
+        "day": "2026-10-21",
+        "min": -12.17,
+        "avg": -12.09,
+        "max": -11.99
+       },
+       {
+        "day": "2026-10-22",
+        "min": -12.19,
+        "avg": -12.1,
+        "max": -11.96
+       },
+       {
+        "day": "2026-10-23",
+        "min": -12.21,
+        "avg": -12.09,
+        "max": -11.97
+       },
+       {
+        "day": "2026-10-24",
+        "min": -13.51,
+        "avg": -13.4,
+        "max": -13.31
+       },
+       {
+        "day": "2026-10-25",
+        "min": -13.5,
+        "avg": -13.4,
+        "max": -13.3
+       },
+       {
+        "day": "2026-10-26",
+        "min": -13.55,
+        "avg": -13.4,
+        "max": -13.25
+       }
+      ]
+     }
+    },
+    {
+     "name": "get_site_notes",
+     "args": {},
+     "result": {
+      "notes": [
+       {
+        "time": "2026-10-18 14:45 UTC",
+        "entry": "Connector at site B ODF inspected and cleaned during routine maintenance. Passed inspection."
+       },
+       {
+        "time": "2026-10-24 06:52 UTC",
+        "entry": "Splicing crew re-entered closure SC-03 to add a branch cable for a new customer. Closure resealed."
+       },
+       {
+        "time": "2026-10-25 23:30 UTC",
+        "entry": "Heavy rain and flooding reported along the route near km 6."
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "step": 1,
+   "content": null,
+   "reasoning": "Need more data. RX power dropped from ~ -12.1 avg to -13.4 on 2026-10-24, correlates with SC-03 work. RX_LOW_WARNING at -13 threshold, so -13.4 triggers minor alarm. Need to see further PM hourly, OTDR etc.\n\nGet hourly pm, power measurements, otdr.",
+   "tool_calls": [
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "rx_power_dbm",
+      "resolution": "hourly",
+      "last_hours": 72
+     },
+     "result": {
+      "metric": "rx_power_dbm",
+      "resolution": "hourly, last 72 hours",
+      "rows": [
+       {
+        "time": "2026-10-24 08:00",
+        "value": -13.37
+       },
+       {
+        "time": "2026-10-24 09:00",
+        "value": -13.33
+       },
+       {
+        "time": "2026-10-24 10:00",
+        "value": -13.46
+       },
+       {
+        "time": "2026-10-24 11:00",
+        "value": -13.34
+       },
+       {
+        "time": "2026-10-24 12:00",
+        "value": -13.44
+       },
+       {
+        "time": "2026-10-24 13:00",
+        "value": -13.51
+       },
+       {
+        "time": "2026-10-24 14:00",
+        "value": -13.34
+       },
+       {
+        "time": "2026-10-24 15:00",
+        "value": -13.37
+       },
+       {
+        "time": "2026-10-24 16:00",
+        "value": -13.33
+       },
+       {
+        "time": "2026-10-24 17:00",
+        "value": -13.32
+       },
+       {
+        "time": "2026-10-24 18:00",
+        "value": -13.34
+       },
+       {
+        "time": "2026-10-24 19:00",
+        "value": -13.37
+       },
+       {
+        "time": "2026-10-24 20:00",
+        "value": -13.47
+       },
+       {
+        "time": "2026-10-24 21:00",
+        "value": -13.48
+       },
+       {
+        "time": "2026-10-24 22:00",
+        "value": -13.46
+       },
+       {
+        "time": "2026-10-24 23:00",
+        "value": -13.37
+       },
+       {
+        "time": "2026-10-25 00:00",
+        "value": -13.44
+       },
+       {
+        "time": "2026-10-25 01:00",
+        "value": -13.42
+       },
+       {
+        "time": "2026-10-25 02:00",
+        "value": -13.4
+       },
+       {
+        "time": "2026-10-25 03:00",
+        "value": -13.4
+       },
+       {
+        "time": "2026-10-25 04:00",
+        "value": -13.31
+       },
+       {
+        "time": "2026-10-25 05:00",
+        "value": -13.34
+       },
+       {
+        "time": "2026-10-25 06:00",
+        "value": -13.41
+       },
+       {
+        "time": "2026-10-25 07:00",
+        "value": -13.49
+       },
+       {
+        "time": "2026-10-25 08:00",
+        "value": -13.41
+       },
+       {
+        "time": "2026-10-25 09:00",
+        "value": -13.38
+       },
+       {
+        "time": "2026-10-25 10:00",
+        "value": -13.43
+       },
+       {
+        "time": "2026-10-25 11:00",
+        "value": -13.41
+       },
+       {
+        "time": "2026-10-25 12:00",
+        "value": -13.4
+       },
+       {
+        "time": "2026-10-25 13:00",
+        "value": -13.43
+       },
+       {
+        "time": "2026-10-25 14:00",
+        "value": -13.47
+       },
+       {
+        "time": "2026-10-25 15:00",
+        "value": -13.49
+       },
+       {
+        "time": "2026-10-25 16:00",
+        "value": -13.37
+       },
+       {
+        "time": "2026-10-25 17:00",
+        "value": -13.49
+       },
+       {
+        "time": "2026-10-25 18:00",
+        "value": -13.39
+       },
+       {
+        "time": "2026-10-25 19:00",
+        "value": -13.38
+       },
+       {
+        "time": "2026-10-25 20:00",
+        "value": -13.36
+       },
+       {
+        "time": "2026-10-25 21:00",
+        "value": -13.5
+       },
+       {
+        "time": "2026-10-25 22:00",
+        "value": -13.33
+       },
+       {
+        "time": "2026-10-25 23:00",
+        "value": -13.3
+       },
+       {
+        "time": "2026-10-26 00:00",
+        "value": -13.32
+       },
+       {
+        "time": "2026-10-26 01:00",
+        "value": -13.38
+       },
+       {
+        "time": "2026-10-26 02:00",
+        "value": -13.4
+       },
+       {
+        "time": "2026-10-26 03:00",
+        "value": -13.36
+       },
+       {
+        "time": "2026-10-26 04:00",
+        "value": -13.41
+       },
+       {
+        "time": "2026-10-26 05:00",
+        "value": -13.37
+       },
+       {
+        "time": "2026-10-26 06:00",
+        "value": -13.33
+       },
+       {
+        "time": "2026-10-26 07:00",
+        "value": -13.43
+       },
+       {
+        "time": "2026-10-26 08:00",
+        "value": -13.36
+       },
+       {
+        "time": "2026-10-26 09:00",
+        "value": -13.43
+       },
+       {
+        "time": "2026-10-26 10:00",
+        "value": -13.32
+       },
+       {
+        "time": "2026-10-26 11:00",
+        "value": -13.38
+       },
+       {
+        "time": "2026-10-26 12:00",
+        "value": -13.42
+       },
+       {
+        "time": "2026-10-26 13:00",
+        "value": -13.35
+       },
+       {
+        "time": "2026-10-26 14:00",
+        "value": -13.41
+       },
+       {
+        "time": "2026-10-26 15:00",
+        "value": -13.42
+       },
+       {
+        "time": "2026-10-26 16:00",
+        "value": -13.49
+       },
+       {
+        "time": "2026-10-26 17:00",
+        "value": -13.25
+       },
+       {
+        "time": "2026-10-26 18:00",
+        "value": -13.39
+       },
+       {
+        "time": "2026-10-26 19:00",
+        "value": -13.41
+       },
+       {
+        "time": "2026-10-26 20:00",
+        "value": -13.41
+       },
+       {
+        "time": "2026-10-26 21:00",
+        "value": -13.43
+       },
+       {
+        "time": "2026-10-26 22:00",
+        "value": -13.44
+       },
+       {
+        "time": "2026-10-26 23:00",
+        "value": -13.41
+       },
+       {
+        "time": "2026-10-27 00:00",
+        "value": -13.55
+       },
+       {
+        "time": "2026-10-27 01:00",
+        "value": -13.42
+       },
+       {
+        "time": "2026-10-27 02:00",
+        "value": -13.35
+       },
+       {
+        "time": "2026-10-27 03:00",
+        "value": -13.4
+       },
+       {
+        "time": "2026-10-27 04:00",
+        "value": -13.41
+       },
+       {
+        "time": "2026-10-27 05:00",
+        "value": -13.48
+       },
+       {
+        "time": "2026-10-27 06:00",
+        "value": -13.32
+       },
+       {
+        "time": "2026-10-27 07:00",
+        "value": -13.3
+       }
+      ]
+     }
+    },
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "tx_power_dbm",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "tx_power_dbm",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": 1.4,
+        "avg": 1.54,
+        "max": 1.62
+       },
+       {
+        "day": "2026-10-14",
+        "min": 1.5,
+        "avg": 1.55,
+        "max": 1.64
+       },
+       {
+        "day": "2026-10-15",
+        "min": 1.43,
+        "avg": 1.55,
+        "max": 1.71
+       },
+       {
+        "day": "2026-10-16",
+        "min": 1.45,
+        "avg": 1.54,
+        "max": 1.65
+       },
+       {
+        "day": "2026-10-17",
+        "min": 1.47,
+        "avg": 1.55,
+        "max": 1.62
+       },
+       {
+        "day": "2026-10-18",
+        "min": 1.49,
+        "avg": 1.56,
+        "max": 1.62
+       },
+       {
+        "day": "2026-10-19",
+        "min": 1.46,
+        "avg": 1.54,
+        "max": 1.62
+       },
+       {
+        "day": "2026-10-20",
+        "min": 1.46,
+        "avg": 1.55,
+        "max": 1.62
+       },
+       {
+        "day": "2026-10-21",
+        "min": 1.47,
+        "avg": 1.54,
+        "max": 1.67
+       },
+       {
+        "day": "2026-10-22",
+        "min": 1.44,
+        "avg": 1.55,
+        "max": 1.65
+       },
+       {
+        "day": "2026-10-23",
+        "min": 1.45,
+        "avg": 1.55,
+        "max": 1.62
+       },
+       {
+        "day": "2026-10-24",
+        "min": 1.45,
+        "avg": 1.55,
+        "max": 1.63
+       },
+       {
+        "day": "2026-10-25",
+        "min": 1.47,
+        "avg": 1.54,
+        "max": 1.62
+       },
+       {
+        "day": "2026-10-26",
+        "min": 1.47,
+        "avg": 1.54,
+        "max": 1.63
+       }
+      ]
+     }
+    },
+    {
+     "name": "measure_power",
+     "args": {
+      "point": "A-TX"
+     },
+     "result": {
+      "point": "A-TX",
+      "wavelength_nm": 1550,
+      "power_dbm": 1.36,
+      "note": "transmitter output at site A patch cord"
+     }
+    },
+    {
+     "name": "measure_power",
+     "args": {
+      "point": "B-ODF"
+     },
+     "result": {
+      "point": "B-ODF",
+      "wavelength_nm": 1550,
+      "power_dbm": -3.23,
+      "note": "power arriving at site B ODF, before the attenuator"
+     }
+    },
+    {
+     "name": "measure_power",
+     "args": {
+      "point": "B-RX"
+     },
+     "result": {
+      "point": "B-RX",
+      "wavelength_nm": 1550,
+      "power_dbm": -13.32,
+      "note": "power at the receiver input, after the attenuator"
+     }
+    },
+    {
+     "name": "otdr_event_table",
+     "args": {
+      "wavelength_nm": 1550,
+      "from_site": "A",
+      "time": "now"
+     },
+     "result": {
+      "wavelength_nm": 1550,
+      "from_site": "A",
+      "test_time": "2026-10-27 08:00 UTC",
+      "pulse_width_ns": 100,
+      "group_index": 1.4682,
+      "note": "Distances are fibre distances from the ODF at the shooting site. Launch and receive cords of 1.000 km were used; the receive cord ends in an open connector.",
+      "fibre_attenuation_db_per_km": 0.19,
+      "events": [
+       {
+        "event": 1,
+        "distance_km": -0.001,
+        "type": "reflective",
+        "loss_db": 0.15,
+        "reflectance_db": -56.3
+       },
+       {
+        "event": 2,
+        "distance_km": 3.953,
+        "type": "non-reflective",
+        "loss_db": 0.06,
+        "reflectance_db": null
+       },
+       {
+        "event": 3,
+        "distance_km": 8.78,
+        "type": "non-reflective",
+        "loss_db": 0.68,
+        "reflectance_db": null
+       },
+       {
+        "event": 4,
+        "distance_km": 10.99,
+        "type": "non-reflective",
+        "loss_db": 1.33,
+        "reflectance_db": null
+       },
+       {
+        "event": 5,
+        "distance_km": 13.344,
+        "type": "non-reflective",
+        "loss_db": 0.06,
+        "reflectance_db": null
+       },
+       {
+        "event": 6,
+        "distance_km": 15.235,
+        "type": "reflective",
+        "loss_db": 0.21,
+        "reflectance_db": -50.0
+       },
+       {
+        "event": 7,
+        "distance_km": 16.235,
+        "type": "end",
+        "loss_db": null,
+        "reflectance_db": -14.0
+       }
+      ]
+     }
+    },
+    {
+     "name": "otdr_event_table",
+     "args": {
+      "wavelength_nm": 1310,
+      "from_site": "A",
+      "time": "now"
+     },
+     "result": {
+      "wavelength_nm": 1310,
+      "from_site": "A",
+      "test_time": "2026-10-27 08:00 UTC",
+      "pulse_width_ns": 100,
+      "group_index": 1.4682,
+      "note": "Distances are fibre distances from the ODF at the shooting site. Launch and receive cords of 1.000 km were used; the receive cord ends in an open connector.",
+      "fibre_attenuation_db_per_km": 0.324,
+      "events": [
+       {
+        "event": 1,
+        "distance_km": 0.0,
+        "type": "reflective",
+        "loss_db": 0.18,
+        "reflectance_db": -56.6
+       },
+       {
+        "event": 2,
+        "distance_km": 3.954,
+        "type": "non-reflective",
+        "loss_db": 0.06,
+        "reflectance_db": null
+       },
+       {
+        "event": 3,
+        "distance_km": 8.78,
+        "type": "non-reflective",
+        "loss_db": 0.39,
+        "reflectance_db": null
+       },
+       {
+        "event": 4,
+        "distance_km": 10.993,
+        "type": "non-reflective",
+        "loss_db": 1.31,
+        "reflectance_db": null
+       },
+       {
+        "event": 5,
+        "distance_km": 15.234,
+        "type": "reflective",
+        "loss_db": 0.19,
+        "reflectance_db": -49.7
+       },
+       {
+        "event": 6,
+        "distance_km": 16.236,
+        "type": "end",
+        "loss_db": null,
+        "reflectance_db": -15.1
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "step": 2,
+   "content": null,
+   "reasoning": "We need to analyze.\n\nLink record: Site A to B 14.82 km route length. Elements: A-ODF 0.0, SC-01 3.877, SC-02 8.6, SC-03 10.723, SC-04 12.986, B-ODF 14.82. Cable excess length 1.0-1.8%, slack loops at each closure ~50m.\n\nService: A-TX 10G 1550nm launch -1 to +2 dBm, B-ATT 10 dB attenuator, B-RX sensitivity -15 overload -1. Commissioning loss A-ODF to B-ODF bidirectional average: 1310 5.55 dB, 1550 3.39 dB. Alarm thresholds: LOW_WARNING -13, LOW_ALARM -16 etc.\n\nCurrent: RX_LOW_WARNING raised 2026-10-24 08:00 active. PM daily rx_power: until 10-23 avg -12.1, on 10-24 avg -13.4 (drop ~1.3 dB). Hourly shows sustained drop.\n\nTX power stable ~1.55 avg. Measure power: A-TX 1.36 dBm, B-ODF -3.23 dBm, B-RX -13.32 dBm. So link loss A-ODF to B-ODF = A-TX - B-ODF = 1.36 - (-3.23) = 4.59 dB. Commissioning was 3.39 dB at 1550, so increased by ~1.2 dB. Attenuator is 10 dB, B-ODF to B-RX difference = -3.23 - (-13.32) = 10.09 dB, matches 10 dB attenuator.\n\nSite notes: SC-03 re-entered 2026-10-24 06:52 to add branch. That aligns with alarm at 08:00 same day.\n\nOTDR tables: Need to interpret.\n\nOTDR from A at 1550 and 1310.\n\nWe have fibre distances from ODF, includes excess length vs route km. Need to convert.\n\nElements distances? At 1550 from A:\n\nEvent1 distance -0.001 reflective loss 0.15 -> This is A-ODF? Possibly launch? Event 2 distance 3.953 non-ref loss 0.06 -> SC-01? Route km 3.877, fibre distance 3.953 ~ close with excess. Event3 distance 8.78 loss 0.68 -> SC-02? Route 8.6, fibre 8.78 higher but includes excess. Note SC-02 joins G.652.D to G.655 replacement. Event4 distance 10.99 loss 1.33 -> SC-03? Route 10.723, fibre 10.99 (~2.5% excess?). Event5 distance 13.344 loss 0.06 -> SC-04? Route 12.986 fibre 13.344 excess ~2.75%? Hmm. Event6 distance 15.235 reflective loss 0.21 -> B-ODF? Route 14.82 fibre 15.235 excess ~2.8%? Event7 end 16.235 end reflective -14.\n\nAt 1310 from A:\n\nEvent1 0.0 reflective 0.18, Event2 3.954 loss 0.06, Event3 8.78 loss 0.39, Event4 10.993 loss 1.31, Event5 15.234 reflective 0.19, Event6 16.236 end.\n\nNotice discrepancy: At 1310, SC-04 event missing? At 1550 we have SC-04 at 13.344 loss 0.06. At 1310 there's no event at 13.344. Could be hidden? Or not detected.\n\nAlso compare losses:\n\n- Event 3 (SC-02, G652 to G655 splice): loss 0.68 at 1550, 0.39 at 1310. That's mode field mismatch? But maybe normal?\n\n- Event 4 (SC-03): loss 1.33 at 1550, 1.31 at 1310 -> similar at both wavelengths (~1.32 dB). That's bad splice.\n\nPM history: daily min/avg before drop -12.1, commissioning link loss 3.39 plus TX 1.36 gives B-ODF = -2.03, minus attenuator 10 => -12.03, matches -12.1 observed. So historical normal.\n\nNow after drop: B-ODF -3.23 vs expected -2.03 => extra ~1.2 dB. OTDR shows at SC-03 a 1.33 dB loss. Wait commissioning overall loss 3.39. If SC-03 now has 1.33 dB, previously what was its loss? Probably ~0.1. So extra ~1.2 aligns.\n\nBut we need to determine root cause: Is it bad splice or macrobend?\n\nBad splice typically wavelength independent (similar loss at 1310 and 1550). Macrobend is wavelength dependent (higher loss at 1550 than 1310). Let's check:\n\n- Event4 SC-03: 1550 loss 1.33, 1310 loss 1.31 => essentially equal -> bad splice.\n\n- Event3 SC-02: 1550 0.68 vs 1310 0.39 => difference 0.29 dB. That's higher at 1550, could indicate bend? But note SC-02 is G652-G655 junction; that mismatch loss may be wavelength dependent? Let's recall G.652 vs G.655 mode field: G.655 may have smaller MFD? Actually typical: G652 MFD ~10 \u00b5m at 1550, G655 MFD ~8 \u00b5m, so splice loss maybe higher at longer wavelength? Need check. However note the design commissioning loss difference: 1310 5.55 vs 1550 3.39 -> 1550 normally lower loss (fibre attenuation lower). So at commissioning, 1550 lower. Now current extra loss at SC-02 is 0.68 vs historic maybe? Hard.\n\n- Event5 SC-04: at 1550 loss 0.06, at 1310 no event -> if bend, would be more at 1550.\n\nBut the major anomaly is Event4 at SC-03: 1.33 dB both wavelengths -> bad splice.\n\nHowever also Event3: 0.68 at 1550 vs 0.39 at 1310 -> differential 0.29 dB. Could be 2 faults? But ticket says single root cause.\n\nWe must also check if there's macrobend signature hidden in trace. Let's get more detail: need OTDR traces and maybe from B side.\n\nWe haven't checked OTDR from B. That will help localize and confirm.\n\nAlso need to examine fibre attenuation vs commissioning. Need to fetch OTDR from B for both wavelengths, and trace images.\n\nWe also should check inspect connectors, but B-ODF cleaned recently and passed. However could be dirty? Check inspection.\n\nAlso need to check hourly TX etc. But TX power stable, so not TX degrad.\n\nLet's get OTDR from B side.",
+   "tool_calls": [
+    {
+     "name": "otdr_event_table",
+     "args": {
+      "wavelength_nm": 1550,
+      "from_site": "B",
+      "time": "now"
+     },
+     "result": {
+      "wavelength_nm": 1550,
+      "from_site": "B",
+      "test_time": "2026-10-27 08:00 UTC",
+      "pulse_width_ns": 100,
+      "group_index": 1.4682,
+      "note": "Distances are fibre distances from the ODF at the shooting site. Launch and receive cords of 1.000 km were used; the receive cord ends in an open connector.",
+      "fibre_attenuation_db_per_km": 0.191,
+      "events": [
+       {
+        "event": 1,
+        "distance_km": 0.0,
+        "type": "reflective",
+        "loss_db": 0.18,
+        "reflectance_db": -48.8
+       },
+       {
+        "event": 2,
+        "distance_km": 4.244,
+        "type": "non-reflective",
+        "loss_db": 1.3,
+        "reflectance_db": null
+       },
+       {
+        "event": 3,
+        "distance_km": 6.452,
+        "type": "non-reflective",
+        "loss_db": -0.57,
+        "reflectance_db": null
+       },
+       {
+        "event": 4,
+        "distance_km": 11.276,
+        "type": "non-reflective",
+        "loss_db": 0.05,
+        "reflectance_db": null
+       },
+       {
+        "event": 5,
+        "distance_km": 15.233,
+        "type": "reflective",
+        "loss_db": 0.14,
+        "reflectance_db": -55.3
+       },
+       {
+        "event": 6,
+        "distance_km": 16.232,
+        "type": "end",
+        "loss_db": null,
+        "reflectance_db": -15.1
+       }
+      ]
+     }
+    },
+    {
+     "name": "otdr_event_table",
+     "args": {
+      "wavelength_nm": 1310,
+      "from_site": "B",
+      "time": "now"
+     },
+     "result": {
+      "error": "OTDR budget used: each OTDR test takes the live service down, and the NOC allows 3 tests per ticket. Already run: [(1310, 'A', 'now'), (1550, 'A', 'now'), (1550, 'B', 'now')]. Results of tests already run can be viewed again."
+     }
+    },
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "tx_bias_ma",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "tx_bias_ma",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": 40.71,
+        "avg": 41.87,
+        "max": 43.23
+       },
+       {
+        "day": "2026-10-14",
+        "min": 40.74,
+        "avg": 41.92,
+        "max": 42.87
+       },
+       {
+        "day": "2026-10-15",
+        "min": 40.88,
+        "avg": 41.91,
+        "max": 42.92
+       },
+       {
+        "day": "2026-10-16",
+        "min": 41.23,
+        "avg": 41.94,
+        "max": 42.89
+       },
+       {
+        "day": "2026-10-17",
+        "min": 40.75,
+        "avg": 41.95,
+        "max": 43.17
+       },
+       {
+        "day": "2026-10-18",
+        "min": 40.82,
+        "avg": 41.87,
+        "max": 42.8
+       },
+       {
+        "day": "2026-10-19",
+        "min": 40.98,
+        "avg": 42.03,
+        "max": 43.15
+       },
+       {
+        "day": "2026-10-20",
+        "min": 41.12,
+        "avg": 41.99,
+        "max": 43.07
+       },
+       {
+        "day": "2026-10-21",
+        "min": 40.91,
+        "avg": 41.92,
+        "max": 43.05
+       },
+       {
+        "day": "2026-10-22",
+        "min": 41.04,
+        "avg": 41.94,
+        "max": 42.81
+       },
+       {
+        "day": "2026-10-23",
+        "min": 41.05,
+        "avg": 41.98,
+        "max": 42.88
+       },
+       {
+        "day": "2026-10-24",
+        "min": 40.67,
+        "avg": 41.9,
+        "max": 42.78
+       },
+       {
+        "day": "2026-10-25",
+        "min": 41.09,
+        "avg": 41.93,
+        "max": 42.92
+       },
+       {
+        "day": "2026-10-26",
+        "min": 40.8,
+        "avg": 41.95,
+        "max": 42.68
+       }
+      ]
+     }
+    },
+    {
+     "name": "inspect_connector",
+     "args": {
+      "element_id": "A-ODF"
+     },
+     "result": {
+      "element_id": "A-ODF",
+      "note": "Inspection scope view of the bulkhead-side connector end face (core at centre, cladding disc, ferrule).",
+      "image": "attached in the next message"
+     }
+    },
+    {
+     "name": "inspect_connector",
+     "args": {
+      "element_id": "B-ODF"
+     },
+     "result": {
+      "element_id": "B-ODF",
+      "note": "Inspection scope view of the bulkhead-side connector end face (core at centre, cladding disc, ferrule).",
+      "image": "attached in the next message"
+     }
+    }
+   ]
+  },
+  {
+   "step": 3,
+   "content": null,
+   "reasoning": "Need analyze.\n\nLink: Route length 14.82 km. Commissioning loss: 1550 3.39 dB A-ODF to B-ODF. Elements: SC-01 3.877km, SC-02 8.6, SC-03 10.723, SC-04 12.986.\n\nRecent alarm RX_LOW_WARNING raised Oct 24 08:00, coincides with SC-03 re-entry for branch. PM: rx power dropped from -12.1 avg to -13.4 avg => about 1.3 dB drop.\n\nTx power stable ~1.55 dBm, bias stable. So Tx ok.\n\nPower measurements: A-TX 1.36 dBm, B-ODF -3.23 dBm, B-RX -13.32 dBm. So link loss A-TX to B-ODF? A-TX to B-ODF includes A-ODF connector loss + fibre + splice losses. Measured: 1.36 - (-3.23)= 4.59 dB loss from A-TX output to B-ODF. Need to estimate expected: Tx spec includes maybe patch? At commissioning, link loss A-ODF to B-ODF 3.39 dB. Plus maybe A-ODF connector? Actually commissioning says A-ODF to B-ODF bidirectional average. So Tx to B-ODF would be maybe ~ Tx patch + connector + fibre. Tx launch 1.36, expect at B-ODF approx 1.36 - 3.39 - connector? Let's see historical: Rx power -12.1 avg with 10 dB attenuator. B-RX = B-ODF - Attenuator. So previously B-ODF would have been B-RX+10 => -2.1 dBm approx. Commissioning: Tx 1.55 - loss 3.39 = -1.84 at B-ODF. Close.\n\nNow B-ODF -3.23, which is ~1.1-1.4 dB worse than before. Actually current B-RX -13.32, +10dB = -3.32 close to B-ODF measured -3.23 (some variation). Good. B-ODF to B-RX delta is 10.09 dB, matching 10 dB attenuator, so attenuator correct.\n\nSo excess loss ~1.2 dB somewhere in link.\n\nOTDR from A 1550: events:\n3.953 km loss 0.06\n8.78 km loss 0.68\n10.99 km loss 1.33\n13.344 km loss 0.06\n15.235 reflective (that's B-ODF? Need to map.)\n\nBut OTDR distances are fibre distances, not route_km. Need correction for excess fibre. Fibre excess 1-1.8% over cable, plus slack stored ~50m at each closure. Route km vs fibre km offset.\n\nNote says distances are fibre distances from ODF shooting site, launch cord 1km used etc. Receive cord ends...\n\nSo we need to map events to elements.\n\nWe have OTDR from A 1550 and 1310 to compare.\n\n1310 from A:\n3.954 loss 0.06\n8.78 loss 0.39\n10.993 loss 1.31\n15.234 reflective\n\nWait missing 13.344 km event at 1310! At 1550, SC-04 at 13.344 loss 0.06. At 1310, no event at 13.344, but next is 15.234 B-ODF. That suggests maybe the 13.344 event not detected? Let's see.\n\nFrom B at 1550:\nEvents: 4.244 loss 1.3\n6.452 loss -0.57 (gainer)\n11.276 loss 0.05\n15.233 reflective\n\nNeed to compute expected positions.\n\nTotal route length 14.82 km. Total fibre length should be longer due to excess. OTDR from A to B-ODF fibre distance should be about? At 1550, B-ODF reflective event at 15.235 km. So fibre distance to B-ODF is 15.235 km vs route 14.82 km => excess 0.415 km => 2.8%? Let's consider slack loops: each closure has ~50m slack stored, 4 closures => 200m extra. Plus excess 1-1.8% of 14.82 => 148-267m. So total extra 348-467m => matches 415m. Good.\n\nSo route_km to fibre_km conversion: fibre \u2248 route * (1+excess) + slack accumulated before that point ?\n\nHard but we can estimate.\n\nElements route_km: SC-01 3.877, SC-02 8.6, SC-03 10.723, SC-04 12.986.\n\nOTDR from A observed distances: 3.953, 8.78, 10.99, 13.344, 15.235.\n\nLet's map:\n\n- SC-01: OTDR 3.953 vs route 3.877 => ratio 1.0196 extra 1.96% fits.\n\n- SC-02: OTDR 8.78 vs route 8.6 => ratio 1.0209 similar.\n\n- SC-03: OTDR 10.99-10.993 vs route 10.723 => ratio 1.025-1.025\n\n- SC-04: OTDR 13.344 vs route 12.986 => ratio 1.0276\n\n- B-ODF: 15.235 vs 14.82 => 1.028\n\nSo matches increasing excess+slack.\n\nThus mapping is clear:\n\nEvent 2 = SC-01 0.06 dB both wavelengths -> good.\n\nEvent 3 = SC-02: loss 0.68 at 1550, 0.39 at 1310. At 1550 higher loss than 1310. But note SC-02 joins G652D to G655 replacement section -> mismatch of mode fields causes different losses. Need evaluate.\n\nIn link record, SC-02 note joins original G652D to G655 replacement. Typically G655 has different MFD, cause splice loss maybe wavelength dependent but direction dependent? Could be the 0.68 dB is high but similar in both? At 1310 vs 1550 difference 0.29 dB. Not huge.\n\nEvent 4 = SC-03: loss 1.33 at 1550, 1.31 at 1310. So roughly equal high loss ~1.3 dB. This is the problematic one? Increased from earlier? But we don't have old OTDR to compare. However site note says SC-03 was re-entered Oct 24, which coincides with degradation. So likely bad splice at SC-03.\n\nBut also need check B side.\n\nOTDR from B: distances from B. Let's map to reverse.\n\nFrom B, B-ODF at 0, then going towards A.\n\n- First event after B-ODF should be SC-04.\n\nSC-04 route 12.986, distance from B route = 14.82-12.986=1.834 km route. Fibre distance observed? Event 2 from B at 4.244 km loss 1.3 dB. Wait that distance is far larger than 1.834 km expected. So maybe my mapping off? Let's examine.\n\nFrom B, OTDR distance is fibre distance from B-ODF. Let's list:\n\nFrom B 1550 events:\n1: 0.0 reflective (B-ODF)\n2: 4.244 loss 1.3 dB\n3: 6.452 loss -0.57 (gainer)\n4: 11.276 loss 0.05\n5: 15.233 reflective (A-ODF)\n6: 16.232 end\n\nBut from A, we had SC-04 at 13.344 (1.891 km fibre before B-ODF). So from B, SC-04 should be ~1.891 km from B (since 15.235 -13.344 =1.891). Yet from B, first event is at 4.244 km, not 1.891. Something inconsistent.\n\nPossibly fibre excess difference causes asymmetry? Let's calculate distances from B expected using A measurements:\n\n- A to B-ODF 15.235 fibre.\n- A to SC-04 13.344 => B to SC-04 = 15.235-13.344 =1.891\n- A to SC-03 10.99 => B to SC-03 =4.245 => That matches Event 2 at 4.244 !! So Event 2 from B corresponds to SC-03, not SC-04. So SC-04 missing?\n\n- A to SC-02 8.78 => B to SC-02 =6.455 => matches Event 3 at 6.452 gainer!\n\n- A to SC-01 3.953 => B to SC-01 =11.282 => matches Event 4 at 11.276!\n\nSo SC-04 not showing from B at 1550? At 1550 from A, SC-04 had 0.06 dB loss (tiny). From B, expected at 1.89 km but not listed \u2013 maybe below detection threshold? But from B event table shows loss of 1.3 at SC-03 (which matches A's 1.33) and gainer -0.57 at SC-02.\n\nWait why SC-02 shows gainer from B direction (-0.57) but loss 0.68 from A? That's typical for mismatch splice: apparent gain in one direction due to different backscatter coefficients. The true loss is average. For SC-02 joining G.652 to G.655, different Rayleigh scattering and MFD.\n\nAverage loss = (0.68 + (-0.57))/2? Actually need to average? For splice between different fiber types, OTDR shows inflated loss one way, deflated the other. Real insertion loss is average: (0.68 -0.57)/2? Let's recall: OTDR measured loss = true splice loss + \u0394 backscatter. Reverse measurement = true loss - \u0394 backscatter. So true = (Loss_A + Loss_B)/2. So (0.68 + (-0.57))/2 =0.055 dB. That is very low true loss, so SC-02 is actually good, apparent high loss due to mismatch.\n\nSimilarly SC-01: both directions 0.06 and 0.05 => true ~0.055 good.\n\nNow SC-03: from A loss 1.33, from B loss 1.3 => both directions high, so not a backscatter mismatch, it's genuine high loss (bad splice). That points to bad splice.\n\nBut we also have SC-04: from A loss 0.06 at 1550, from B no event? Actually from B, there should be an event at 1.891 km with small loss maybe not detected as event because threshold? Let's see: Event table from B shows first event after launch at 4.244 (SC-03). It skips SC-04. Could be that SC-04 loss is so small 0.06 it was not flagged from B direction? However from A it was flagged. But difference could be detection settings.\n\nCheck 1310 nm from A: there was NO event at SC-04 (13.344). At 1310, SC-04 not flagged, but SC-03 loss 1.31 still high. And B-ODF at 15.234. So at 1310, SC-04 disappeared. Interesting.\n\nAlso need to evaluate macrobend vs bad splice.\n\nTypical differentiation: macrobend shows higher loss at 1550 than 1310, while bad splice shows similar loss at both wavelengths. Let's see data:\n\n- SC-02: 1550 0.68, 1310 0.39 => higher at 1550, could be bend? But it's splice between fiber types, also wavelength dependence.\n\n- SC-03: 1550 1.33, 1310 1.31 => nearly identical => indicates splice loss, not bend.\n\n- SC-01: 0.06 both => fine.\n\n- SC-04: 1550 0.06, 1310 no event (effectively 0) => small.\n\nSo the sudden 1.3 dB extra matches the ~1.3 dB drop in Rx power.\n\nCheck history: commissioning loss at 1550 was 3.39 dB. Now measured A-TX to B-ODF is 4.59 dB => extra 1.2 dB. OTDR shows extra ~1.3 dB at SC-03. Likely the crew introduced bend or bad splice.\n\nSite notes: splicing crew re-entered SC-03 to add branch. Could leave macrobend of slack coil or bad splice of the through fibre.\n\nOTDR signature for macrobend: wavelength dependent loss significantly higher at 1550 vs 1310 (often 1310 shows minimal). Our SC-03 shows equal loss, so more like bad splice.\n\nAlso need to rule out dirty connectors: inspected images show both A-ODF and B-ODF clean? Images show clean connector, no dirt, no damage. Probably pass.\n\nAttenuator check: B-ODF to B-RX difference 10 dB matches design.\n\nTx degradation: Tx power normal 1.36 within spec, bias stable.\n\nFibre break: no, service still up but low.\n\nThus root cause is bad splice at SC-03.\n\nLocation: element_id SC-03 (route_km 10.723). Could also give route_km 10.723 or fibre distance? Instruction: give element_id for faults at connector, splice closure, attenuator or transmitter; give route_km for macrobend or fibre break. Since this is bad_splice at splice closure, give element_id SC-03.\n\nNeed additional confirmation via otdr_trace maybe? But we have limited OTDR budget (3 tests). Already used 3. Cannot run more. However we have enough.\n\nWe should also examine otdr traces images if needed via otdr_trace_image? But we can request trace image without counting against OTDR budget? The tool otdr_trace uses OTDR data but maybe doesn't count? Actually otdr_trace_image is separate. The budget note only mentions OTDR event table limit? The description says each OTDR test takes service down and NOC allows 3 tests. Results of tests already run can be viewed again. Does otdr_trace count as additional tests? It says OTDR budget used: each OTDR test ... Already run: [(1310,'A','now'), (1550,'A','now'), (1550,'B','now')]. So otdr_trace may use existing data, not new test? The trace tool has wavelength, from_site, time params same as event table; likely it accesses same data without new test, so it should be allowed. We could fetch trace to confirm extra loss.\n\nLet's try to get trace around SC-03 to show splice loss vs bend.\n\nWe have not yet done otdr_trace.\n\n",
+   "tool_calls": [
+    {
+     "name": "otdr_trace",
+     "args": {
+      "wavelength_nm": 1550,
+      "from_site": "A",
+      "start_km": 10.0,
+      "end_km": 12.0,
+      "points": 100,
+      "time": "now"
+     },
+     "result": {
+      "wavelength_nm": 1550,
+      "from_site": "A",
+      "pulse_width_ns": 100,
+      "note": "Backscatter level (dB, one-way display). peak_db shows reflections inside each bin.",
+      "samples": [
+       {
+        "km": 10.008,
+        "mean_db": -2.76,
+        "peak_db": -2.75
+       },
+       {
+        "km": 10.028,
+        "mean_db": -2.76,
+        "peak_db": -2.75
+       },
+       {
+        "km": 10.048,
+        "mean_db": -2.76,
+        "peak_db": -2.76
+       },
+       {
+        "km": 10.068,
+        "mean_db": -2.77,
+        "peak_db": -2.77
+       },
+       {
+        "km": 10.088,
+        "mean_db": -2.77,
+        "peak_db": -2.77
+       },
+       {
+        "km": 10.108,
+        "mean_db": -2.78,
+        "peak_db": -2.77
+       },
+       {
+        "km": 10.128,
+        "mean_db": -2.78,
+        "peak_db": -2.78
+       },
+       {
+        "km": 10.148,
+        "mean_db": -2.79,
+        "peak_db": -2.78
+       },
+       {
+        "km": 10.168,
+        "mean_db": -2.79,
+        "peak_db": -2.78
+       },
+       {
+        "km": 10.188,
+        "mean_db": -2.79,
+        "peak_db": -2.79
+       },
+       {
+        "km": 10.208,
+        "mean_db": -2.8,
+        "peak_db": -2.79
+       },
+       {
+        "km": 10.228,
+        "mean_db": -2.8,
+        "peak_db": -2.79
+       },
+       {
+        "km": 10.248,
+        "mean_db": -2.8,
+        "peak_db": -2.79
+       },
+       {
+        "km": 10.268,
+        "mean_db": -2.81,
+        "peak_db": -2.8
+       },
+       {
+        "km": 10.288,
+        "mean_db": -2.82,
+        "peak_db": -2.81
+       },
+       {
+        "km": 10.308,
+        "mean_db": -2.81,
+        "peak_db": -2.81
+       },
+       {
+        "km": 10.328,
+        "mean_db": -2.81,
+        "peak_db": -2.81
+       },
+       {
+        "km": 10.348,
+        "mean_db": -2.83,
+        "peak_db": -2.82
+       },
+       {
+        "km": 10.368,
+        "mean_db": -2.83,
+        "peak_db": -2.82
+       },
+       {
+        "km": 10.388,
+        "mean_db": -2.83,
+        "peak_db": -2.82
+       },
+       {
+        "km": 10.408,
+        "mean_db": -2.83,
+        "peak_db": -2.83
+       },
+       {
+        "km": 10.428,
+        "mean_db": -2.84,
+        "peak_db": -2.84
+       },
+       {
+        "km": 10.448,
+        "mean_db": -2.84,
+        "peak_db": -2.84
+       },
+       {
+        "km": 10.468,
+        "mean_db": -2.85,
+        "peak_db": -2.84
+       },
+       {
+        "km": 10.488,
+        "mean_db": -2.85,
+        "peak_db": -2.85
+       },
+       {
+        "km": 10.508,
+        "mean_db": -2.85,
+        "peak_db": -2.85
+       },
+       {
+        "km": 10.528,
+        "mean_db": -2.86,
+        "peak_db": -2.86
+       },
+       {
+        "km": 10.548,
+        "mean_db": -2.86,
+        "peak_db": -2.86
+       },
+       {
+        "km": 10.568,
+        "mean_db": -2.86,
+        "peak_db": -2.86
+       },
+       {
+        "km": 10.588,
+        "mean_db": -2.87,
+        "peak_db": -2.86
+       },
+       {
+        "km": 10.608,
+        "mean_db": -2.87,
+        "peak_db": -2.87
+       },
+       {
+        "km": 10.628,
+        "mean_db": -2.87,
+        "peak_db": -2.87
+       },
+       {
+        "km": 10.648,
+        "mean_db": -2.88,
+        "peak_db": -2.88
+       },
+       {
+        "km": 10.668,
+        "mean_db": -2.89,
+        "peak_db": -2.88
+       },
+       {
+        "km": 10.688,
+        "mean_db": -2.89,
+        "peak_db": -2.88
+       },
+       {
+        "km": 10.708,
+        "mean_db": -2.89,
+        "peak_db": -2.89
+       },
+       {
+        "km": 10.728,
+        "mean_db": -2.89,
+        "peak_db": -2.89
+       },
+       {
+        "km": 10.748,
+        "mean_db": -2.9,
+        "peak_db": -2.89
+       },
+       {
+        "km": 10.768,
+        "mean_db": -2.9,
+        "peak_db": -2.9
+       },
+       {
+        "km": 10.788,
+        "mean_db": -2.91,
+        "peak_db": -2.9
+       },
+       {
+        "km": 10.808,
+        "mean_db": -2.91,
+        "peak_db": -2.91
+       },
+       {
+        "km": 10.828,
+        "mean_db": -2.91,
+        "peak_db": -2.9
+       },
+       {
+        "km": 10.848,
+        "mean_db": -2.92,
+        "peak_db": -2.91
+       },
+       {
+        "km": 10.868,
+        "mean_db": -2.92,
+        "peak_db": -2.91
+       },
+       {
+        "km": 10.888,
+        "mean_db": -2.92,
+        "peak_db": -2.92
+       },
+       {
+        "km": 10.908,
+        "mean_db": -2.93,
+        "peak_db": -2.92
+       },
+       {
+        "km": 10.928,
+        "mean_db": -2.93,
+        "peak_db": -2.93
+       },
+       {
+        "km": 10.948,
+        "mean_db": -2.93,
+        "peak_db": -2.93
+       },
+       {
+        "km": 10.968,
+        "mean_db": -2.94,
+        "peak_db": -2.94
+       },
+       {
+        "km": 10.988,
+        "mean_db": -3.16,
+        "peak_db": -2.95
+       },
+       {
+        "km": 11.008,
+        "mean_db": -4.26,
+        "peak_db": -4.26
+       },
+       {
+        "km": 11.028,
+        "mean_db": -4.26,
+        "peak_db": -4.26
+       },
+       {
+        "km": 11.048,
+        "mean_db": -4.26,
+        "peak_db": -4.26
+       },
+       {
+        "km": 11.068,
+        "mean_db": -4.27,
+        "peak_db": -4.27
+       },
+       {
+        "km": 11.088,
+        "mean_db": -4.27,
+        "peak_db": -4.27
+       },
+       {
+        "km": 11.108,
+        "mean_db": -4.28,
+        "peak_db": -4.27
+       },
+       {
+        "km": 11.128,
+        "mean_db": -4.28,
+        "peak_db": -4.28
+       },
+       {
+        "km": 11.148,
+        "mean_db": -4.29,
+        "peak_db": -4.28
+       },
+       {
+        "km": 11.168,
+        "mean_db": -4.29,
+        "peak_db": -4.29
+       },
+       {
+        "km": 11.188,
+        "mean_db": -4.3,
+        "peak_db": -4.29
+       },
+       {
+        "km": 11.208,
+        "mean_db": -4.3,
+        "peak_db": -4.29
+       },
+       {
+        "km": 11.228,
+        "mean_db": -4.3,
+        "peak_db": -4.3
+       },
+       {
+        "km": 11.248,
+        "mean_db": -4.31,
+        "peak_db": -4.31
+       },
+       {
+        "km": 11.268,
+        "mean_db": -4.31,
+        "peak_db": -4.31
+       },
+       {
+        "km": 11.288,
+        "mean_db": -4.32,
+        "peak_db": -4.31
+       },
+       {
+        "km": 11.308,
+        "mean_db": -4.32,
+        "peak_db": -4.31
+       },
+       {
+        "km": 11.328,
+        "mean_db": -4.32,
+        "peak_db": -4.31
+       },
+       {
+        "km": 11.348,
+        "mean_db": -4.32,
+        "peak_db": -4.32
+       },
+       {
+        "km": 11.368,
+        "mean_db": -4.33,
+        "peak_db": -4.31
+       },
+       {
+        "km": 11.388,
+        "mean_db": -4.33,
+        "peak_db": -4.33
+       },
+       {
+        "km": 11.408,
+        "mean_db": -4.34,
+        "peak_db": -4.33
+       },
+       {
+        "km": 11.428,
+        "mean_db": -4.34,
+        "peak_db": -4.34
+       },
+       {
+        "km": 11.448,
+        "mean_db": -4.34,
+        "peak_db": -4.34
+       },
+       {
+        "km": 11.468,
+        "mean_db": -4.35,
+        "peak_db": -4.34
+       },
+       {
+        "km": 11.488,
+        "mean_db": -4.35,
+        "peak_db": -4.34
+       },
+       {
+        "km": 11.508,
+        "mean_db": -4.35,
+        "peak_db": -4.35
+       },
+       {
+        "km": 11.528,
+        "mean_db": -4.36,
+        "peak_db": -4.35
+       },
+       {
+        "km": 11.548,
+        "mean_db": -4.36,
+        "peak_db": -4.36
+       },
+       {
+        "km": 11.568,
+        "mean_db": -4.37,
+        "peak_db": -4.36
+       },
+       {
+        "km": 11.588,
+        "mean_db": -4.37,
+        "peak_db": -4.36
+       },
+       {
+        "km": 11.608,
+        "mean_db": -4.38,
+        "peak_db": -4.37
+       },
+       {
+        "km": 11.628,
+        "mean_db": -4.37,
+        "peak_db": -4.37
+       },
+       {
+        "km": 11.648,
+        "mean_db": -4.38,
+        "peak_db": -4.38
+       },
+       {
+        "km": 11.668,
+        "mean_db": -4.39,
+        "peak_db": -4.38
+       },
+       {
+        "km": 11.688,
+        "mean_db": -4.39,
+        "peak_db": -4.39
+       },
+       {
+        "km": 11.708,
+        "mean_db": -4.39,
+        "peak_db": -4.39
+       },
+       {
+        "km": 11.728,
+        "mean_db": -4.39,
+        "peak_db": -4.38
+       },
+       {
+        "km": 11.748,
+        "mean_db": -4.4,
+        "peak_db": -4.39
+       },
+       {
+        "km": 11.768,
+        "mean_db": -4.4,
+        "peak_db": -4.4
+       },
+       {
+        "km": 11.788,
+        "mean_db": -4.41,
+        "peak_db": -4.4
+       },
+       {
+        "km": 11.808,
+        "mean_db": -4.41,
+        "peak_db": -4.41
+       },
+       {
+        "km": 11.828,
+        "mean_db": -4.42,
+        "peak_db": -4.41
+       },
+       {
+        "km": 11.848,
+        "mean_db": -4.42,
+        "peak_db": -4.41
+       },
+       {
+        "km": 11.868,
+        "mean_db": -4.42,
+        "peak_db": -4.42
+       },
+       {
+        "km": 11.888,
+        "mean_db": -4.42,
+        "peak_db": -4.42
+       },
+       {
+        "km": 11.908,
+        "mean_db": -4.43,
+        "peak_db": -4.42
+       },
+       {
+        "km": 11.928,
+        "mean_db": -4.43,
+        "peak_db": -4.43
+       },
+       {
+        "km": 11.948,
+        "mean_db": -4.44,
+        "peak_db": -4.43
+       },
+       {
+        "km": 11.968,
+        "mean_db": -4.44,
+        "peak_db": -4.43
+       },
+       {
+        "km": 11.988,
+        "mean_db": -4.44,
+        "peak_db": -4.44
+       }
+      ]
+     }
+    },
+    {
+     "name": "otdr_trace",
+     "args": {
+      "wavelength_nm": 1310,
+      "from_site": "A",
+      "start_km": 10.0,
+      "end_km": 12.0,
+      "points": 100,
+      "time": "now"
+     },
+     "result": {
+      "wavelength_nm": 1310,
+      "from_site": "A",
+      "pulse_width_ns": 100,
+      "note": "Backscatter level (dB, one-way display). peak_db shows reflections inside each bin.",
+      "samples": [
+       {
+        "km": 10.008,
+        "mean_db": -3.94,
+        "peak_db": -3.93
+       },
+       {
+        "km": 10.028,
+        "mean_db": -3.94,
+        "peak_db": -3.94
+       },
+       {
+        "km": 10.048,
+        "mean_db": -3.95,
+        "peak_db": -3.94
+       },
+       {
+        "km": 10.068,
+        "mean_db": -3.96,
+        "peak_db": -3.95
+       },
+       {
+        "km": 10.088,
+        "mean_db": -3.97,
+        "peak_db": -3.96
+       },
+       {
+        "km": 10.108,
+        "mean_db": -3.97,
+        "peak_db": -3.96
+       },
+       {
+        "km": 10.128,
+        "mean_db": -3.98,
+        "peak_db": -3.97
+       },
+       {
+        "km": 10.148,
+        "mean_db": -3.98,
+        "peak_db": -3.98
+       },
+       {
+        "km": 10.168,
+        "mean_db": -4.0,
+        "peak_db": -3.99
+       },
+       {
+        "km": 10.188,
+        "mean_db": -4.0,
+        "peak_db": -3.99
+       },
+       {
+        "km": 10.208,
+        "mean_db": -4.0,
+        "peak_db": -4.0
+       },
+       {
+        "km": 10.228,
+        "mean_db": -4.01,
+        "peak_db": -4.01
+       },
+       {
+        "km": 10.248,
+        "mean_db": -4.02,
+        "peak_db": -4.01
+       },
+       {
+        "km": 10.268,
+        "mean_db": -4.03,
+        "peak_db": -4.02
+       },
+       {
+        "km": 10.288,
+        "mean_db": -4.03,
+        "peak_db": -4.02
+       },
+       {
+        "km": 10.308,
+        "mean_db": -4.03,
+        "peak_db": -4.03
+       },
+       {
+        "km": 10.328,
+        "mean_db": -4.05,
+        "peak_db": -4.04
+       },
+       {
+        "km": 10.348,
+        "mean_db": -4.05,
+        "peak_db": -4.04
+       },
+       {
+        "km": 10.368,
+        "mean_db": -4.06,
+        "peak_db": -4.05
+       },
+       {
+        "km": 10.388,
+        "mean_db": -4.06,
+        "peak_db": -4.06
+       },
+       {
+        "km": 10.408,
+        "mean_db": -4.07,
+        "peak_db": -4.06
+       },
+       {
+        "km": 10.428,
+        "mean_db": -4.08,
+        "peak_db": -4.07
+       },
+       {
+        "km": 10.448,
+        "mean_db": -4.09,
+        "peak_db": -4.08
+       },
+       {
+        "km": 10.468,
+        "mean_db": -4.09,
+        "peak_db": -4.08
+       },
+       {
+        "km": 10.488,
+        "mean_db": -4.09,
+        "peak_db": -4.09
+       },
+       {
+        "km": 10.508,
+        "mean_db": -4.1,
+        "peak_db": -4.1
+       },
+       {
+        "km": 10.528,
+        "mean_db": -4.11,
+        "peak_db": -4.11
+       },
+       {
+        "km": 10.548,
+        "mean_db": -4.12,
+        "peak_db": -4.11
+       },
+       {
+        "km": 10.568,
+        "mean_db": -4.12,
+        "peak_db": -4.12
+       },
+       {
+        "km": 10.588,
+        "mean_db": -4.13,
+        "peak_db": -4.12
+       },
+       {
+        "km": 10.608,
+        "mean_db": -4.14,
+        "peak_db": -4.13
+       },
+       {
+        "km": 10.628,
+        "mean_db": -4.14,
+        "peak_db": -4.14
+       },
+       {
+        "km": 10.648,
+        "mean_db": -4.15,
+        "peak_db": -4.15
+       },
+       {
+        "km": 10.668,
+        "mean_db": -4.15,
+        "peak_db": -4.15
+       },
+       {
+        "km": 10.688,
+        "mean_db": -4.16,
+        "peak_db": -4.15
+       },
+       {
+        "km": 10.708,
+        "mean_db": -4.17,
+        "peak_db": -4.16
+       },
+       {
+        "km": 10.728,
+        "mean_db": -4.18,
+        "peak_db": -4.17
+       },
+       {
+        "km": 10.748,
+        "mean_db": -4.18,
+        "peak_db": -4.18
+       },
+       {
+        "km": 10.768,
+        "mean_db": -4.19,
+        "peak_db": -4.19
+       },
+       {
+        "km": 10.788,
+        "mean_db": -4.19,
+        "peak_db": -4.19
+       },
+       {
+        "km": 10.808,
+        "mean_db": -4.2,
+        "peak_db": -4.19
+       },
+       {
+        "km": 10.828,
+        "mean_db": -4.21,
+        "peak_db": -4.2
+       },
+       {
+        "km": 10.848,
+        "mean_db": -4.22,
+        "peak_db": -4.21
+       },
+       {
+        "km": 10.868,
+        "mean_db": -4.22,
+        "peak_db": -4.22
+       },
+       {
+        "km": 10.888,
+        "mean_db": -4.23,
+        "peak_db": -4.23
+       },
+       {
+        "km": 10.908,
+        "mean_db": -4.23,
+        "peak_db": -4.23
+       },
+       {
+        "km": 10.928,
+        "mean_db": -4.24,
+        "peak_db": -4.24
+       },
+       {
+        "km": 10.948,
+        "mean_db": -4.25,
+        "peak_db": -4.24
+       },
+       {
+        "km": 10.968,
+        "mean_db": -4.26,
+        "peak_db": -4.25
+       },
+       {
+        "km": 10.988,
+        "mean_db": -4.48,
+        "peak_db": -4.25
+       },
+       {
+        "km": 11.008,
+        "mean_db": -5.58,
+        "peak_db": -5.58
+       },
+       {
+        "km": 11.028,
+        "mean_db": -5.59,
+        "peak_db": -5.59
+       },
+       {
+        "km": 11.048,
+        "mean_db": -5.59,
+        "peak_db": -5.59
+       },
+       {
+        "km": 11.068,
+        "mean_db": -5.6,
+        "peak_db": -5.6
+       },
+       {
+        "km": 11.088,
+        "mean_db": -5.61,
+        "peak_db": -5.61
+       },
+       {
+        "km": 11.108,
+        "mean_db": -5.62,
+        "peak_db": -5.61
+       },
+       {
+        "km": 11.128,
+        "mean_db": -5.62,
+        "peak_db": -5.62
+       },
+       {
+        "km": 11.148,
+        "mean_db": -5.63,
+        "peak_db": -5.62
+       },
+       {
+        "km": 11.168,
+        "mean_db": -5.64,
+        "peak_db": -5.64
+       },
+       {
+        "km": 11.188,
+        "mean_db": -5.64,
+        "peak_db": -5.64
+       },
+       {
+        "km": 11.208,
+        "mean_db": -5.65,
+        "peak_db": -5.63
+       },
+       {
+        "km": 11.228,
+        "mean_db": -5.65,
+        "peak_db": -5.65
+       },
+       {
+        "km": 11.248,
+        "mean_db": -5.66,
+        "peak_db": -5.65
+       },
+       {
+        "km": 11.268,
+        "mean_db": -5.67,
+        "peak_db": -5.66
+       },
+       {
+        "km": 11.288,
+        "mean_db": -5.67,
+        "peak_db": -5.66
+       },
+       {
+        "km": 11.308,
+        "mean_db": -5.68,
+        "peak_db": -5.68
+       },
+       {
+        "km": 11.328,
+        "mean_db": -5.68,
+        "peak_db": -5.68
+       },
+       {
+        "km": 11.348,
+        "mean_db": -5.69,
+        "peak_db": -5.69
+       },
+       {
+        "km": 11.368,
+        "mean_db": -5.7,
+        "peak_db": -5.7
+       },
+       {
+        "km": 11.388,
+        "mean_db": -5.71,
+        "peak_db": -5.71
+       },
+       {
+        "km": 11.408,
+        "mean_db": -5.72,
+        "peak_db": -5.71
+       },
+       {
+        "km": 11.428,
+        "mean_db": -5.72,
+        "peak_db": -5.72
+       },
+       {
+        "km": 11.448,
+        "mean_db": -5.73,
+        "peak_db": -5.72
+       },
+       {
+        "km": 11.468,
+        "mean_db": -5.74,
+        "peak_db": -5.74
+       },
+       {
+        "km": 11.488,
+        "mean_db": -5.74,
+        "peak_db": -5.74
+       },
+       {
+        "km": 11.508,
+        "mean_db": -5.75,
+        "peak_db": -5.74
+       },
+       {
+        "km": 11.528,
+        "mean_db": -5.75,
+        "peak_db": -5.75
+       },
+       {
+        "km": 11.548,
+        "mean_db": -5.76,
+        "peak_db": -5.75
+       },
+       {
+        "km": 11.568,
+        "mean_db": -5.77,
+        "peak_db": -5.75
+       },
+       {
+        "km": 11.588,
+        "mean_db": -5.78,
+        "peak_db": -5.77
+       },
+       {
+        "km": 11.608,
+        "mean_db": -5.78,
+        "peak_db": -5.78
+       },
+       {
+        "km": 11.628,
+        "mean_db": -5.78,
+        "peak_db": -5.78
+       },
+       {
+        "km": 11.648,
+        "mean_db": -5.79,
+        "peak_db": -5.78
+       },
+       {
+        "km": 11.668,
+        "mean_db": -5.8,
+        "peak_db": -5.79
+       },
+       {
+        "km": 11.688,
+        "mean_db": -5.81,
+        "peak_db": -5.81
+       },
+       {
+        "km": 11.708,
+        "mean_db": -5.81,
+        "peak_db": -5.81
+       },
+       {
+        "km": 11.728,
+        "mean_db": -5.82,
+        "peak_db": -5.82
+       },
+       {
+        "km": 11.748,
+        "mean_db": -5.83,
+        "peak_db": -5.82
+       },
+       {
+        "km": 11.768,
+        "mean_db": -5.83,
+        "peak_db": -5.83
+       },
+       {
+        "km": 11.788,
+        "mean_db": -5.84,
+        "peak_db": -5.83
+       },
+       {
+        "km": 11.808,
+        "mean_db": -5.85,
+        "peak_db": -5.84
+       },
+       {
+        "km": 11.828,
+        "mean_db": -5.85,
+        "peak_db": -5.85
+       },
+       {
+        "km": 11.848,
+        "mean_db": -5.86,
+        "peak_db": -5.86
+       },
+       {
+        "km": 11.868,
+        "mean_db": -5.86,
+        "peak_db": -5.86
+       },
+       {
+        "km": 11.888,
+        "mean_db": -5.88,
+        "peak_db": -5.88
+       },
+       {
+        "km": 11.908,
+        "mean_db": -5.88,
+        "peak_db": -5.87
+       },
+       {
+        "km": 11.928,
+        "mean_db": -5.88,
+        "peak_db": -5.88
+       },
+       {
+        "km": 11.948,
+        "mean_db": -5.89,
+        "peak_db": -5.89
+       },
+       {
+        "km": 11.968,
+        "mean_db": -5.9,
+        "peak_db": -5.89
+       },
+       {
+        "km": 11.988,
+        "mean_db": -5.9,
+        "peak_db": -5.9
+       }
+      ]
+     }
+    },
+    {
+     "name": "otdr_trace_image",
+     "args": {
+      "wavelength_nm": 1550,
+      "from_site": "A",
+      "start_km": 10.0,
+      "end_km": 12.0,
+      "time": "now"
+     },
+     "result": {
+      "wavelength_nm": 1550,
+      "from_site": "A",
+      "image": "attached in the next message"
+     }
+    },
+    {
+     "name": "otdr_trace_image",
+     "args": {
+      "wavelength_nm": 1310,
+      "from_site": "A",
+      "start_km": 10.0,
+      "end_km": 12.0,
+      "time": "now"
+     },
+     "result": {
+      "wavelength_nm": 1310,
+      "from_site": "A",
+      "image": "attached in the next message"
+     }
+    }
+   ]
+  },
+  {
+   "step": 4,
+   "content": null,
+   "reasoning": "We need to synthesize diagnosis.\n\nWe have link A to B 14.82 km. OTDR from A shows events at 3.95km loss 0.06 (SC01), 8.78 loss 0.68 (SC02), 10.99 loss 1.33 (SC03), 13.344 loss 0.06 (SC04), then end.\n\nNote: OTDR distances are fibre distances, not route km. Need to convert? Fibre excess 1.0-1.8% over cable. Slack loops 50m at each closure. Route km for SC-03 is 10.723. OTDR event at 10.99 km from A is SC-03 but with fibre distance longer due to excess.\n\nSimilarly SC-02 at route 8.6, OTDR 8.78.\n\nWe see after SC-03 intervention on 2026-10-24, RX power dropped from ~-12.1 to -13.4 avg, about 1.3 dB degradation. That matches OTDR loss at SC-03 of 1.33 dB at 1550 (and 1.31 at 1310).\n\nWe need to determine fault type: The options: dirty_connector, damaged_connector, macrobend, bad_splice, fibre_break, wrong_attenuator, tx_degradation\n\nWe have TX power stable 1.36 dBm launch, normal. RX at B-ODF -3.23 dBm, B-RX -13.32 dBm difference is 10.09 dB which matches design attenuator 10 dB correct. So wrong attenuator not.\n\nDirty connector images show both A-ODF and B-ODF clean. So not.\n\nOTDR shows large loss at ~11km fibre distance, which is near SC-03 closure. Could be bad splice vs macrobend.\n\nKey to distinguish: macrobend is wavelength dependent: 1550 loss >>1310. Bad splice typically similar loss or maybe but not strongly wavelength dependent? Need to check.\n\nWe have data: At 10.99 km event loss: 1550: 1.33 dB, 1310: 1.31 dB essentially identical (within 0.02 dB). That suggests a non-bend loss => bad splice.\n\nAlso from B side OTDR: let's parse B side events.\n\nFrom B, fibre distance 0 is B-ODF. Route total 14.82, so distance mapping reversed. Event at 4.244 km from B with loss 1.3 dB non-reflective corresponds to same SC-03? Let's check: Total fibre distance approx route length * (1+ excess) + slacks? Commissioning OTDR not given but current shows from A total to B-ODF should be about 15.235-1 = 14.235? Wait need to compute.\n\nFrom A: event 6 at 15.235 km is B-ODF reflective (0.21 dB). Actually launch cord 1km, so true fibre distance to B-ODF is 15.235-1 =14.235? Let's not overcomplicate.\n\nFrom B: event 2 at 4.244 km loss 1.3 dB matches SC-03 (distance from B). Indeed if SC-03 is at 10.723 route km, distance from B is 14.82-10.723 =4.097 km route. Fibre distance maybe ~4.24 km matches.\n\nEvent 3 from B at 6.452 km with loss -0.57 dB (i.e., apparent gain) This is characteristic of splice between dissimilar fibers (G.652.D to G.655) with different mode field diameters / backscatter coefficients. That gain at SC-02 is expected due to G.655 replacement section between SC-02 and SC-03? Let's see: Link notes: SC-02 joins original G.652.D to G.655 replacement section, SC-03 joins back? Actually note: SC-02: joins original G.652.D to G.655 replacement section. So from SC-02 to SC-03 is G.655, after SC-03 back to G.652.D. That's why OTDR shows 0.68 dB loss at SC-02 from A, and -0.57 gain from B? Possibly.\n\nBut the key fault at SC-03 shows similar loss at both wavelengths => bad splice, not macrobend.\n\nAlso macrobend would show larger loss at 1550 vs 1310. Here 1550 loss 1.33 vs 1310 1.31 nearly equal, so not bend.\n\nAlso OTDR trace images show sharp step, no excessive curvature typical of bend? Hard to tell but trace sharp drop suggests splice.\n\nWe need to calculate power budget to confirm: TX 1.36 dBm, B-ODF -3.23 => link loss A-ODF to B-ODF = 1.36 - (-3.23) = 4.59 dB. Commissioning loss at 1550 was 3.39 dB, so increased by 1.20 dB, consistent with OTDR 1.33.\n\nAlso need location: element_id for bad_splice is SC-03. Provide evidence.\n\nBut also need to consider route_km vs fibre distance for submission if required macrobend/fibre_break would need route_km. For bad_splice we need element_id.\n\nFault type = bad_splice, element_id SC-03, action resplice.\n\nCheck alternative possibilities: Could be fibre_break? No, fibre break would be large loss and LOS. Not.\n\nDirty vs damaged connector: images clean, both look clean, no damage (maybe second image tiny black dot but maybe dust?). However both connectors appear clean with no scratches, contamination. Also OTDR shows no event at 0 km large loss (0.15 dB normal). So not connector.\n\nWrong attenuator: measured B-RX vs B-ODF difference ~10.09 dB correct.\n\nTX degradation: TX power stable, bias stable.\n\nHence answer is bad splice at SC-03.\n\nNeed to provide evidence string citing measurements.\n\nWe must also address that OTDR budget used, but we have enough.\n\nPotential nuance: Need to account for fibre excess: But submission expects element_id for bad_splice, so give SC-03.\n\nProvide actionable: resplice.\n\nDouble-check OTDR event table: At 1310, event 4 distance 10.993 vs at 1550 10.99 same, loss similar.\n\nFrom B side at 1550, event 2 loss 1.3 at 4.244 km confirming bidirectional similar loss ~1.3 dB, which for a bad splice bidirectional average ~1.3, whereas macrobend would be asymmetric? Actually OTDR loss might be bidirectional but wavelength dependence still.\n\nSo definitely bad splice.\n\nCheck site notes: Splicing crew re-entered SC-03 on 2026-10-24 06:52 to add branch cable. Exactly when alarm raised 08:00. So temporal correlation.\n\nProvide evidence: RX power drop 1.3 dB on 24 Oct, OTDR shows 1.31-1.33 dB non-reflective loss at ~11 km fibre (SC-03), bidirectional 1.30 dB from B, identical at 1310/1550 ruling out bend, connector inspections clean, TX stable, attenuator correct.\n\nWe should call submit_diagnosis.\n\nNeed to ensure location param: provide element_id, route_km null.\n\nFault_type bad_splice, action resplice.\n\nCheck spec: element_id required for faults at connector, splice closure, attenuator or transmitter. So for SC-03, provide \"SC-03\". route_km null.\n\nMake evidence concise but citing measurements.\n\n",
+   "tool_calls": [
+    {
+     "name": "submit_diagnosis",
+     "args": {
+      "fault_type": "bad_splice",
+      "element_id": "SC-03",
+      "route_km": null,
+      "action": "resplice",
+      "evidence": "RX power dropped ~1.3dB on 2026-10-24 08:00 (daily avg -12.1 to -13.4 dBm, hourly confirms) coinciding with crew re-entry of SC-03 (10.723 route km) at 06:52. OTDR from A shows non-reflective loss 1.33 dB @1550nm at 10.99 km fibre (1.31 dB @1310nm, essentially equal, ruling out macrobend) and from B 1.30 dB at 4.24 km fibre - same physical splice. Link loss A-TX (1.36 dBm) to B-ODF (-3.23 dBm) =4.59 dB vs commissioning 3.39 dB (+1.2 dB). TX power/bias stable, B-ODF to B-RX delta 10.1 dB matches design 10 dB attenuator, connector inspections clean at A-ODF/B-ODF, no wavelength-dependent excess loss."
+     },
+     "result": {
+      "status": "submitted"
+     }
+    }
+   ]
+  }
+ ]
+}

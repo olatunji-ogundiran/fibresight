@@ -1,0 +1,4254 @@
+{
+ "seed": 1005,
+ "model": "muse-spark-1.3",
+ "mode": "standard",
+ "answer": {
+  "action": "repair_break",
+  "element_id": "null",
+  "evidence": "TX normal 0.46dBm in spec with stable bias/temp, B-ODF and B-RX no light (<-50dBm), PM sudden RX_LOS 2026-10-17 22:00 from -11.8 to -40dBm. OTDR 1550+1310 from A shows end at 18.20/18.19km fibre, from B shows end at 13.16km fibre (sum 31.36km = total fibre), trace shows abrupt drop to noise with no continuation, same physical point. Anchored between SC-03 (13.668 route /14.057 fibre) and SC-04 (19.484 route /20.031 fibre) => route ~17.7km. Connectors clean, SC-02 0.97dB is G.652/G.655 backscatter mismatch not cause. Correlates with road works/flooding km18-20.",
+  "fault_type": "fibre_break",
+  "route_km": 17.7
+ },
+ "grade": {
+  "score": 1.0,
+  "valid": true,
+  "errors": [],
+  "fault_type_ok": true,
+  "action_ok": true,
+  "location_ok": true,
+  "route_error_km": 0.013,
+  "truth": {
+   "fault_type": "fibre_break",
+   "element_id": null,
+   "route_km": 17.713,
+   "action": "repair_break"
+  }
+ },
+ "steps": 7,
+ "tool_calls": 22,
+ "seconds": 63.6,
+ "usage": {
+  "prompt_tokens": 81623,
+  "completion_tokens": 16304
+ },
+ "transcript": [
+  {
+   "step": 0,
+   "content": "Service ticket opened \u2014 pulling link records and alarms to pinpoint the failure.",
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_link_record",
+     "args": {},
+     "result": {
+      "link": "Site A to Site B, single-mode G.652.D, route length 30.48 km (as-built route map)",
+      "elements_in_route_order": [
+       {
+        "id": "A-ODF",
+        "type": "connector (ODF/patch panel)",
+        "route_km": 0.0
+       },
+       {
+        "id": "SC-01",
+        "type": "splice closure",
+        "route_km": 3.088,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-02",
+        "type": "splice closure",
+        "route_km": 8.094,
+        "slack_stored_m": "about 50 (as-built varies)",
+        "note": "joins the original G.652.D cable to a G.655 replacement section"
+       },
+       {
+        "id": "SC-03",
+        "type": "splice closure",
+        "route_km": 13.668,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-04",
+        "type": "splice closure",
+        "route_km": 19.484,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-05",
+        "type": "splice closure",
+        "route_km": 24.346,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-06",
+        "type": "splice closure",
+        "route_km": 28.601,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "B-ODF",
+        "type": "connector (ODF/patch panel)",
+        "route_km": 30.48
+       }
+      ],
+      "cable": {
+       "fibre_excess_length_over_cable_pct": "1.0 to 1.8 (manufacturer spec)",
+       "slack_loops": "spare fibre is coiled at each splice closure"
+      },
+      "service": {
+       "direction": "site A transmits, site B receives, 1550 nm",
+       "A-TX": "10G 1550 nm transceiver, launch power spec -1.0 to +2.0 dBm",
+       "B-ATT": "fixed in-line attenuator at site B between ODF and receiver, design value 5 dB",
+       "B-RX": "receiver sensitivity -15.0 dBm, overload -1.0 dBm",
+       "available_attenuator_values_db": [
+        0,
+        3,
+        5,
+        7,
+        10,
+        15
+       ]
+      },
+      "commissioning_link_loss_db": {
+       "1310": 11.55,
+       "1550": 7.1,
+       "note": "A-ODF to B-ODF, bidirectional average, at commissioning"
+      },
+      "alarm_thresholds_dbm": {
+       "RX_LOW_WARNING": -13.0,
+       "RX_LOW_ALARM": -16.0,
+       "RX_LOS": -25.0,
+       "RX_HIGH_WARNING": -3.0,
+       "RX_HIGH_ALARM": -1.0
+      },
+      "answer_ids": {
+       "elements": [
+        "A-ODF",
+        "SC-01",
+        "SC-02",
+        "SC-03",
+        "SC-04",
+        "SC-05",
+        "SC-06",
+        "B-ODF"
+       ],
+       "equipment": [
+        "A-TX",
+        "B-ATT"
+       ]
+      }
+     }
+    },
+    {
+     "name": "get_alarms",
+     "args": {},
+     "result": {
+      "now": "2026-10-27 08:00 UTC",
+      "alarms": [
+       {
+        "alarm": "RX_LOS",
+        "severity": "critical",
+        "raised": "2026-10-17 22:00 UTC",
+        "cleared": "active",
+        "entity": "B-RX (1550 nm service from site A)"
+       },
+       {
+        "alarm": "PRE_FEC_BER_HIGH",
+        "severity": "major",
+        "raised": "2026-10-17 22:00 UTC",
+        "cleared": "active",
+        "entity": "B-RX (1550 nm service from site A)"
+       }
+      ]
+     }
+    },
+    {
+     "name": "get_site_notes",
+     "args": {},
+     "result": {
+      "notes": [
+       {
+        "time": "2026-10-14 22:30 UTC",
+        "entry": "Heavy rain and flooding reported along the route near km 18."
+       },
+       {
+        "time": "2026-10-16 15:00 UTC",
+        "entry": "Splicing crew re-entered closure SC-02 to add a branch cable for a new customer. Closure resealed."
+       },
+       {
+        "time": "2026-10-17 22:19 UTC",
+        "entry": "Customer reports total outage. Road works reported somewhere around route km 20."
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "step": 1,
+   "content": "Critical LOS alarm active since Oct 17 \u2014 gathering performance history to trace the outage.",
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "rx_power_dbm",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "rx_power_dbm",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": -11.96,
+        "avg": -11.84,
+        "max": -11.76
+       },
+       {
+        "day": "2026-10-14",
+        "min": -11.98,
+        "avg": -11.84,
+        "max": -11.73
+       },
+       {
+        "day": "2026-10-15",
+        "min": -11.98,
+        "avg": -11.87,
+        "max": -11.78
+       },
+       {
+        "day": "2026-10-16",
+        "min": -12.0,
+        "avg": -11.87,
+        "max": -11.79
+       },
+       {
+        "day": "2026-10-17",
+        "min": -40.0,
+        "avg": -23.58,
+        "max": -11.74
+       },
+       {
+        "day": "2026-10-18",
+        "min": -40.0,
+        "avg": -40.0,
+        "max": -40.0
+       },
+       {
+        "day": "2026-10-19",
+        "min": -40.0,
+        "avg": -40.0,
+        "max": -40.0
+       },
+       {
+        "day": "2026-10-20",
+        "min": -40.0,
+        "avg": -40.0,
+        "max": -40.0
+       },
+       {
+        "day": "2026-10-21",
+        "min": -40.0,
+        "avg": -40.0,
+        "max": -40.0
+       },
+       {
+        "day": "2026-10-22",
+        "min": -40.0,
+        "avg": -40.0,
+        "max": -40.0
+       },
+       {
+        "day": "2026-10-23",
+        "min": -40.0,
+        "avg": -40.0,
+        "max": -40.0
+       },
+       {
+        "day": "2026-10-24",
+        "min": -40.0,
+        "avg": -40.0,
+        "max": -40.0
+       },
+       {
+        "day": "2026-10-25",
+        "min": -40.0,
+        "avg": -40.0,
+        "max": -40.0
+       },
+       {
+        "day": "2026-10-26",
+        "min": -40.0,
+        "avg": -40.0,
+        "max": -40.0
+       }
+      ]
+     }
+    },
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "tx_power_dbm",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "tx_power_dbm",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": 0.49,
+        "avg": 0.58,
+        "max": 0.69
+       },
+       {
+        "day": "2026-10-14",
+        "min": 0.48,
+        "avg": 0.57,
+        "max": 0.66
+       },
+       {
+        "day": "2026-10-15",
+        "min": 0.44,
+        "avg": 0.57,
+        "max": 0.65
+       },
+       {
+        "day": "2026-10-16",
+        "min": 0.45,
+        "avg": 0.57,
+        "max": 0.68
+       },
+       {
+        "day": "2026-10-17",
+        "min": 0.47,
+        "avg": 0.56,
+        "max": 0.66
+       },
+       {
+        "day": "2026-10-18",
+        "min": 0.49,
+        "avg": 0.56,
+        "max": 0.64
+       },
+       {
+        "day": "2026-10-19",
+        "min": 0.5,
+        "avg": 0.59,
+        "max": 0.71
+       },
+       {
+        "day": "2026-10-20",
+        "min": 0.5,
+        "avg": 0.58,
+        "max": 0.71
+       },
+       {
+        "day": "2026-10-21",
+        "min": 0.47,
+        "avg": 0.58,
+        "max": 0.68
+       },
+       {
+        "day": "2026-10-22",
+        "min": 0.5,
+        "avg": 0.56,
+        "max": 0.66
+       },
+       {
+        "day": "2026-10-23",
+        "min": 0.5,
+        "avg": 0.57,
+        "max": 0.68
+       },
+       {
+        "day": "2026-10-24",
+        "min": 0.5,
+        "avg": 0.59,
+        "max": 0.7
+       },
+       {
+        "day": "2026-10-25",
+        "min": 0.51,
+        "avg": 0.58,
+        "max": 0.71
+       },
+       {
+        "day": "2026-10-26",
+        "min": 0.5,
+        "avg": 0.6,
+        "max": 0.69
+       }
+      ]
+     }
+    },
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "tx_bias_ma",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "tx_bias_ma",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": 36.73,
+        "avg": 37.87,
+        "max": 38.96
+       },
+       {
+        "day": "2026-10-14",
+        "min": 37.12,
+        "avg": 37.99,
+        "max": 39.09
+       },
+       {
+        "day": "2026-10-15",
+        "min": 36.86,
+        "avg": 37.94,
+        "max": 38.87
+       },
+       {
+        "day": "2026-10-16",
+        "min": 36.31,
+        "avg": 37.79,
+        "max": 38.83
+       },
+       {
+        "day": "2026-10-17",
+        "min": 37.0,
+        "avg": 37.86,
+        "max": 38.67
+       },
+       {
+        "day": "2026-10-18",
+        "min": 37.05,
+        "avg": 37.98,
+        "max": 39.01
+       },
+       {
+        "day": "2026-10-19",
+        "min": 36.69,
+        "avg": 37.95,
+        "max": 38.93
+       },
+       {
+        "day": "2026-10-20",
+        "min": 36.91,
+        "avg": 37.9,
+        "max": 38.67
+       },
+       {
+        "day": "2026-10-21",
+        "min": 37.13,
+        "avg": 37.92,
+        "max": 38.78
+       },
+       {
+        "day": "2026-10-22",
+        "min": 36.98,
+        "avg": 37.89,
+        "max": 39.06
+       },
+       {
+        "day": "2026-10-23",
+        "min": 36.77,
+        "avg": 37.87,
+        "max": 38.77
+       },
+       {
+        "day": "2026-10-24",
+        "min": 36.84,
+        "avg": 37.91,
+        "max": 38.91
+       },
+       {
+        "day": "2026-10-25",
+        "min": 36.78,
+        "avg": 37.91,
+        "max": 38.72
+       },
+       {
+        "day": "2026-10-26",
+        "min": 36.88,
+        "avg": 37.99,
+        "max": 38.79
+       }
+      ]
+     }
+    },
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "pre_fec_ber",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "pre_fec_ber",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": 1e-15,
+        "avg": 1.09e-15,
+        "max": 1.45e-15
+       },
+       {
+        "day": "2026-10-14",
+        "min": 1e-15,
+        "avg": 1.05e-15,
+        "max": 1.21e-15
+       },
+       {
+        "day": "2026-10-15",
+        "min": 1e-15,
+        "avg": 1.07e-15,
+        "max": 1.55e-15
+       },
+       {
+        "day": "2026-10-16",
+        "min": 1e-15,
+        "avg": 1.06e-15,
+        "max": 1.41e-15
+       },
+       {
+        "day": "2026-10-17",
+        "min": 1e-15,
+        "avg": 2.79e-10,
+        "max": 0.0117
+       },
+       {
+        "day": "2026-10-18",
+        "min": 0.00818,
+        "avg": 0.0102,
+        "max": 0.0133
+       },
+       {
+        "day": "2026-10-19",
+        "min": 0.00679,
+        "avg": 0.00968,
+        "max": 0.0121
+       },
+       {
+        "day": "2026-10-20",
+        "min": 0.00679,
+        "avg": 0.0101,
+        "max": 0.0159
+       },
+       {
+        "day": "2026-10-21",
+        "min": 0.00602,
+        "avg": 0.00996,
+        "max": 0.0136
+       },
+       {
+        "day": "2026-10-22",
+        "min": 0.00522,
+        "avg": 0.00953,
+        "max": 0.0143
+       },
+       {
+        "day": "2026-10-23",
+        "min": 0.00655,
+        "avg": 0.0102,
+        "max": 0.0131
+       },
+       {
+        "day": "2026-10-24",
+        "min": 0.00755,
+        "avg": 0.0102,
+        "max": 0.0137
+       },
+       {
+        "day": "2026-10-25",
+        "min": 0.00658,
+        "avg": 0.0096,
+        "max": 0.0131
+       },
+       {
+        "day": "2026-10-26",
+        "min": 0.00705,
+        "avg": 0.00993,
+        "max": 0.0142
+       }
+      ]
+     }
+    },
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "rx_module_temp_c",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "rx_module_temp_c",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": 32.76,
+        "avg": 35.94,
+        "max": 39.35
+       },
+       {
+        "day": "2026-10-14",
+        "min": 32.95,
+        "avg": 36.12,
+        "max": 39.46
+       },
+       {
+        "day": "2026-10-15",
+        "min": 32.72,
+        "avg": 35.98,
+        "max": 39.23
+       },
+       {
+        "day": "2026-10-16",
+        "min": 32.47,
+        "avg": 36.0,
+        "max": 39.79
+       },
+       {
+        "day": "2026-10-17",
+        "min": 32.66,
+        "avg": 36.1,
+        "max": 39.32
+       },
+       {
+        "day": "2026-10-18",
+        "min": 32.39,
+        "avg": 36.05,
+        "max": 39.49
+       },
+       {
+        "day": "2026-10-19",
+        "min": 33.15,
+        "avg": 36.03,
+        "max": 39.48
+       },
+       {
+        "day": "2026-10-20",
+        "min": 33.1,
+        "avg": 36.03,
+        "max": 38.98
+       },
+       {
+        "day": "2026-10-21",
+        "min": 32.18,
+        "avg": 36.0,
+        "max": 39.24
+       },
+       {
+        "day": "2026-10-22",
+        "min": 33.11,
+        "avg": 35.98,
+        "max": 39.13
+       },
+       {
+        "day": "2026-10-23",
+        "min": 32.7,
+        "avg": 36.01,
+        "max": 39.07
+       },
+       {
+        "day": "2026-10-24",
+        "min": 32.9,
+        "avg": 35.92,
+        "max": 38.77
+       },
+       {
+        "day": "2026-10-25",
+        "min": 33.05,
+        "avg": 36.04,
+        "max": 39.72
+       },
+       {
+        "day": "2026-10-26",
+        "min": 32.51,
+        "avg": 35.94,
+        "max": 38.84
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "step": 2,
+   "content": "Transmit is stable but receive collapsed \u2014 checking optical power and running OTDR to locate the fault.",
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "measure_power",
+     "args": {
+      "point": "A-TX"
+     },
+     "result": {
+      "point": "A-TX",
+      "wavelength_nm": 1550,
+      "power_dbm": 0.46,
+      "note": "transmitter output at site A patch cord"
+     }
+    },
+    {
+     "name": "measure_power",
+     "args": {
+      "point": "B-ODF"
+     },
+     "result": {
+      "point": "B-ODF",
+      "wavelength_nm": 1550,
+      "power_dbm": null,
+      "reading": "no light (below -50 dBm)"
+     }
+    },
+    {
+     "name": "measure_power",
+     "args": {
+      "point": "B-RX"
+     },
+     "result": {
+      "point": "B-RX",
+      "wavelength_nm": 1550,
+      "power_dbm": null,
+      "reading": "no light (below -50 dBm)"
+     }
+    },
+    {
+     "name": "otdr_event_table",
+     "args": {
+      "from_site": "A",
+      "time": "now",
+      "wavelength_nm": 1550
+     },
+     "result": {
+      "wavelength_nm": 1550,
+      "from_site": "A",
+      "test_time": "2026-10-27 08:00 UTC",
+      "pulse_width_ns": 1000,
+      "group_index": 1.4682,
+      "note": "Distances are fibre distances from the ODF at the shooting site. Launch and receive cords of 1.000 km were used; the receive cord ends in an open connector.",
+      "fibre_attenuation_db_per_km": 0.201,
+      "events": [
+       {
+        "event": 1,
+        "distance_km": -0.003,
+        "type": "reflective",
+        "loss_db": 0.28,
+        "reflectance_db": -56.0
+       },
+       {
+        "event": 2,
+        "distance_km": 3.176,
+        "type": "non-reflective",
+        "loss_db": -0.09,
+        "reflectance_db": null
+       },
+       {
+        "event": 3,
+        "distance_km": 8.33,
+        "type": "non-reflective",
+        "loss_db": 0.97,
+        "reflectance_db": null
+       },
+       {
+        "event": 4,
+        "distance_km": 14.057,
+        "type": "non-reflective",
+        "loss_db": 0.06,
+        "reflectance_db": null
+       },
+       {
+        "event": 5,
+        "distance_km": 18.203,
+        "type": "end",
+        "loss_db": null,
+        "reflectance_db": null
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "step": 3,
+   "content": "No light arriving at Site B \u2014 now running bidirectional OTDR to localize the break.",
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "otdr_event_table",
+     "args": {
+      "from_site": "B",
+      "time": "now",
+      "wavelength_nm": 1550
+     },
+     "result": {
+      "wavelength_nm": 1550,
+      "from_site": "B",
+      "test_time": "2026-10-27 08:00 UTC",
+      "pulse_width_ns": 1000,
+      "group_index": 1.4682,
+      "note": "Distances are fibre distances from the ODF at the shooting site. Launch and receive cords of 1.000 km were used; the receive cord ends in an open connector.",
+      "fibre_attenuation_db_per_km": 0.204,
+      "events": [
+       {
+        "event": 1,
+        "distance_km": -0.001,
+        "type": "reflective",
+        "loss_db": 0.18,
+        "reflectance_db": -49.8
+       },
+       {
+        "event": 2,
+        "distance_km": 11.331,
+        "type": "non-reflective",
+        "loss_db": 0.09,
+        "reflectance_db": null
+       },
+       {
+        "event": 3,
+        "distance_km": 13.159,
+        "type": "end",
+        "loss_db": null,
+        "reflectance_db": null
+       }
+      ]
+     }
+    },
+    {
+     "name": "otdr_event_table",
+     "args": {
+      "from_site": "A",
+      "time": "now",
+      "wavelength_nm": 1310
+     },
+     "result": {
+      "wavelength_nm": 1310,
+      "from_site": "A",
+      "test_time": "2026-10-27 08:00 UTC",
+      "pulse_width_ns": 1000,
+      "group_index": 1.4682,
+      "note": "Distances are fibre distances from the ODF at the shooting site. Launch and receive cords of 1.000 km were used; the receive cord ends in an open connector.",
+      "fibre_attenuation_db_per_km": 0.346,
+      "events": [
+       {
+        "event": 1,
+        "distance_km": -0.007,
+        "type": "reflective",
+        "loss_db": 0.3,
+        "reflectance_db": -55.1
+       },
+       {
+        "event": 2,
+        "distance_km": 3.168,
+        "type": "non-reflective",
+        "loss_db": -0.06,
+        "reflectance_db": null
+       },
+       {
+        "event": 3,
+        "distance_km": 8.335,
+        "type": "non-reflective",
+        "loss_db": 0.5,
+        "reflectance_db": null
+       },
+       {
+        "event": 4,
+        "distance_km": 14.069,
+        "type": "non-reflective",
+        "loss_db": 0.06,
+        "reflectance_db": null
+       },
+       {
+        "event": 5,
+        "distance_km": 18.188,
+        "type": "end",
+        "loss_db": null,
+        "reflectance_db": null
+       }
+      ]
+     }
+    },
+    {
+     "name": "otdr_event_table",
+     "args": {
+      "from_site": "B",
+      "time": "now",
+      "wavelength_nm": 1310
+     },
+     "result": {
+      "wavelength_nm": 1310,
+      "from_site": "B",
+      "test_time": "2026-10-27 08:00 UTC",
+      "pulse_width_ns": 1000,
+      "group_index": 1.4682,
+      "note": "Distances are fibre distances from the ODF at the shooting site. Launch and receive cords of 1.000 km were used; the receive cord ends in an open connector.",
+      "fibre_attenuation_db_per_km": 0.346,
+      "events": [
+       {
+        "event": 1,
+        "distance_km": -0.012,
+        "type": "reflective",
+        "loss_db": 0.19,
+        "reflectance_db": -50.6
+       },
+       {
+        "event": 2,
+        "distance_km": 11.343,
+        "type": "non-reflective",
+        "loss_db": 0.09,
+        "reflectance_db": null
+       },
+       {
+        "event": 3,
+        "distance_km": 13.157,
+        "type": "end",
+        "loss_db": null,
+        "reflectance_db": null
+       }
+      ]
+     }
+    },
+    {
+     "name": "get_pm",
+     "args": {
+      "last_hours": 72,
+      "metric": "rx_power_dbm",
+      "resolution": "hourly"
+     },
+     "result": {
+      "metric": "rx_power_dbm",
+      "resolution": "hourly, last 72 hours",
+      "rows": [
+       {
+        "time": "2026-10-24 08:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 09:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 10:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 11:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 12:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 13:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 14:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 15:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 16:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 17:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 18:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 19:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 20:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 21:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 22:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-24 23:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 00:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 01:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 02:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 03:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 04:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 05:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 06:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 07:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 08:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 09:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 10:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 11:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 12:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 13:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 14:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 15:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 16:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 17:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 18:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 19:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 20:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 21:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 22:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-25 23:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 00:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 01:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 02:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 03:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 04:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 05:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 06:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 07:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 08:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 09:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 10:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 11:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 12:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 13:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 14:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 15:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 16:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 17:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 18:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 19:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 20:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 21:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 22:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-26 23:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-27 00:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-27 01:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-27 02:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-27 03:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-27 04:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-27 05:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-27 06:00",
+        "value": -40.0
+       },
+       {
+        "time": "2026-10-27 07:00",
+        "value": -40.0
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "step": 4,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "otdr_trace",
+     "args": {
+      "end_km": 20.0,
+      "from_site": "A",
+      "points": 300,
+      "start_km": 12.0,
+      "time": "now",
+      "wavelength_nm": 1550
+     },
+     "result": {
+      "wavelength_nm": 1550,
+      "from_site": "A",
+      "pulse_width_ns": 1000,
+      "note": "Backscatter level (dB, one-way display). peak_db shows reflections inside each bin.",
+      "samples": [
+       {
+        "km": 12.02,
+        "mean_db": -3.59,
+        "peak_db": -3.59
+       },
+       {
+        "km": 12.04,
+        "mean_db": -3.6,
+        "peak_db": -3.6
+       },
+       {
+        "km": 12.06,
+        "mean_db": -3.6,
+        "peak_db": -3.6
+       },
+       {
+        "km": 12.09,
+        "mean_db": -3.6,
+        "peak_db": -3.6
+       },
+       {
+        "km": 12.12,
+        "mean_db": -3.61,
+        "peak_db": -3.61
+       },
+       {
+        "km": 12.14,
+        "mean_db": -3.61,
+        "peak_db": -3.61
+       },
+       {
+        "km": 12.16,
+        "mean_db": -3.62,
+        "peak_db": -3.62
+       },
+       {
+        "km": 12.19,
+        "mean_db": -3.62,
+        "peak_db": -3.62
+       },
+       {
+        "km": 12.22,
+        "mean_db": -3.63,
+        "peak_db": -3.63
+       },
+       {
+        "km": 12.24,
+        "mean_db": -3.63,
+        "peak_db": -3.63
+       },
+       {
+        "km": 12.27,
+        "mean_db": -3.64,
+        "peak_db": -3.64
+       },
+       {
+        "km": 12.3,
+        "mean_db": -3.65,
+        "peak_db": -3.65
+       },
+       {
+        "km": 12.32,
+        "mean_db": -3.65,
+        "peak_db": -3.65
+       },
+       {
+        "km": 12.34,
+        "mean_db": -3.67,
+        "peak_db": -3.67
+       },
+       {
+        "km": 12.37,
+        "mean_db": -3.66,
+        "peak_db": -3.66
+       },
+       {
+        "km": 12.4,
+        "mean_db": -3.66,
+        "peak_db": -3.66
+       },
+       {
+        "km": 12.42,
+        "mean_db": -3.67,
+        "peak_db": -3.67
+       },
+       {
+        "km": 12.45,
+        "mean_db": -3.68,
+        "peak_db": -3.68
+       },
+       {
+        "km": 12.48,
+        "mean_db": -3.69,
+        "peak_db": -3.69
+       },
+       {
+        "km": 12.5,
+        "mean_db": -3.68,
+        "peak_db": -3.68
+       },
+       {
+        "km": 12.52,
+        "mean_db": -3.69,
+        "peak_db": -3.69
+       },
+       {
+        "km": 12.55,
+        "mean_db": -3.7,
+        "peak_db": -3.69
+       },
+       {
+        "km": 12.58,
+        "mean_db": -3.7,
+        "peak_db": -3.7
+       },
+       {
+        "km": 12.6,
+        "mean_db": -3.71,
+        "peak_db": -3.71
+       },
+       {
+        "km": 12.63,
+        "mean_db": -3.71,
+        "peak_db": -3.71
+       },
+       {
+        "km": 12.66,
+        "mean_db": -3.71,
+        "peak_db": -3.71
+       },
+       {
+        "km": 12.68,
+        "mean_db": -3.72,
+        "peak_db": -3.72
+       },
+       {
+        "km": 12.7,
+        "mean_db": -3.73,
+        "peak_db": -3.73
+       },
+       {
+        "km": 12.73,
+        "mean_db": -3.73,
+        "peak_db": -3.73
+       },
+       {
+        "km": 12.76,
+        "mean_db": -3.74,
+        "peak_db": -3.74
+       },
+       {
+        "km": 12.78,
+        "mean_db": -3.74,
+        "peak_db": -3.74
+       },
+       {
+        "km": 12.81,
+        "mean_db": -3.75,
+        "peak_db": -3.75
+       },
+       {
+        "km": 12.84,
+        "mean_db": -3.75,
+        "peak_db": -3.75
+       },
+       {
+        "km": 12.86,
+        "mean_db": -3.76,
+        "peak_db": -3.76
+       },
+       {
+        "km": 12.88,
+        "mean_db": -3.76,
+        "peak_db": -3.76
+       },
+       {
+        "km": 12.91,
+        "mean_db": -3.77,
+        "peak_db": -3.76
+       },
+       {
+        "km": 12.94,
+        "mean_db": -3.78,
+        "peak_db": -3.78
+       },
+       {
+        "km": 12.96,
+        "mean_db": -3.78,
+        "peak_db": -3.78
+       },
+       {
+        "km": 12.99,
+        "mean_db": -3.79,
+        "peak_db": -3.79
+       },
+       {
+        "km": 13.02,
+        "mean_db": -3.78,
+        "peak_db": -3.78
+       },
+       {
+        "km": 13.04,
+        "mean_db": -3.8,
+        "peak_db": -3.8
+       },
+       {
+        "km": 13.06,
+        "mean_db": -3.8,
+        "peak_db": -3.8
+       },
+       {
+        "km": 13.09,
+        "mean_db": -3.8,
+        "peak_db": -3.8
+       },
+       {
+        "km": 13.12,
+        "mean_db": -3.81,
+        "peak_db": -3.81
+       },
+       {
+        "km": 13.14,
+        "mean_db": -3.81,
+        "peak_db": -3.81
+       },
+       {
+        "km": 13.17,
+        "mean_db": -3.82,
+        "peak_db": -3.82
+       },
+       {
+        "km": 13.2,
+        "mean_db": -3.82,
+        "peak_db": -3.82
+       },
+       {
+        "km": 13.22,
+        "mean_db": -3.83,
+        "peak_db": -3.83
+       },
+       {
+        "km": 13.24,
+        "mean_db": -3.83,
+        "peak_db": -3.83
+       },
+       {
+        "km": 13.27,
+        "mean_db": -3.85,
+        "peak_db": -3.84
+       },
+       {
+        "km": 13.3,
+        "mean_db": -3.84,
+        "peak_db": -3.84
+       },
+       {
+        "km": 13.32,
+        "mean_db": -3.84,
+        "peak_db": -3.84
+       },
+       {
+        "km": 13.35,
+        "mean_db": -3.85,
+        "peak_db": -3.85
+       },
+       {
+        "km": 13.38,
+        "mean_db": -3.87,
+        "peak_db": -3.87
+       },
+       {
+        "km": 13.4,
+        "mean_db": -3.86,
+        "peak_db": -3.86
+       },
+       {
+        "km": 13.42,
+        "mean_db": -3.87,
+        "peak_db": -3.87
+       },
+       {
+        "km": 13.45,
+        "mean_db": -3.88,
+        "peak_db": -3.88
+       },
+       {
+        "km": 13.48,
+        "mean_db": -3.88,
+        "peak_db": -3.88
+       },
+       {
+        "km": 13.5,
+        "mean_db": -3.88,
+        "peak_db": -3.88
+       },
+       {
+        "km": 13.53,
+        "mean_db": -3.89,
+        "peak_db": -3.89
+       },
+       {
+        "km": 13.56,
+        "mean_db": -3.91,
+        "peak_db": -3.91
+       },
+       {
+        "km": 13.58,
+        "mean_db": -3.91,
+        "peak_db": -3.91
+       },
+       {
+        "km": 13.6,
+        "mean_db": -3.91,
+        "peak_db": -3.91
+       },
+       {
+        "km": 13.63,
+        "mean_db": -3.92,
+        "peak_db": -3.92
+       },
+       {
+        "km": 13.66,
+        "mean_db": -3.92,
+        "peak_db": -3.92
+       },
+       {
+        "km": 13.68,
+        "mean_db": -3.93,
+        "peak_db": -3.93
+       },
+       {
+        "km": 13.7,
+        "mean_db": -3.93,
+        "peak_db": -3.93
+       },
+       {
+        "km": 13.73,
+        "mean_db": -3.93,
+        "peak_db": -3.92
+       },
+       {
+        "km": 13.76,
+        "mean_db": -3.94,
+        "peak_db": -3.94
+       },
+       {
+        "km": 13.78,
+        "mean_db": -3.94,
+        "peak_db": -3.94
+       },
+       {
+        "km": 13.81,
+        "mean_db": -3.95,
+        "peak_db": -3.95
+       },
+       {
+        "km": 13.84,
+        "mean_db": -3.96,
+        "peak_db": -3.96
+       },
+       {
+        "km": 13.86,
+        "mean_db": -3.96,
+        "peak_db": -3.96
+       },
+       {
+        "km": 13.88,
+        "mean_db": -3.96,
+        "peak_db": -3.96
+       },
+       {
+        "km": 13.91,
+        "mean_db": -3.97,
+        "peak_db": -3.97
+       },
+       {
+        "km": 13.94,
+        "mean_db": -3.97,
+        "peak_db": -3.97
+       },
+       {
+        "km": 13.96,
+        "mean_db": -3.98,
+        "peak_db": -3.98
+       },
+       {
+        "km": 13.99,
+        "mean_db": -3.99,
+        "peak_db": -3.99
+       },
+       {
+        "km": 14.02,
+        "mean_db": -3.99,
+        "peak_db": -3.99
+       },
+       {
+        "km": 14.04,
+        "mean_db": -3.99,
+        "peak_db": -3.99
+       },
+       {
+        "km": 14.06,
+        "mean_db": -4.01,
+        "peak_db": -4.01
+       },
+       {
+        "km": 14.09,
+        "mean_db": -4.02,
+        "peak_db": -4.01
+       },
+       {
+        "km": 14.12,
+        "mean_db": -4.03,
+        "peak_db": -4.03
+       },
+       {
+        "km": 14.14,
+        "mean_db": -4.05,
+        "peak_db": -4.05
+       },
+       {
+        "km": 14.17,
+        "mean_db": -4.06,
+        "peak_db": -4.05
+       },
+       {
+        "km": 14.2,
+        "mean_db": -4.07,
+        "peak_db": -4.07
+       },
+       {
+        "km": 14.22,
+        "mean_db": -4.08,
+        "peak_db": -4.08
+       },
+       {
+        "km": 14.24,
+        "mean_db": -4.07,
+        "peak_db": -4.07
+       },
+       {
+        "km": 14.27,
+        "mean_db": -4.08,
+        "peak_db": -4.07
+       },
+       {
+        "km": 14.3,
+        "mean_db": -4.09,
+        "peak_db": -4.09
+       },
+       {
+        "km": 14.32,
+        "mean_db": -4.09,
+        "peak_db": -4.09
+       },
+       {
+        "km": 14.35,
+        "mean_db": -4.1,
+        "peak_db": -4.09
+       },
+       {
+        "km": 14.38,
+        "mean_db": -4.09,
+        "peak_db": -4.09
+       },
+       {
+        "km": 14.4,
+        "mean_db": -4.11,
+        "peak_db": -4.11
+       },
+       {
+        "km": 14.42,
+        "mean_db": -4.1,
+        "peak_db": -4.1
+       },
+       {
+        "km": 14.45,
+        "mean_db": -4.12,
+        "peak_db": -4.12
+       },
+       {
+        "km": 14.48,
+        "mean_db": -4.13,
+        "peak_db": -4.13
+       },
+       {
+        "km": 14.5,
+        "mean_db": -4.13,
+        "peak_db": -4.13
+       },
+       {
+        "km": 14.53,
+        "mean_db": -4.14,
+        "peak_db": -4.14
+       },
+       {
+        "km": 14.56,
+        "mean_db": -4.13,
+        "peak_db": -4.13
+       },
+       {
+        "km": 14.58,
+        "mean_db": -4.15,
+        "peak_db": -4.15
+       },
+       {
+        "km": 14.6,
+        "mean_db": -4.15,
+        "peak_db": -4.15
+       },
+       {
+        "km": 14.63,
+        "mean_db": -4.15,
+        "peak_db": -4.14
+       },
+       {
+        "km": 14.66,
+        "mean_db": -4.17,
+        "peak_db": -4.17
+       },
+       {
+        "km": 14.68,
+        "mean_db": -4.17,
+        "peak_db": -4.17
+       },
+       {
+        "km": 14.71,
+        "mean_db": -4.17,
+        "peak_db": -4.17
+       },
+       {
+        "km": 14.74,
+        "mean_db": -4.17,
+        "peak_db": -4.17
+       },
+       {
+        "km": 14.76,
+        "mean_db": -4.19,
+        "peak_db": -4.19
+       },
+       {
+        "km": 14.78,
+        "mean_db": -4.19,
+        "peak_db": -4.19
+       },
+       {
+        "km": 14.81,
+        "mean_db": -4.19,
+        "peak_db": -4.19
+       },
+       {
+        "km": 14.84,
+        "mean_db": -4.21,
+        "peak_db": -4.21
+       },
+       {
+        "km": 14.86,
+        "mean_db": -4.2,
+        "peak_db": -4.2
+       },
+       {
+        "km": 14.89,
+        "mean_db": -4.21,
+        "peak_db": -4.21
+       },
+       {
+        "km": 14.92,
+        "mean_db": -4.21,
+        "peak_db": -4.21
+       },
+       {
+        "km": 14.94,
+        "mean_db": -4.22,
+        "peak_db": -4.22
+       },
+       {
+        "km": 14.96,
+        "mean_db": -4.22,
+        "peak_db": -4.22
+       },
+       {
+        "km": 14.99,
+        "mean_db": -4.23,
+        "peak_db": -4.23
+       },
+       {
+        "km": 15.02,
+        "mean_db": -4.23,
+        "peak_db": -4.23
+       },
+       {
+        "km": 15.04,
+        "mean_db": -4.24,
+        "peak_db": -4.24
+       },
+       {
+        "km": 15.07,
+        "mean_db": -4.24,
+        "peak_db": -4.24
+       },
+       {
+        "km": 15.1,
+        "mean_db": -4.26,
+        "peak_db": -4.26
+       },
+       {
+        "km": 15.12,
+        "mean_db": -4.26,
+        "peak_db": -4.26
+       },
+       {
+        "km": 15.14,
+        "mean_db": -4.26,
+        "peak_db": -4.26
+       },
+       {
+        "km": 15.17,
+        "mean_db": -4.26,
+        "peak_db": -4.26
+       },
+       {
+        "km": 15.2,
+        "mean_db": -4.26,
+        "peak_db": -4.26
+       },
+       {
+        "km": 15.22,
+        "mean_db": -4.28,
+        "peak_db": -4.28
+       },
+       {
+        "km": 15.24,
+        "mean_db": -4.27,
+        "peak_db": -4.27
+       },
+       {
+        "km": 15.27,
+        "mean_db": -4.29,
+        "peak_db": -4.28
+       },
+       {
+        "km": 15.3,
+        "mean_db": -4.29,
+        "peak_db": -4.29
+       },
+       {
+        "km": 15.32,
+        "mean_db": -4.3,
+        "peak_db": -4.3
+       },
+       {
+        "km": 15.35,
+        "mean_db": -4.3,
+        "peak_db": -4.29
+       },
+       {
+        "km": 15.38,
+        "mean_db": -4.31,
+        "peak_db": -4.31
+       },
+       {
+        "km": 15.4,
+        "mean_db": -4.31,
+        "peak_db": -4.31
+       },
+       {
+        "km": 15.42,
+        "mean_db": -4.32,
+        "peak_db": -4.32
+       },
+       {
+        "km": 15.45,
+        "mean_db": -4.31,
+        "peak_db": -4.31
+       },
+       {
+        "km": 15.48,
+        "mean_db": -4.33,
+        "peak_db": -4.33
+       },
+       {
+        "km": 15.5,
+        "mean_db": -4.33,
+        "peak_db": -4.33
+       },
+       {
+        "km": 15.53,
+        "mean_db": -4.34,
+        "peak_db": -4.33
+       },
+       {
+        "km": 15.56,
+        "mean_db": -4.33,
+        "peak_db": -4.33
+       },
+       {
+        "km": 15.58,
+        "mean_db": -4.35,
+        "peak_db": -4.35
+       },
+       {
+        "km": 15.6,
+        "mean_db": -4.34,
+        "peak_db": -4.34
+       },
+       {
+        "km": 15.63,
+        "mean_db": -4.36,
+        "peak_db": -4.35
+       },
+       {
+        "km": 15.66,
+        "mean_db": -4.35,
+        "peak_db": -4.35
+       },
+       {
+        "km": 15.68,
+        "mean_db": -4.36,
+        "peak_db": -4.36
+       },
+       {
+        "km": 15.71,
+        "mean_db": -4.38,
+        "peak_db": -4.38
+       },
+       {
+        "km": 15.74,
+        "mean_db": -4.38,
+        "peak_db": -4.38
+       },
+       {
+        "km": 15.76,
+        "mean_db": -4.4,
+        "peak_db": -4.4
+       },
+       {
+        "km": 15.78,
+        "mean_db": -4.39,
+        "peak_db": -4.39
+       },
+       {
+        "km": 15.81,
+        "mean_db": -4.39,
+        "peak_db": -4.39
+       },
+       {
+        "km": 15.84,
+        "mean_db": -4.4,
+        "peak_db": -4.4
+       },
+       {
+        "km": 15.86,
+        "mean_db": -4.4,
+        "peak_db": -4.4
+       },
+       {
+        "km": 15.89,
+        "mean_db": -4.4,
+        "peak_db": -4.4
+       },
+       {
+        "km": 15.92,
+        "mean_db": -4.41,
+        "peak_db": -4.41
+       },
+       {
+        "km": 15.94,
+        "mean_db": -4.42,
+        "peak_db": -4.42
+       },
+       {
+        "km": 15.96,
+        "mean_db": -4.42,
+        "peak_db": -4.42
+       },
+       {
+        "km": 15.99,
+        "mean_db": -4.43,
+        "peak_db": -4.42
+       },
+       {
+        "km": 16.02,
+        "mean_db": -4.43,
+        "peak_db": -4.43
+       },
+       {
+        "km": 16.04,
+        "mean_db": -4.43,
+        "peak_db": -4.43
+       },
+       {
+        "km": 16.07,
+        "mean_db": -4.44,
+        "peak_db": -4.44
+       },
+       {
+        "km": 16.1,
+        "mean_db": -4.44,
+        "peak_db": -4.44
+       },
+       {
+        "km": 16.12,
+        "mean_db": -4.44,
+        "peak_db": -4.44
+       },
+       {
+        "km": 16.14,
+        "mean_db": -4.45,
+        "peak_db": -4.45
+       },
+       {
+        "km": 16.17,
+        "mean_db": -4.46,
+        "peak_db": -4.46
+       },
+       {
+        "km": 16.2,
+        "mean_db": -4.46,
+        "peak_db": -4.46
+       },
+       {
+        "km": 16.22,
+        "mean_db": -4.47,
+        "peak_db": -4.47
+       },
+       {
+        "km": 16.25,
+        "mean_db": -4.48,
+        "peak_db": -4.48
+       },
+       {
+        "km": 16.28,
+        "mean_db": -4.48,
+        "peak_db": -4.48
+       },
+       {
+        "km": 16.3,
+        "mean_db": -4.49,
+        "peak_db": -4.49
+       },
+       {
+        "km": 16.32,
+        "mean_db": -4.49,
+        "peak_db": -4.49
+       },
+       {
+        "km": 16.35,
+        "mean_db": -4.5,
+        "peak_db": -4.5
+       },
+       {
+        "km": 16.38,
+        "mean_db": -4.51,
+        "peak_db": -4.51
+       },
+       {
+        "km": 16.4,
+        "mean_db": -4.51,
+        "peak_db": -4.51
+       },
+       {
+        "km": 16.43,
+        "mean_db": -4.51,
+        "peak_db": -4.51
+       },
+       {
+        "km": 16.46,
+        "mean_db": -4.52,
+        "peak_db": -4.52
+       },
+       {
+        "km": 16.48,
+        "mean_db": -4.52,
+        "peak_db": -4.52
+       },
+       {
+        "km": 16.5,
+        "mean_db": -4.53,
+        "peak_db": -4.53
+       },
+       {
+        "km": 16.53,
+        "mean_db": -4.54,
+        "peak_db": -4.53
+       },
+       {
+        "km": 16.56,
+        "mean_db": -4.54,
+        "peak_db": -4.54
+       },
+       {
+        "km": 16.58,
+        "mean_db": -4.55,
+        "peak_db": -4.55
+       },
+       {
+        "km": 16.61,
+        "mean_db": -4.55,
+        "peak_db": -4.55
+       },
+       {
+        "km": 16.64,
+        "mean_db": -4.55,
+        "peak_db": -4.55
+       },
+       {
+        "km": 16.66,
+        "mean_db": -4.56,
+        "peak_db": -4.56
+       },
+       {
+        "km": 16.68,
+        "mean_db": -4.56,
+        "peak_db": -4.56
+       },
+       {
+        "km": 16.71,
+        "mean_db": -4.57,
+        "peak_db": -4.57
+       },
+       {
+        "km": 16.74,
+        "mean_db": -4.58,
+        "peak_db": -4.58
+       },
+       {
+        "km": 16.76,
+        "mean_db": -4.57,
+        "peak_db": -4.57
+       },
+       {
+        "km": 16.78,
+        "mean_db": -4.59,
+        "peak_db": -4.59
+       },
+       {
+        "km": 16.81,
+        "mean_db": -4.59,
+        "peak_db": -4.59
+       },
+       {
+        "km": 16.84,
+        "mean_db": -4.6,
+        "peak_db": -4.6
+       },
+       {
+        "km": 16.86,
+        "mean_db": -4.61,
+        "peak_db": -4.61
+       },
+       {
+        "km": 16.89,
+        "mean_db": -4.61,
+        "peak_db": -4.61
+       },
+       {
+        "km": 16.92,
+        "mean_db": -4.62,
+        "peak_db": -4.62
+       },
+       {
+        "km": 16.94,
+        "mean_db": -4.63,
+        "peak_db": -4.63
+       },
+       {
+        "km": 16.96,
+        "mean_db": -4.62,
+        "peak_db": -4.62
+       },
+       {
+        "km": 16.99,
+        "mean_db": -4.63,
+        "peak_db": -4.63
+       },
+       {
+        "km": 17.02,
+        "mean_db": -4.64,
+        "peak_db": -4.64
+       },
+       {
+        "km": 17.04,
+        "mean_db": -4.64,
+        "peak_db": -4.64
+       },
+       {
+        "km": 17.07,
+        "mean_db": -4.64,
+        "peak_db": -4.64
+       },
+       {
+        "km": 17.1,
+        "mean_db": -4.65,
+        "peak_db": -4.65
+       },
+       {
+        "km": 17.12,
+        "mean_db": -4.65,
+        "peak_db": -4.65
+       },
+       {
+        "km": 17.14,
+        "mean_db": -4.66,
+        "peak_db": -4.66
+       },
+       {
+        "km": 17.17,
+        "mean_db": -4.67,
+        "peak_db": -4.66
+       },
+       {
+        "km": 17.2,
+        "mean_db": -4.68,
+        "peak_db": -4.68
+       },
+       {
+        "km": 17.22,
+        "mean_db": -4.67,
+        "peak_db": -4.67
+       },
+       {
+        "km": 17.25,
+        "mean_db": -4.68,
+        "peak_db": -4.68
+       },
+       {
+        "km": 17.28,
+        "mean_db": -4.69,
+        "peak_db": -4.69
+       },
+       {
+        "km": 17.3,
+        "mean_db": -4.69,
+        "peak_db": -4.69
+       },
+       {
+        "km": 17.32,
+        "mean_db": -4.69,
+        "peak_db": -4.69
+       },
+       {
+        "km": 17.35,
+        "mean_db": -4.7,
+        "peak_db": -4.7
+       },
+       {
+        "km": 17.38,
+        "mean_db": -4.7,
+        "peak_db": -4.7
+       },
+       {
+        "km": 17.4,
+        "mean_db": -4.7,
+        "peak_db": -4.7
+       },
+       {
+        "km": 17.43,
+        "mean_db": -4.72,
+        "peak_db": -4.72
+       },
+       {
+        "km": 17.46,
+        "mean_db": -4.71,
+        "peak_db": -4.71
+       },
+       {
+        "km": 17.48,
+        "mean_db": -4.73,
+        "peak_db": -4.73
+       },
+       {
+        "km": 17.5,
+        "mean_db": -4.73,
+        "peak_db": -4.73
+       },
+       {
+        "km": 17.53,
+        "mean_db": -4.73,
+        "peak_db": -4.73
+       },
+       {
+        "km": 17.56,
+        "mean_db": -4.75,
+        "peak_db": -4.75
+       },
+       {
+        "km": 17.58,
+        "mean_db": -4.75,
+        "peak_db": -4.75
+       },
+       {
+        "km": 17.61,
+        "mean_db": -4.75,
+        "peak_db": -4.75
+       },
+       {
+        "km": 17.64,
+        "mean_db": -4.76,
+        "peak_db": -4.76
+       },
+       {
+        "km": 17.66,
+        "mean_db": -4.76,
+        "peak_db": -4.76
+       },
+       {
+        "km": 17.68,
+        "mean_db": -4.77,
+        "peak_db": -4.77
+       },
+       {
+        "km": 17.71,
+        "mean_db": -4.77,
+        "peak_db": -4.77
+       },
+       {
+        "km": 17.74,
+        "mean_db": -4.78,
+        "peak_db": -4.78
+       },
+       {
+        "km": 17.76,
+        "mean_db": -4.78,
+        "peak_db": -4.78
+       },
+       {
+        "km": 17.79,
+        "mean_db": -4.79,
+        "peak_db": -4.78
+       },
+       {
+        "km": 17.82,
+        "mean_db": -4.8,
+        "peak_db": -4.8
+       },
+       {
+        "km": 17.84,
+        "mean_db": -4.8,
+        "peak_db": -4.8
+       },
+       {
+        "km": 17.86,
+        "mean_db": -4.81,
+        "peak_db": -4.81
+       },
+       {
+        "km": 17.89,
+        "mean_db": -4.81,
+        "peak_db": -4.81
+       },
+       {
+        "km": 17.92,
+        "mean_db": -4.82,
+        "peak_db": -4.82
+       },
+       {
+        "km": 17.94,
+        "mean_db": -4.82,
+        "peak_db": -4.82
+       },
+       {
+        "km": 17.97,
+        "mean_db": -4.83,
+        "peak_db": -4.83
+       },
+       {
+        "km": 18.0,
+        "mean_db": -4.83,
+        "peak_db": -4.83
+       },
+       {
+        "km": 18.02,
+        "mean_db": -4.83,
+        "peak_db": -4.83
+       },
+       {
+        "km": 18.04,
+        "mean_db": -4.82,
+        "peak_db": -4.82
+       },
+       {
+        "km": 18.07,
+        "mean_db": -4.84,
+        "peak_db": -4.84
+       },
+       {
+        "km": 18.1,
+        "mean_db": -4.85,
+        "peak_db": -4.85
+       },
+       {
+        "km": 18.12,
+        "mean_db": -4.85,
+        "peak_db": -4.85
+       },
+       {
+        "km": 18.15,
+        "mean_db": -4.85,
+        "peak_db": -4.85
+       },
+       {
+        "km": 18.18,
+        "mean_db": -4.86,
+        "peak_db": -4.86
+       },
+       {
+        "km": 18.2,
+        "mean_db": -4.87,
+        "peak_db": -4.87
+       },
+       {
+        "km": 18.22,
+        "mean_db": -37.9,
+        "peak_db": -37.9
+       },
+       {
+        "km": 18.25,
+        "mean_db": -37.62,
+        "peak_db": -36.16
+       },
+       {
+        "km": 18.28,
+        "mean_db": -38.05,
+        "peak_db": -38.05
+       },
+       {
+        "km": 18.3,
+        "mean_db": -37.98,
+        "peak_db": -37.98
+       },
+       {
+        "km": 18.32,
+        "mean_db": -36.58,
+        "peak_db": -36.58
+       },
+       {
+        "km": 18.35,
+        "mean_db": -39.9,
+        "peak_db": -36.82
+       },
+       {
+        "km": 18.38,
+        "mean_db": -39.79,
+        "peak_db": -39.79
+       },
+       {
+        "km": 18.4,
+        "mean_db": -36.93,
+        "peak_db": -36.93
+       },
+       {
+        "km": 18.43,
+        "mean_db": -39.06,
+        "peak_db": -37.84
+       },
+       {
+        "km": 18.46,
+        "mean_db": -39.05,
+        "peak_db": -39.05
+       },
+       {
+        "km": 18.48,
+        "mean_db": -37.15,
+        "peak_db": -37.15
+       },
+       {
+        "km": 18.5,
+        "mean_db": -37.13,
+        "peak_db": -37.13
+       },
+       {
+        "km": 18.53,
+        "mean_db": -38.37,
+        "peak_db": -38.2
+       },
+       {
+        "km": 18.56,
+        "mean_db": -37.94,
+        "peak_db": -37.94
+       },
+       {
+        "km": 18.58,
+        "mean_db": -41.73,
+        "peak_db": -41.73
+       },
+       {
+        "km": 18.61,
+        "mean_db": -38.0,
+        "peak_db": -36.92
+       },
+       {
+        "km": 18.64,
+        "mean_db": -35.76,
+        "peak_db": -35.76
+       },
+       {
+        "km": 18.66,
+        "mean_db": -36.29,
+        "peak_db": -36.29
+       },
+       {
+        "km": 18.68,
+        "mean_db": -37.52,
+        "peak_db": -37.52
+       },
+       {
+        "km": 18.71,
+        "mean_db": -38.52,
+        "peak_db": -38.09
+       },
+       {
+        "km": 18.74,
+        "mean_db": -38.95,
+        "peak_db": -38.95
+       },
+       {
+        "km": 18.76,
+        "mean_db": -37.07,
+        "peak_db": -37.07
+       },
+       {
+        "km": 18.79,
+        "mean_db": -39.01,
+        "peak_db": -38.73
+       },
+       {
+        "km": 18.82,
+        "mean_db": -37.16,
+        "peak_db": -37.16
+       },
+       {
+        "km": 18.84,
+        "mean_db": -38.81,
+        "peak_db": -38.81
+       },
+       {
+        "km": 18.86,
+        "mean_db": -40.22,
+        "peak_db": -40.22
+       },
+       {
+        "km": 18.89,
+        "mean_db": -38.17,
+        "peak_db": -37.98
+       },
+       {
+        "km": 18.92,
+        "mean_db": -37.54,
+        "peak_db": -37.54
+       },
+       {
+        "km": 18.94,
+        "mean_db": -40.51,
+        "peak_db": -40.51
+       },
+       {
+        "km": 18.97,
+        "mean_db": -39.26,
+        "peak_db": -37.84
+       },
+       {
+        "km": 19.0,
+        "mean_db": -37.05,
+        "peak_db": -37.05
+       },
+       {
+        "km": 19.02,
+        "mean_db": -37.77,
+        "peak_db": -37.77
+       },
+       {
+        "km": 19.04,
+        "mean_db": -36.63,
+        "peak_db": -36.63
+       },
+       {
+        "km": 19.07,
+        "mean_db": -39.08,
+        "peak_db": -37.26
+       },
+       {
+        "km": 19.1,
+        "mean_db": -38.59,
+        "peak_db": -38.59
+       },
+       {
+        "km": 19.12,
+        "mean_db": -38.23,
+        "peak_db": -38.23
+       },
+       {
+        "km": 19.15,
+        "mean_db": -36.99,
+        "peak_db": -36.68
+       },
+       {
+        "km": 19.18,
+        "mean_db": -36.72,
+        "peak_db": -36.72
+       },
+       {
+        "km": 19.2,
+        "mean_db": -38.7,
+        "peak_db": -38.7
+       },
+       {
+        "km": 19.22,
+        "mean_db": -37.1,
+        "peak_db": -37.1
+       },
+       {
+        "km": 19.25,
+        "mean_db": -37.82,
+        "peak_db": -37.75
+       },
+       {
+        "km": 19.28,
+        "mean_db": -37.59,
+        "peak_db": -37.59
+       },
+       {
+        "km": 19.3,
+        "mean_db": -41.31,
+        "peak_db": -41.31
+       },
+       {
+        "km": 19.33,
+        "mean_db": -37.99,
+        "peak_db": -37.69
+       },
+       {
+        "km": 19.36,
+        "mean_db": -38.31,
+        "peak_db": -38.31
+       },
+       {
+        "km": 19.38,
+        "mean_db": -38.09,
+        "peak_db": -38.09
+       },
+       {
+        "km": 19.4,
+        "mean_db": -39.0,
+        "peak_db": -39.0
+       },
+       {
+        "km": 19.43,
+        "mean_db": -36.37,
+        "peak_db": -35.53
+       },
+       {
+        "km": 19.46,
+        "mean_db": -38.3,
+        "peak_db": -38.3
+       },
+       {
+        "km": 19.48,
+        "mean_db": -37.2,
+        "peak_db": -37.2
+       },
+       {
+        "km": 19.51,
+        "mean_db": -38.49,
+        "peak_db": -37.3
+       },
+       {
+        "km": 19.54,
+        "mean_db": -38.91,
+        "peak_db": -38.91
+       },
+       {
+        "km": 19.56,
+        "mean_db": -38.3,
+        "peak_db": -38.3
+       },
+       {
+        "km": 19.58,
+        "mean_db": -37.15,
+        "peak_db": -37.15
+       },
+       {
+        "km": 19.61,
+        "mean_db": -37.17,
+        "peak_db": -37.06
+       },
+       {
+        "km": 19.64,
+        "mean_db": -38.06,
+        "peak_db": -38.06
+       },
+       {
+        "km": 19.66,
+        "mean_db": -36.67,
+        "peak_db": -36.67
+       },
+       {
+        "km": 19.69,
+        "mean_db": -37.96,
+        "peak_db": -37.73
+       }
+      ]
+     }
+    },
+    {
+     "name": "otdr_trace",
+     "args": {
+      "end_km": 15.0,
+      "from_site": "B",
+      "points": 300,
+      "start_km": 9.0,
+      "time": "now",
+      "wavelength_nm": 1550
+     },
+     "result": {
+      "wavelength_nm": 1550,
+      "from_site": "B",
+      "pulse_width_ns": 1000,
+      "note": "Backscatter level (dB, one-way display). peak_db shows reflections inside each bin.",
+      "samples": [
+       {
+        "km": 9.02,
+        "mean_db": -2.01,
+        "peak_db": -2.01
+       },
+       {
+        "km": 9.04,
+        "mean_db": -2.01,
+        "peak_db": -2.01
+       },
+       {
+        "km": 9.06,
+        "mean_db": -2.02,
+        "peak_db": -2.02
+       },
+       {
+        "km": 9.08,
+        "mean_db": -2.02,
+        "peak_db": -2.02
+       },
+       {
+        "km": 9.1,
+        "mean_db": -2.02,
+        "peak_db": -2.02
+       },
+       {
+        "km": 9.12,
+        "mean_db": -2.03,
+        "peak_db": -2.03
+       },
+       {
+        "km": 9.14,
+        "mean_db": -2.03,
+        "peak_db": -2.03
+       },
+       {
+        "km": 9.16,
+        "mean_db": -2.04,
+        "peak_db": -2.04
+       },
+       {
+        "km": 9.18,
+        "mean_db": -2.04,
+        "peak_db": -2.04
+       },
+       {
+        "km": 9.2,
+        "mean_db": -2.05,
+        "peak_db": -2.05
+       },
+       {
+        "km": 9.22,
+        "mean_db": -2.05,
+        "peak_db": -2.05
+       },
+       {
+        "km": 9.24,
+        "mean_db": -2.06,
+        "peak_db": -2.06
+       },
+       {
+        "km": 9.26,
+        "mean_db": -2.06,
+        "peak_db": -2.06
+       },
+       {
+        "km": 9.28,
+        "mean_db": -2.07,
+        "peak_db": -2.07
+       },
+       {
+        "km": 9.3,
+        "mean_db": -2.07,
+        "peak_db": -2.07
+       },
+       {
+        "km": 9.32,
+        "mean_db": -2.07,
+        "peak_db": -2.07
+       },
+       {
+        "km": 9.34,
+        "mean_db": -2.08,
+        "peak_db": -2.08
+       },
+       {
+        "km": 9.36,
+        "mean_db": -2.08,
+        "peak_db": -2.08
+       },
+       {
+        "km": 9.38,
+        "mean_db": -2.08,
+        "peak_db": -2.08
+       },
+       {
+        "km": 9.4,
+        "mean_db": -2.09,
+        "peak_db": -2.09
+       },
+       {
+        "km": 9.42,
+        "mean_db": -2.09,
+        "peak_db": -2.09
+       },
+       {
+        "km": 9.44,
+        "mean_db": -2.1,
+        "peak_db": -2.1
+       },
+       {
+        "km": 9.46,
+        "mean_db": -2.09,
+        "peak_db": -2.09
+       },
+       {
+        "km": 9.48,
+        "mean_db": -2.1,
+        "peak_db": -2.1
+       },
+       {
+        "km": 9.5,
+        "mean_db": -2.11,
+        "peak_db": -2.11
+       },
+       {
+        "km": 9.52,
+        "mean_db": -2.11,
+        "peak_db": -2.11
+       },
+       {
+        "km": 9.54,
+        "mean_db": -2.11,
+        "peak_db": -2.11
+       },
+       {
+        "km": 9.56,
+        "mean_db": -2.12,
+        "peak_db": -2.12
+       },
+       {
+        "km": 9.58,
+        "mean_db": -2.13,
+        "peak_db": -2.13
+       },
+       {
+        "km": 9.6,
+        "mean_db": -2.13,
+        "peak_db": -2.13
+       },
+       {
+        "km": 9.62,
+        "mean_db": -2.14,
+        "peak_db": -2.14
+       },
+       {
+        "km": 9.64,
+        "mean_db": -2.14,
+        "peak_db": -2.14
+       },
+       {
+        "km": 9.66,
+        "mean_db": -2.14,
+        "peak_db": -2.14
+       },
+       {
+        "km": 9.68,
+        "mean_db": -2.13,
+        "peak_db": -2.13
+       },
+       {
+        "km": 9.7,
+        "mean_db": -2.15,
+        "peak_db": -2.15
+       },
+       {
+        "km": 9.72,
+        "mean_db": -2.16,
+        "peak_db": -2.16
+       },
+       {
+        "km": 9.74,
+        "mean_db": -2.16,
+        "peak_db": -2.16
+       },
+       {
+        "km": 9.76,
+        "mean_db": -2.16,
+        "peak_db": -2.16
+       },
+       {
+        "km": 9.78,
+        "mean_db": -2.16,
+        "peak_db": -2.16
+       },
+       {
+        "km": 9.8,
+        "mean_db": -2.17,
+        "peak_db": -2.17
+       },
+       {
+        "km": 9.82,
+        "mean_db": -2.17,
+        "peak_db": -2.17
+       },
+       {
+        "km": 9.84,
+        "mean_db": -2.17,
+        "peak_db": -2.17
+       },
+       {
+        "km": 9.86,
+        "mean_db": -2.17,
+        "peak_db": -2.17
+       },
+       {
+        "km": 9.88,
+        "mean_db": -2.18,
+        "peak_db": -2.18
+       },
+       {
+        "km": 9.9,
+        "mean_db": -2.18,
+        "peak_db": -2.18
+       },
+       {
+        "km": 9.92,
+        "mean_db": -2.2,
+        "peak_db": -2.2
+       },
+       {
+        "km": 9.94,
+        "mean_db": -2.19,
+        "peak_db": -2.19
+       },
+       {
+        "km": 9.96,
+        "mean_db": -2.2,
+        "peak_db": -2.2
+       },
+       {
+        "km": 9.98,
+        "mean_db": -2.19,
+        "peak_db": -2.19
+       },
+       {
+        "km": 10.0,
+        "mean_db": -2.21,
+        "peak_db": -2.21
+       },
+       {
+        "km": 10.02,
+        "mean_db": -2.21,
+        "peak_db": -2.21
+       },
+       {
+        "km": 10.04,
+        "mean_db": -2.22,
+        "peak_db": -2.22
+       },
+       {
+        "km": 10.06,
+        "mean_db": -2.22,
+        "peak_db": -2.22
+       },
+       {
+        "km": 10.08,
+        "mean_db": -2.22,
+        "peak_db": -2.22
+       },
+       {
+        "km": 10.1,
+        "mean_db": -2.23,
+        "peak_db": -2.23
+       },
+       {
+        "km": 10.12,
+        "mean_db": -2.23,
+        "peak_db": -2.23
+       },
+       {
+        "km": 10.14,
+        "mean_db": -2.23,
+        "peak_db": -2.23
+       },
+       {
+        "km": 10.16,
+        "mean_db": -2.24,
+        "peak_db": -2.24
+       },
+       {
+        "km": 10.18,
+        "mean_db": -2.24,
+        "peak_db": -2.24
+       },
+       {
+        "km": 10.2,
+        "mean_db": -2.24,
+        "peak_db": -2.24
+       },
+       {
+        "km": 10.22,
+        "mean_db": -2.25,
+        "peak_db": -2.25
+       },
+       {
+        "km": 10.24,
+        "mean_db": -2.26,
+        "peak_db": -2.26
+       },
+       {
+        "km": 10.26,
+        "mean_db": -2.26,
+        "peak_db": -2.26
+       },
+       {
+        "km": 10.28,
+        "mean_db": -2.27,
+        "peak_db": -2.27
+       },
+       {
+        "km": 10.3,
+        "mean_db": -2.27,
+        "peak_db": -2.27
+       },
+       {
+        "km": 10.32,
+        "mean_db": -2.27,
+        "peak_db": -2.27
+       },
+       {
+        "km": 10.34,
+        "mean_db": -2.27,
+        "peak_db": -2.27
+       },
+       {
+        "km": 10.36,
+        "mean_db": -2.28,
+        "peak_db": -2.28
+       },
+       {
+        "km": 10.38,
+        "mean_db": -2.29,
+        "peak_db": -2.29
+       },
+       {
+        "km": 10.4,
+        "mean_db": -2.29,
+        "peak_db": -2.29
+       },
+       {
+        "km": 10.42,
+        "mean_db": -2.29,
+        "peak_db": -2.29
+       },
+       {
+        "km": 10.44,
+        "mean_db": -2.29,
+        "peak_db": -2.29
+       },
+       {
+        "km": 10.46,
+        "mean_db": -2.3,
+        "peak_db": -2.3
+       },
+       {
+        "km": 10.48,
+        "mean_db": -2.3,
+        "peak_db": -2.3
+       },
+       {
+        "km": 10.5,
+        "mean_db": -2.3,
+        "peak_db": -2.3
+       },
+       {
+        "km": 10.52,
+        "mean_db": -2.32,
+        "peak_db": -2.32
+       },
+       {
+        "km": 10.54,
+        "mean_db": -2.32,
+        "peak_db": -2.32
+       },
+       {
+        "km": 10.56,
+        "mean_db": -2.32,
+        "peak_db": -2.32
+       },
+       {
+        "km": 10.58,
+        "mean_db": -2.33,
+        "peak_db": -2.33
+       },
+       {
+        "km": 10.6,
+        "mean_db": -2.33,
+        "peak_db": -2.33
+       },
+       {
+        "km": 10.62,
+        "mean_db": -2.33,
+        "peak_db": -2.33
+       },
+       {
+        "km": 10.64,
+        "mean_db": -2.33,
+        "peak_db": -2.33
+       },
+       {
+        "km": 10.66,
+        "mean_db": -2.33,
+        "peak_db": -2.33
+       },
+       {
+        "km": 10.68,
+        "mean_db": -2.35,
+        "peak_db": -2.35
+       },
+       {
+        "km": 10.7,
+        "mean_db": -2.35,
+        "peak_db": -2.35
+       },
+       {
+        "km": 10.72,
+        "mean_db": -2.35,
+        "peak_db": -2.35
+       },
+       {
+        "km": 10.74,
+        "mean_db": -2.36,
+        "peak_db": -2.36
+       },
+       {
+        "km": 10.76,
+        "mean_db": -2.36,
+        "peak_db": -2.36
+       },
+       {
+        "km": 10.78,
+        "mean_db": -2.37,
+        "peak_db": -2.37
+       },
+       {
+        "km": 10.8,
+        "mean_db": -2.36,
+        "peak_db": -2.36
+       },
+       {
+        "km": 10.82,
+        "mean_db": -2.37,
+        "peak_db": -2.37
+       },
+       {
+        "km": 10.84,
+        "mean_db": -2.37,
+        "peak_db": -2.37
+       },
+       {
+        "km": 10.86,
+        "mean_db": -2.38,
+        "peak_db": -2.38
+       },
+       {
+        "km": 10.88,
+        "mean_db": -2.38,
+        "peak_db": -2.38
+       },
+       {
+        "km": 10.9,
+        "mean_db": -2.38,
+        "peak_db": -2.38
+       },
+       {
+        "km": 10.92,
+        "mean_db": -2.39,
+        "peak_db": -2.39
+       },
+       {
+        "km": 10.94,
+        "mean_db": -2.39,
+        "peak_db": -2.39
+       },
+       {
+        "km": 10.96,
+        "mean_db": -2.4,
+        "peak_db": -2.4
+       },
+       {
+        "km": 10.98,
+        "mean_db": -2.4,
+        "peak_db": -2.4
+       },
+       {
+        "km": 11.0,
+        "mean_db": -2.41,
+        "peak_db": -2.41
+       },
+       {
+        "km": 11.02,
+        "mean_db": -2.41,
+        "peak_db": -2.41
+       },
+       {
+        "km": 11.04,
+        "mean_db": -2.42,
+        "peak_db": -2.42
+       },
+       {
+        "km": 11.06,
+        "mean_db": -2.42,
+        "peak_db": -2.42
+       },
+       {
+        "km": 11.08,
+        "mean_db": -2.42,
+        "peak_db": -2.42
+       },
+       {
+        "km": 11.1,
+        "mean_db": -2.43,
+        "peak_db": -2.43
+       },
+       {
+        "km": 11.12,
+        "mean_db": -2.43,
+        "peak_db": -2.43
+       },
+       {
+        "km": 11.14,
+        "mean_db": -2.44,
+        "peak_db": -2.44
+       },
+       {
+        "km": 11.16,
+        "mean_db": -2.43,
+        "peak_db": -2.43
+       },
+       {
+        "km": 11.18,
+        "mean_db": -2.45,
+        "peak_db": -2.45
+       },
+       {
+        "km": 11.2,
+        "mean_db": -2.45,
+        "peak_db": -2.45
+       },
+       {
+        "km": 11.22,
+        "mean_db": -2.45,
+        "peak_db": -2.45
+       },
+       {
+        "km": 11.24,
+        "mean_db": -2.46,
+        "peak_db": -2.46
+       },
+       {
+        "km": 11.26,
+        "mean_db": -2.47,
+        "peak_db": -2.47
+       },
+       {
+        "km": 11.28,
+        "mean_db": -2.46,
+        "peak_db": -2.46
+       },
+       {
+        "km": 11.3,
+        "mean_db": -2.48,
+        "peak_db": -2.48
+       },
+       {
+        "km": 11.32,
+        "mean_db": -2.47,
+        "peak_db": -2.47
+       },
+       {
+        "km": 11.34,
+        "mean_db": -2.49,
+        "peak_db": -2.49
+       },
+       {
+        "km": 11.36,
+        "mean_db": -2.5,
+        "peak_db": -2.5
+       },
+       {
+        "km": 11.38,
+        "mean_db": -2.52,
+        "peak_db": -2.52
+       },
+       {
+        "km": 11.4,
+        "mean_db": -2.54,
+        "peak_db": -2.54
+       },
+       {
+        "km": 11.42,
+        "mean_db": -2.56,
+        "peak_db": -2.56
+       },
+       {
+        "km": 11.44,
+        "mean_db": -2.58,
+        "peak_db": -2.58
+       },
+       {
+        "km": 11.46,
+        "mean_db": -2.59,
+        "peak_db": -2.59
+       },
+       {
+        "km": 11.48,
+        "mean_db": -2.58,
+        "peak_db": -2.58
+       },
+       {
+        "km": 11.5,
+        "mean_db": -2.59,
+        "peak_db": -2.59
+       },
+       {
+        "km": 11.52,
+        "mean_db": -2.59,
+        "peak_db": -2.59
+       },
+       {
+        "km": 11.54,
+        "mean_db": -2.59,
+        "peak_db": -2.59
+       },
+       {
+        "km": 11.56,
+        "mean_db": -2.6,
+        "peak_db": -2.6
+       },
+       {
+        "km": 11.58,
+        "mean_db": -2.6,
+        "peak_db": -2.6
+       },
+       {
+        "km": 11.6,
+        "mean_db": -2.61,
+        "peak_db": -2.61
+       },
+       {
+        "km": 11.62,
+        "mean_db": -2.61,
+        "peak_db": -2.61
+       },
+       {
+        "km": 11.64,
+        "mean_db": -2.61,
+        "peak_db": -2.61
+       },
+       {
+        "km": 11.66,
+        "mean_db": -2.63,
+        "peak_db": -2.63
+       },
+       {
+        "km": 11.68,
+        "mean_db": -2.63,
+        "peak_db": -2.63
+       },
+       {
+        "km": 11.7,
+        "mean_db": -2.63,
+        "peak_db": -2.63
+       },
+       {
+        "km": 11.72,
+        "mean_db": -2.64,
+        "peak_db": -2.64
+       },
+       {
+        "km": 11.74,
+        "mean_db": -2.64,
+        "peak_db": -2.64
+       },
+       {
+        "km": 11.76,
+        "mean_db": -2.64,
+        "peak_db": -2.64
+       },
+       {
+        "km": 11.78,
+        "mean_db": -2.65,
+        "peak_db": -2.65
+       },
+       {
+        "km": 11.8,
+        "mean_db": -2.65,
+        "peak_db": -2.65
+       },
+       {
+        "km": 11.82,
+        "mean_db": -2.65,
+        "peak_db": -2.65
+       },
+       {
+        "km": 11.84,
+        "mean_db": -2.66,
+        "peak_db": -2.66
+       },
+       {
+        "km": 11.86,
+        "mean_db": -2.66,
+        "peak_db": -2.66
+       },
+       {
+        "km": 11.88,
+        "mean_db": -2.67,
+        "peak_db": -2.67
+       },
+       {
+        "km": 11.9,
+        "mean_db": -2.67,
+        "peak_db": -2.67
+       },
+       {
+        "km": 11.92,
+        "mean_db": -2.67,
+        "peak_db": -2.67
+       },
+       {
+        "km": 11.94,
+        "mean_db": -2.68,
+        "peak_db": -2.68
+       },
+       {
+        "km": 11.96,
+        "mean_db": -2.68,
+        "peak_db": -2.68
+       },
+       {
+        "km": 11.98,
+        "mean_db": -2.69,
+        "peak_db": -2.69
+       },
+       {
+        "km": 12.0,
+        "mean_db": -2.69,
+        "peak_db": -2.69
+       },
+       {
+        "km": 12.02,
+        "mean_db": -2.69,
+        "peak_db": -2.69
+       },
+       {
+        "km": 12.04,
+        "mean_db": -2.7,
+        "peak_db": -2.7
+       },
+       {
+        "km": 12.06,
+        "mean_db": -2.7,
+        "peak_db": -2.7
+       },
+       {
+        "km": 12.08,
+        "mean_db": -2.7,
+        "peak_db": -2.7
+       },
+       {
+        "km": 12.1,
+        "mean_db": -2.71,
+        "peak_db": -2.71
+       },
+       {
+        "km": 12.12,
+        "mean_db": -2.71,
+        "peak_db": -2.71
+       },
+       {
+        "km": 12.14,
+        "mean_db": -2.72,
+        "peak_db": -2.72
+       },
+       {
+        "km": 12.16,
+        "mean_db": -2.72,
+        "peak_db": -2.72
+       },
+       {
+        "km": 12.18,
+        "mean_db": -2.73,
+        "peak_db": -2.73
+       },
+       {
+        "km": 12.2,
+        "mean_db": -2.72,
+        "peak_db": -2.72
+       },
+       {
+        "km": 12.22,
+        "mean_db": -2.74,
+        "peak_db": -2.74
+       },
+       {
+        "km": 12.24,
+        "mean_db": -2.74,
+        "peak_db": -2.74
+       },
+       {
+        "km": 12.26,
+        "mean_db": -2.74,
+        "peak_db": -2.74
+       },
+       {
+        "km": 12.28,
+        "mean_db": -2.74,
+        "peak_db": -2.74
+       },
+       {
+        "km": 12.3,
+        "mean_db": -2.75,
+        "peak_db": -2.75
+       },
+       {
+        "km": 12.32,
+        "mean_db": -2.75,
+        "peak_db": -2.75
+       },
+       {
+        "km": 12.34,
+        "mean_db": -2.76,
+        "peak_db": -2.76
+       },
+       {
+        "km": 12.36,
+        "mean_db": -2.77,
+        "peak_db": -2.77
+       },
+       {
+        "km": 12.38,
+        "mean_db": -2.77,
+        "peak_db": -2.77
+       },
+       {
+        "km": 12.4,
+        "mean_db": -2.77,
+        "peak_db": -2.77
+       },
+       {
+        "km": 12.42,
+        "mean_db": -2.77,
+        "peak_db": -2.77
+       },
+       {
+        "km": 12.44,
+        "mean_db": -2.78,
+        "peak_db": -2.78
+       },
+       {
+        "km": 12.46,
+        "mean_db": -2.78,
+        "peak_db": -2.78
+       },
+       {
+        "km": 12.48,
+        "mean_db": -2.79,
+        "peak_db": -2.79
+       },
+       {
+        "km": 12.5,
+        "mean_db": -2.78,
+        "peak_db": -2.78
+       },
+       {
+        "km": 12.52,
+        "mean_db": -2.79,
+        "peak_db": -2.79
+       },
+       {
+        "km": 12.54,
+        "mean_db": -2.79,
+        "peak_db": -2.79
+       },
+       {
+        "km": 12.56,
+        "mean_db": -2.8,
+        "peak_db": -2.8
+       },
+       {
+        "km": 12.58,
+        "mean_db": -2.8,
+        "peak_db": -2.8
+       },
+       {
+        "km": 12.6,
+        "mean_db": -2.81,
+        "peak_db": -2.81
+       },
+       {
+        "km": 12.62,
+        "mean_db": -2.81,
+        "peak_db": -2.81
+       },
+       {
+        "km": 12.64,
+        "mean_db": -2.81,
+        "peak_db": -2.81
+       },
+       {
+        "km": 12.66,
+        "mean_db": -2.82,
+        "peak_db": -2.82
+       },
+       {
+        "km": 12.68,
+        "mean_db": -2.83,
+        "peak_db": -2.83
+       },
+       {
+        "km": 12.7,
+        "mean_db": -2.83,
+        "peak_db": -2.83
+       },
+       {
+        "km": 12.72,
+        "mean_db": -2.84,
+        "peak_db": -2.84
+       },
+       {
+        "km": 12.74,
+        "mean_db": -2.84,
+        "peak_db": -2.84
+       },
+       {
+        "km": 12.76,
+        "mean_db": -2.85,
+        "peak_db": -2.85
+       },
+       {
+        "km": 12.78,
+        "mean_db": -2.84,
+        "peak_db": -2.84
+       },
+       {
+        "km": 12.8,
+        "mean_db": -2.85,
+        "peak_db": -2.85
+       },
+       {
+        "km": 12.82,
+        "mean_db": -2.86,
+        "peak_db": -2.86
+       },
+       {
+        "km": 12.84,
+        "mean_db": -2.85,
+        "peak_db": -2.85
+       },
+       {
+        "km": 12.86,
+        "mean_db": -2.87,
+        "peak_db": -2.87
+       },
+       {
+        "km": 12.88,
+        "mean_db": -2.87,
+        "peak_db": -2.87
+       },
+       {
+        "km": 12.9,
+        "mean_db": -2.87,
+        "peak_db": -2.87
+       },
+       {
+        "km": 12.92,
+        "mean_db": -2.87,
+        "peak_db": -2.87
+       },
+       {
+        "km": 12.94,
+        "mean_db": -2.88,
+        "peak_db": -2.88
+       },
+       {
+        "km": 12.96,
+        "mean_db": -2.88,
+        "peak_db": -2.88
+       },
+       {
+        "km": 12.98,
+        "mean_db": -2.89,
+        "peak_db": -2.89
+       },
+       {
+        "km": 13.0,
+        "mean_db": -2.9,
+        "peak_db": -2.9
+       },
+       {
+        "km": 13.02,
+        "mean_db": -2.89,
+        "peak_db": -2.89
+       },
+       {
+        "km": 13.04,
+        "mean_db": -2.89,
+        "peak_db": -2.89
+       },
+       {
+        "km": 13.06,
+        "mean_db": -2.9,
+        "peak_db": -2.9
+       },
+       {
+        "km": 13.08,
+        "mean_db": -2.91,
+        "peak_db": -2.91
+       },
+       {
+        "km": 13.1,
+        "mean_db": -2.9,
+        "peak_db": -2.9
+       },
+       {
+        "km": 13.12,
+        "mean_db": -2.92,
+        "peak_db": -2.92
+       },
+       {
+        "km": 13.14,
+        "mean_db": -2.92,
+        "peak_db": -2.92
+       },
+       {
+        "km": 13.16,
+        "mean_db": -37.94,
+        "peak_db": -37.94
+       },
+       {
+        "km": 13.18,
+        "mean_db": -41.51,
+        "peak_db": -41.51
+       },
+       {
+        "km": 13.2,
+        "mean_db": -37.63,
+        "peak_db": -37.63
+       },
+       {
+        "km": 13.22,
+        "mean_db": -38.34,
+        "peak_db": -38.34
+       },
+       {
+        "km": 13.24,
+        "mean_db": -38.09,
+        "peak_db": -38.09
+       },
+       {
+        "km": 13.26,
+        "mean_db": -37.16,
+        "peak_db": -37.16
+       },
+       {
+        "km": 13.28,
+        "mean_db": -39.02,
+        "peak_db": -39.02
+       },
+       {
+        "km": 13.3,
+        "mean_db": -37.7,
+        "peak_db": -37.7
+       },
+       {
+        "km": 13.32,
+        "mean_db": -39.23,
+        "peak_db": -39.23
+       },
+       {
+        "km": 13.34,
+        "mean_db": -48.03,
+        "peak_db": -48.03
+       },
+       {
+        "km": 13.36,
+        "mean_db": -36.5,
+        "peak_db": -36.5
+       },
+       {
+        "km": 13.38,
+        "mean_db": -37.07,
+        "peak_db": -37.07
+       },
+       {
+        "km": 13.4,
+        "mean_db": -43.18,
+        "peak_db": -43.18
+       },
+       {
+        "km": 13.42,
+        "mean_db": -36.81,
+        "peak_db": -36.81
+       },
+       {
+        "km": 13.44,
+        "mean_db": -37.87,
+        "peak_db": -37.87
+       },
+       {
+        "km": 13.46,
+        "mean_db": -46.34,
+        "peak_db": -46.34
+       },
+       {
+        "km": 13.48,
+        "mean_db": -39.44,
+        "peak_db": -39.44
+       },
+       {
+        "km": 13.5,
+        "mean_db": -36.73,
+        "peak_db": -36.73
+       },
+       {
+        "km": 13.52,
+        "mean_db": -38.16,
+        "peak_db": -38.16
+       },
+       {
+        "km": 13.54,
+        "mean_db": -36.67,
+        "peak_db": -36.67
+       },
+       {
+        "km": 13.56,
+        "mean_db": -38.19,
+        "peak_db": -38.19
+       },
+       {
+        "km": 13.58,
+        "mean_db": -36.95,
+        "peak_db": -36.95
+       },
+       {
+        "km": 13.6,
+        "mean_db": -38.0,
+        "peak_db": -38.0
+       },
+       {
+        "km": 13.62,
+        "mean_db": -45.76,
+        "peak_db": -45.76
+       },
+       {
+        "km": 13.64,
+        "mean_db": -39.08,
+        "peak_db": -39.08
+       },
+       {
+        "km": 13.66,
+        "mean_db": -39.03,
+        "peak_db": -39.03
+       },
+       {
+        "km": 13.68,
+        "mean_db": -37.12,
+        "peak_db": -37.12
+       },
+       {
+        "km": 13.7,
+        "mean_db": -37.77,
+        "peak_db": -37.77
+       },
+       {
+        "km": 13.72,
+        "mean_db": -37.2,
+        "peak_db": -37.2
+       },
+       {
+        "km": 13.74,
+        "mean_db": -36.93,
+        "peak_db": -36.93
+       },
+       {
+        "km": 13.76,
+        "mean_db": -38.07,
+        "peak_db": -38.07
+       },
+       {
+        "km": 13.78,
+        "mean_db": -38.41,
+        "peak_db": -38.41
+       },
+       {
+        "km": 13.8,
+        "mean_db": -36.99,
+        "peak_db": -36.99
+       },
+       {
+        "km": 13.82,
+        "mean_db": -37.23,
+        "peak_db": -37.23
+       },
+       {
+        "km": 13.84,
+        "mean_db": -37.57,
+        "peak_db": -37.57
+       },
+       {
+        "km": 13.86,
+        "mean_db": -37.55,
+        "peak_db": -37.55
+       },
+       {
+        "km": 13.88,
+        "mean_db": -36.77,
+        "peak_db": -36.77
+       },
+       {
+        "km": 13.9,
+        "mean_db": -39.96,
+        "peak_db": -39.96
+       },
+       {
+        "km": 13.92,
+        "mean_db": -38.14,
+        "peak_db": -38.14
+       },
+       {
+        "km": 13.94,
+        "mean_db": -37.44,
+        "peak_db": -37.44
+       },
+       {
+        "km": 13.96,
+        "mean_db": -37.41,
+        "peak_db": -37.41
+       },
+       {
+        "km": 13.98,
+        "mean_db": -37.77,
+        "peak_db": -37.77
+       },
+       {
+        "km": 14.0,
+        "mean_db": -38.13,
+        "peak_db": -38.13
+       },
+       {
+        "km": 14.02,
+        "mean_db": -38.73,
+        "peak_db": -38.73
+       },
+       {
+        "km": 14.04,
+        "mean_db": -41.45,
+        "peak_db": -41.45
+       },
+       {
+        "km": 14.06,
+        "mean_db": -37.3,
+        "peak_db": -37.3
+       },
+       {
+        "km": 14.08,
+        "mean_db": -40.69,
+        "peak_db": -40.69
+       },
+       {
+        "km": 14.1,
+        "mean_db": -37.85,
+        "peak_db": -37.85
+       },
+       {
+        "km": 14.12,
+        "mean_db": -38.28,
+        "peak_db": -38.28
+       },
+       {
+        "km": 14.14,
+        "mean_db": -38.31,
+        "peak_db": -38.31
+       },
+       {
+        "km": 14.16,
+        "mean_db": -40.62,
+        "peak_db": -40.62
+       },
+       {
+        "km": 14.18,
+        "mean_db": -38.79,
+        "peak_db": -38.79
+       },
+       {
+        "km": 14.2,
+        "mean_db": -39.61,
+        "peak_db": -39.61
+       },
+       {
+        "km": 14.22,
+        "mean_db": -37.1,
+        "peak_db": -37.1
+       },
+       {
+        "km": 14.24,
+        "mean_db": -36.82,
+        "peak_db": -36.82
+       },
+       {
+        "km": 14.26,
+        "mean_db": -37.13,
+        "peak_db": -37.13
+       },
+       {
+        "km": 14.28,
+        "mean_db": -38.66,
+        "peak_db": -38.66
+       },
+       {
+        "km": 14.3,
+        "mean_db": -36.36,
+        "peak_db": -36.36
+       },
+       {
+        "km": 14.32,
+        "mean_db": -38.41,
+        "peak_db": -38.41
+       },
+       {
+        "km": 14.34,
+        "mean_db": -37.55,
+        "peak_db": -37.55
+       },
+       {
+        "km": 14.36,
+        "mean_db": -38.22,
+        "peak_db": -38.22
+       },
+       {
+        "km": 14.38,
+        "mean_db": -38.09,
+        "peak_db": -38.09
+       },
+       {
+        "km": 14.4,
+        "mean_db": -36.88,
+        "peak_db": -36.88
+       },
+       {
+        "km": 14.42,
+        "mean_db": -37.97,
+        "peak_db": -37.97
+       },
+       {
+        "km": 14.44,
+        "mean_db": -36.78,
+        "peak_db": -36.78
+       },
+       {
+        "km": 14.46,
+        "mean_db": -38.93,
+        "peak_db": -38.93
+       },
+       {
+        "km": 14.48,
+        "mean_db": -39.68,
+        "peak_db": -39.68
+       },
+       {
+        "km": 14.5,
+        "mean_db": -36.56,
+        "peak_db": -36.56
+       },
+       {
+        "km": 14.52,
+        "mean_db": -37.08,
+        "peak_db": -37.08
+       },
+       {
+        "km": 14.54,
+        "mean_db": -40.17,
+        "peak_db": -40.17
+       },
+       {
+        "km": 14.56,
+        "mean_db": -36.73,
+        "peak_db": -36.73
+       },
+       {
+        "km": 14.58,
+        "mean_db": -39.51,
+        "peak_db": -39.51
+       },
+       {
+        "km": 14.6,
+        "mean_db": -40.12,
+        "peak_db": -40.12
+       },
+       {
+        "km": 14.62,
+        "mean_db": -37.92,
+        "peak_db": -37.92
+       },
+       {
+        "km": 14.64,
+        "mean_db": -38.54,
+        "peak_db": -38.54
+       }
+      ]
+     }
+    },
+    {
+     "name": "otdr_trace_image",
+     "args": {
+      "end_km": 20.0,
+      "from_site": "A",
+      "start_km": 12.0,
+      "time": "now",
+      "wavelength_nm": 1550
+     },
+     "result": {
+      "wavelength_nm": 1550,
+      "from_site": "A",
+      "image": "attached in the next message"
+     }
+    }
+   ]
+  },
+  {
+   "step": 5,
+   "content": "I've narrowed the fault to a mid-span break \u2014 verifying the endpoints before submitting the diagnosis.",
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "otdr_trace_image",
+     "args": {
+      "end_km": 15.0,
+      "from_site": "B",
+      "start_km": 9.0,
+      "time": "now",
+      "wavelength_nm": 1550
+     },
+     "result": {
+      "wavelength_nm": 1550,
+      "from_site": "B",
+      "image": "attached in the next message"
+     }
+    },
+    {
+     "name": "inspect_connector",
+     "args": {
+      "element_id": "A-ODF"
+     },
+     "result": {
+      "element_id": "A-ODF",
+      "note": "Inspection scope view of the bulkhead-side connector end face (core at centre, cladding disc, ferrule).",
+      "image": "attached in the next message"
+     }
+    },
+    {
+     "name": "inspect_connector",
+     "args": {
+      "element_id": "B-ODF"
+     },
+     "result": {
+      "element_id": "B-ODF",
+      "note": "Inspection scope view of the bulkhead-side connector end face (core at centre, cladding disc, ferrule).",
+      "image": "attached in the next message"
+     }
+    }
+   ]
+  },
+  {
+   "step": 6,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "submit_diagnosis",
+     "args": {
+      "action": "repair_break",
+      "element_id": "null",
+      "evidence": "TX normal 0.46dBm in spec with stable bias/temp, B-ODF and B-RX no light (<-50dBm), PM sudden RX_LOS 2026-10-17 22:00 from -11.8 to -40dBm. OTDR 1550+1310 from A shows end at 18.20/18.19km fibre, from B shows end at 13.16km fibre (sum 31.36km = total fibre), trace shows abrupt drop to noise with no continuation, same physical point. Anchored between SC-03 (13.668 route /14.057 fibre) and SC-04 (19.484 route /20.031 fibre) => route ~17.7km. Connectors clean, SC-02 0.97dB is G.652/G.655 backscatter mismatch not cause. Correlates with road works/flooding km18-20.",
+      "fault_type": "fibre_break",
+      "route_km": 17.7
+     },
+     "result": {
+      "status": "submitted"
+     }
+    }
+   ]
+  }
+ ]
+}

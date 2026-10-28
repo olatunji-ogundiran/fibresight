@@ -135,13 +135,13 @@ def _load_env(path: str = ".env") -> None:
             os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
 
 
-def make_client(provider: str = "baseten"):
+def make_client(provider: str = "baseten", model: Optional[str] = None):
     from openai import OpenAI
     _load_env()
     if provider == "baseten":
         return OpenAI(base_url="https://inference.baseten.co/v1", api_key=os.environ["BASETEN_API_KEY"]), \
-            "meta-models/muse-spark-open-1026"
+            model or "meta-models/muse-spark-open-1026"
     if provider == "meta":
         return OpenAI(base_url=os.environ.get("META_BASE_URL", "https://api.meta.ai/v1"),
-                      api_key=os.environ["META_API_KEY"]), os.environ.get("META_MODEL", "muse-spark-1.3")
+                      api_key=os.environ["META_API_KEY"]), (model or os.environ.get("META_MODEL", "muse-spark-1.3"))
     raise ValueError(provider)

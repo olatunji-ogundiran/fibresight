@@ -43,15 +43,16 @@ def main(argv=None):
     ap.add_argument("--mode", choices=["standard", "raw", "hard"], default="standard")
     ap.add_argument("--max-steps", type=int, default=30)
     ap.add_argument("--name", default=None)
+    ap.add_argument("--model", default=None, help="override the provider default model")
     a = ap.parse_args(argv)
 
-    name = a.name or (f"{a.solver}_{a.mode}" if a.solver == "expert" else f"{a.provider}_{a.mode}_{a.prompt}{'_noimg' if a.no_images else ''}")
+    name = a.name or (f"{a.solver}_{a.mode}" if a.solver == "expert" else f"{a.provider}{'-' + a.model.split('/')[-1] if a.model else ''}_{a.mode}_{a.prompt}{'_noimg' if a.no_images else ''}")
     out = os.path.join("results", name)
     os.makedirs(out, exist_ok=True)
     seeds = list(range(a.start, a.start + a.n))
     client = model = None
     if a.solver == "agent":
-        client, model = make_client(a.provider)
+        client, model = make_client(a.provider, a.model)
 
     def one(seed):
         case = generate_case(seed, hard=(a.mode == "hard"))
