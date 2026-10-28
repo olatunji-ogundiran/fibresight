@@ -9,8 +9,9 @@ element or a route distance on the map, uses an action that fixes that fault,
 cites at least two measurements that match the tool outputs they cite, and
 leaves no checklist item open.
 
-Layer 2, reviewer (optional): a second Meta model reads the diagnosis and the
-cited tool outputs and approves or rejects it, with reasons.
+Layer 2, reviewer (optional): a second Meta model reads the diagnosis, the
+cited tool outputs and every other measurement taken, and approves or rejects
+it with reasons.
 
 A rejected submission goes back to the agent with the problems listed. After
 MAX_ATTEMPTS rejections the ticket is escalated to a human engineer.
@@ -61,9 +62,14 @@ def deterministic_checks(answer, tb) -> list:
     return problems
 
 
+MEASUREMENTS = ("get_alarms", "get_pm", "embedded_otdr", "otdr_event_table", "otdr_trace", "measure_power",
+                "segment_endface", "inspect_connector", "get_site_notes")
+REVIEW_CHARS = 30000
+
+
 REVIEW_PROMPT = """You are a senior transmission engineer reviewing a colleague's diagnosis of a fibre link fault
-before a crew is dispatched. You see the diagnosis, the measurements it cites (with the full tool output each
-citation comes from) and the route map. Decide whether the cited evidence supports the stated fault type, the
+before a crew is dispatched. You see the diagnosis, the measurements it cites, every other measurement taken
+during the investigation (look at all of it, not only what was cited) and the route map. Decide whether the cited evidence supports the stated fault type, the
 location and the action. Approve when it does. Reject only for a concrete problem: a contradiction with the data,
 a location that does not follow from the measurements, or a key alternative cause the evidence does not rule out.
 Do not reject for style. Reply with JSON only: {"verdict": "approve" or "reject", "reasons": ["short reason", ...]}"""
@@ -73,20 +79,30 @@ def review(client, model: str, answer: dict, tb) -> dict:
     """Second-model check of the claims. Errors never block a submission:
     they are reported as 'not reviewed'."""
     record = tb.get_link_record()
-    cited = {}
+    cited_ids = set()
     for r in answer.get("evidence_refs") or []:
         try:
-            cid = int(r["call_id"])
+            cited_ids.add(int(r["call_id"]))
         except (KeyError, TypeError, ValueError):
             continue
-        if 1 <= cid <= len(tb.calls) and cid not in cited:
-            c = tb.calls[cid - 1]
-            cited[cid] = {"tool": c["tool"], "args": c["args"],
-                          "output": json.dumps(c["result"], default=str)[:4000]}
+    # Cited outputs first, then every other measurement, within a size budget.
+    order = sorted(range(1, len(tb.calls) + 1), key=lambda i: (i not in cited_ids, i))
+    outputs, used = {}, 0
+    for cid in order:
+        c = tb.calls[cid - 1]
+        if c["tool"] not in MEASUREMENTS and cid not in cited_ids:
+            continue
+        res = {k: v for k, v in c["result"].items() if k != "image_path"} if isinstance(c["result"], dict) else c["result"]
+        out = json.dumps(res, default=str)[:4000]
+        if used + len(out) > REVIEW_CHARS:
+            continue
+        used += len(out)
+        outputs[cid] = {"tool": c["tool"], "args": c["args"], "cited": cid in cited_ids, "output": out}
     route = [(e["id"], e["route_km"]) for e in record["elements_in_route_order"]]
     content = json.dumps({"diagnosis": {k: answer.get(k) for k in ("fault_type", "element_id", "route_km", "action", "evidence")},
-                          "citations": answer.get("evidence_refs"), "cited_tool_outputs": cited,
-                          "route_map": route, "service": record["service"]}, default=str)
+                          "citations": answer.get("evidence_refs"), "measurements": outputs,
+                          "route_map": route, "service": record["service"],
+                          "commissioning_link_loss_db": record["commissioning_link_loss_db"]}, default=str)
     try:
         resp = client.chat.completions.create(model=model, messages=[
             {"role": "system", "content": REVIEW_PROMPT}, {"role": "user", "content": content}])
