@@ -60,12 +60,19 @@ def _image_message(path: str, tool: str) -> dict:
         {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64}"}}]}
 
 
-def run_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_PROMPT,
-              max_steps: int = 30, images: bool = True, temperature: Optional[float] = None,
-              log_path: Optional[str] = None, mode: str = "standard") -> dict:
-    tb = ToolBox(case, workdir, mode)
-    messages = [{"role": "system", "content": prompt},
-                {"role": "user", "content": "Ticket: customer reports problems on the A to B 1550 nm service. Find the root cause."}]
+TICKET = "Ticket: customer reports problems on the A to B 1550 nm service. Find the root cause."
+
+
+def iter_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_PROMPT,
+               max_steps: int = 30, images: bool = True, temperature: Optional[float] = None,
+               mode: str = "standard", vision_client=None, ticket: str = TICKET):
+    """Run the agent and yield events as it works (used by the demo app).
+
+    Events: {"type": "thinking"}, {"type": "tool"}, and a final {"type": "done"}
+    carrying the answer, grade, grounding check, checklist and usage.
+    """
+    tb = ToolBox(case, workdir, mode, vision_client=vision_client)
+    messages = [{"role": "system", "content": prompt}, {"role": "user", "content": ticket}]
     transcript, answer, usage = [], None, {"prompt_tokens": 0, "completion_tokens": 0}
     t0 = time.time()
     for step in range(max_steps):
@@ -79,6 +86,8 @@ def run_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_P
         msg = resp.choices[0].message
         reasoning = getattr(msg, "reasoning_content", None) or getattr(msg, "reasoning", None)
         entry = {"step": step, "content": msg.content, "reasoning": reasoning, "tool_calls": []}
+        if reasoning or msg.content:
+            yield {"type": "thinking", "step": step, "reasoning": reasoning, "content": msg.content}
         calls = msg.tool_calls or []
         messages.append({"role": "assistant", "content": msg.content or "",
                          "tool_calls": [{"id": c.id, "type": "function",
@@ -95,6 +104,7 @@ def run_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_P
                 args = json.loads(c.function.arguments or "{}")
             except json.JSONDecodeError:
                 args = None
+            image_path = None
             if name == "submit_diagnosis":
                 answer = args
                 result = {"status": "submitted"}
@@ -106,20 +116,34 @@ def run_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_P
                 except ToolError as e:
                     result = {"error": str(e)}
             if isinstance(result, dict) and "image_path" in result:
+                image_path = result["image_path"]
                 if images:
-                    pending_images.append((result["image_path"], name))
+                    pending_images.append((image_path, name))
                 result = {k: v for k, v in result.items() if k != "image_path"}
                 result["image"] = "attached in the next message" if images else "not available"
             entry["tool_calls"].append({"name": name, "args": args, "result": result})
             messages.append({"role": "tool", "tool_call_id": c.id, "content": json.dumps(result, default=str)})
+            if name != "submit_diagnosis":
+                yield {"type": "tool", "step": step, "name": name, "args": args, "result": result,
+                       "image_path": image_path, "checklist": [dict(i) for i in tb.checklist]}
         for path, name in pending_images:
             messages.append(_image_message(path, name))
         transcript.append(entry)
         if answer is not None:
             break
-    result = {"seed": case.seed, "model": model, "mode": mode, "answer": answer, "grade": grade(answer, case), "grounding": grounding(answer, tb.calls), "checklist": tb.checklist,
-              "steps": len(transcript), "tool_calls": len(tb.calls), "seconds": round(time.time() - t0, 1),
-              "usage": usage, "transcript": transcript}
+    yield {"type": "done", "seed": case.seed, "model": model, "mode": mode, "answer": answer,
+           "grade": grade(answer, case), "grounding": grounding(answer, tb.calls), "checklist": tb.checklist,
+           "steps": len(transcript), "tool_calls": len(tb.calls), "seconds": round(time.time() - t0, 1),
+           "usage": usage, "transcript": transcript}
+
+
+def run_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_PROMPT,
+              max_steps: int = 30, images: bool = True, temperature: Optional[float] = None,
+              log_path: Optional[str] = None, mode: str = "standard", vision_client=None) -> dict:
+    result = None
+    for ev in iter_agent(case, client, model, workdir, prompt, max_steps, images, temperature, mode, vision_client):
+        if ev["type"] == "done":
+            result = {k: v for k, v in ev.items() if k != "type"}
     if log_path:
         os.makedirs(os.path.dirname(log_path) or ".", exist_ok=True)
         with open(log_path, "w") as f:

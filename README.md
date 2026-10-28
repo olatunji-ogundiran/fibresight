@@ -56,3 +56,12 @@ python -m fibresight.bench --solver expert --n 21
 # with a key in .env (BASETEN_API_KEY=...)
 python -m fibresight.bench --solver agent --provider baseten --n 21
 ```
+
+## Demo app
+
+```
+pip install -r requirements.txt fastapi uvicorn
+python -m fibresight.app      # open http://localhost:8000
+```
+
+Pick a case and a model, press **Run agent**, and watch the investigation: the agent's checklist, every instrument it uses (OTDR event tables and traces, connector end faces scanned by SAM 3.1, power readings), its cited evidence, and the final diagnosis checked against the simulator's ground truth. Every run is saved and can be replayed offline from the Replay menu.

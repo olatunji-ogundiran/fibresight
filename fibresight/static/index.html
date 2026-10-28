@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FibreSight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: route strip across the top, then case | agent timeline | checklist + verdict */
+:root {
+  --bg: #f3f5f6; --panel: #ffffff; --ink: #15202a; --muted: #5d6b77; --line: #d7dde2;
+  --fibre: #d99a00;      /* single-mode fibre jacket yellow */
+  --upc: #1f6fd1;        /* UPC connector blue */
+  --ok: #1b8a4a; --bad: #c2362b; --warn: #b86e00;
+  --chip: #eef2f5; --code: #f6f8fa;
+  --display: "Barlow Semi Condensed", "Arial Narrow", Arial, sans-serif;
+  --body: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+  --mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f151a; --panel: #161e25; --ink: #e6ecf0; --muted: #93a3af; --line: #26323c;
+  --fibre: #f2b705; --upc: #5aa2ff; --ok: #3fbf74; --bad: #ff6b5f; --warn: #f0a33a;
+  --chip: #1f2a33; --code: #121a20; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f151a; --panel: #161e25; --ink: #e6ecf0; --muted: #93a3af; --line: #26323c;
+  --fibre: #f2b705; --upc: #5aa2ff; --ok: #3fbf74; --bad: #ff6b5f; --warn: #f0a33a;
+  --chip: #1f2a33; --code: #121a20; color-scheme: dark }
+
+* { box-sizing: border-box }
+html, body { margin: 0 }
+body { background: var(--bg); color: var(--ink); font: 15px/1.45 var(--body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 14px 40px }
+h1, h2, h3 { font-family: var(--display); margin: 0; letter-spacing: .01em; text-wrap: balance }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums }
+button, select, input { font: inherit; color: inherit }
+:focus-visible { outline: 2px solid var(--upc); outline-offset: 2px }
+
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-bottom: 14px }
+.brand { display: flex; align-items: baseline; gap: 10px }
+.brand h1 { font-size: 30px; font-weight: 700 }
+.brand h1 span { color: var(--fibre) }
+.brand p { margin: 0; color: var(--muted); font-size: 14px }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-left: auto }
+.controls label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; display: flex; flex-direction: column; gap: 2px }
+.controls select, .controls input { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; min-width: 0 }
+.controls input { width: 90px }
+.btn { background: var(--ink); color: var(--bg); border: 0; border-radius: 6px; padding: 9px 16px; font-weight: 600; cursor: pointer; align-self: flex-end }
+.btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line) }
+.btn:disabled { opacity: .5; cursor: progress }
+
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; min-width: 0 }
+.label { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600 }
+
+#route { margin-bottom: 14px }
+#route .head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 6px }
+#routeSvg { width: 100%; min-width: 640px; height: auto; display: block }
+.svg-text { fill: var(--muted); font: 11px var(--mono) }
+.svg-id { fill: var(--ink); font: 600 11px var(--mono) }
+
+.grid { display: grid; grid-template-columns: minmax(230px, 1fr) minmax(0, 2.3fr) minmax(250px, 1.1fr); gap: 14px; align-items: start }
+@media (max-width: 1100px) { .grid { grid-template-columns: 1fr } }
+.stack { display: flex; flex-direction: column; gap: 14px; min-width: 0 }
+
+.alarm { display: flex; gap: 8px; align-items: baseline; padding: 6px 0; border-bottom: 1px dashed var(--line); font-size: 13px }
+.alarm:last-child { border-bottom: 0 }
+.sev { font: 600 11px var(--mono); padding: 1px 6px; border-radius: 4px; background: var(--chip) }
+.sev.critical, .sev.major { color: var(--bad) }
+.sev.minor { color: var(--warn) }
+.note { font-size: 13px; padding: 7px 0; border-bottom: 1px dashed var(--line) }
+.note time { display: block; font: 11px var(--mono); color: var(--muted) }
+
+#timeline { display: flex; flex-direction: column; gap: 10px }
+.empty { color: var(--muted); padding: 30px 10px; text-align: center }
+.step { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--panel); min-width: 0 }
+.step .top { display: flex; gap: 8px; align-items: center; flex-wrap: wrap }
+.callid { font: 600 11px var(--mono); color: var(--muted); background: var(--chip); border-radius: 4px; padding: 1px 6px }
+.tname { font-family: var(--display); font-weight: 600; font-size: 16px }
+.args { font: 12px var(--mono); color: var(--muted); overflow-wrap: anywhere }
+.think { border-left: 3px solid var(--line); padding: 4px 10px; color: var(--muted); font-size: 13.5px; white-space: pre-wrap; overflow-wrap: anywhere }
+.think summary { cursor: pointer; color: var(--ink); font-weight: 600 }
+.result { margin-top: 8px; min-width: 0 }
+.result img { max-width: 100%; border-radius: 6px; border: 1px solid var(--line); display: block; background: #fff }
+.result img.face { max-width: 260px }
+.reading { font: 600 26px var(--mono); }
+.reading small { font-size: 13px; color: var(--muted); font-weight: 400 }
+.tbl { overflow-x: auto }
+table { border-collapse: collapse; font: 12px var(--mono); font-variant-numeric: tabular-nums; width: 100% }
+th, td { text-align: right; padding: 3px 8px; border-bottom: 1px solid var(--line); white-space: nowrap }
+th:first-child, td:first-child, th:nth-child(2), td:nth-child(2) { text-align: left }
+th { color: var(--muted); font-weight: 600 }
+tr.hi td { color: var(--bad); font-weight: 600 }
+details.raw summary { cursor: pointer; font-size: 12px; color: var(--muted) }
+details.raw pre { background: var(--code); padding: 8px; border-radius: 6px; overflow-x: auto; font: 11.5px var(--mono); max-height: 260px }
+.err { color: var(--bad); font: 12px var(--mono) }
+.verdict-chip { font: 600 12px var(--mono); padding: 2px 8px; border-radius: 4px }
+.verdict-chip.pass { color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent) }
+.verdict-chip.fail { color: var(--bad); background: color-mix(in srgb, var(--bad) 14%, transparent) }
+
+#checklist ol { margin: 8px 0 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 6px }
+#checklist li { display: grid; grid-template-columns: 20px 1fr; gap: 6px; font-size: 13.5px }
+#checklist li .mark { font: 600 13px var(--mono); }
+#checklist li.done .mark { color: var(--ok) } #checklist li.failed .mark { color: var(--bad) }
+#checklist li.skipped { color: var(--muted) }
+#checklist li .n { display: block; color: var(--muted); font-size: 12px }
+
+#diagnosis .big { font-family: var(--display); font-size: 26px; font-weight: 700; margin: 6px 0 2px }
+#diagnosis .where { font: 600 15px var(--mono) }
+#diagnosis .action { margin-top: 6px; font-weight: 600 }
+#diagnosis .ev { font-size: 13.5px; margin-top: 10px; color: var(--muted) }
+.refs { margin-top: 10px; display: flex; flex-direction: column; gap: 4px }
+.ref { font: 12px var(--mono); display: flex; gap: 6px; align-items: baseline }
+.ref a { color: var(--upc); text-decoration: none }
+.check { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 13.5px }
+.check .row { display: flex; justify-content: space-between; gap: 8px }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px }
+.stat .v { font: 600 18px var(--mono) }
+.stat .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em }
+.status { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px }
+.pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--fibre); animation: p 1.2s infinite }
+@keyframes p { 50% { opacity: .25 } }
+@media (prefers-reduced-motion: reduce) { .pulse { animation: none } }
+.flash { animation: fl 1.2s ease-out }
+@keyframes fl { from { box-shadow: 0 0 0 3px var(--upc) } to { box-shadow: 0 0 0 0 transparent } }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><h1>Fibre<span>Sight</span></h1><p>Verifiable fault-finding agent for fibre links, on Meta Muse models</p></div>
+  <div class="controls">
+    <label>Case <input id="seed" type="number" value="1001" min="0"></label>
+    <label>Track <select id="mode"><option value="standard">Standard</option><option value="hard">Hard</option></select></label>
+    <label>Model <select id="model"></select></label>
+    <label>Connector vision <select id="sam"><option value="true">SAM 3.1 on</option><option value="false">Off</option></select></label>
+    <button class="btn ghost" id="loadBtn">Load case</button>
+    <button class="btn" id="runBtn">Run agent</button>
+    <label>Replay <select id="replay"><option value="">Saved runs</option></select></label>
+  </div>
+</header>
+
+<section id="route" class="panel">
+  <div class="head"><span class="label">Link under test</span><span class="status" id="status">Load a case to begin</span></div>
+  <div class="tbl"><svg id="routeSvg" viewBox="0 0 1000 140" role="img" aria-label="Route map from site A to site B"></svg></div>
+</section>
+
+<div class="grid">
+  <div class="stack">
+    <section class="panel"><div class="label">Ticket</div><p style="margin:6px 0 0">Customer reports problems on the site A to site B 1550 nm service. Find the root cause.</p></section>
+    <section class="panel"><div class="label">Latest alarms</div><div id="alarms"></div></section>
+    <section class="panel"><div class="label">Field log</div><div id="notes"></div></section>
+  </div>
+  <section class="stack">
+    <div class="panel"><div class="label">Agent investigation</div></div>
+    <div id="timeline"><div class="empty">Press Run agent to watch FibreSight work the case step by step.</div></div>
+  </section>
+  <div class="stack">
+    <section class="panel" id="checklist"><div class="label">Investigation checklist</div><ol><li class="empty" style="display:block">The agent writes its plan here.</li></ol></section>
+    <section class="panel" id="diagnosis"><div class="label">Diagnosis</div><p class="empty" style="padding:14px 0">Waiting for the agent.</p></section>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const PRETTY = {dirty_connector:"Dirty connector", damaged_connector:"Damaged connector", macrobend:"Macrobend",
+  bad_splice:"Bad splice", fibre_break:"Fibre break", wrong_attenuator:"Wrong attenuator", tx_degradation:"Failing transmitter"};
+const ACTION = {clean_connector:"Clean and re-inspect the connector", replace_connector:"Replace the connector",
+  relieve_bend:"Find and relieve the bend", resplice:"Re-splice the joint", repair_break:"Dispatch crew to repair the break",
+  replace_attenuator:"Fit the correct attenuator", replace_transmitter:"Replace the transmitter"};
+const TOOL = {get_link_record:"Link record", get_alarms:"Alarm log", get_pm:"Performance history", otdr_event_table:"OTDR event table",
+  otdr_trace:"OTDR trace", otdr_trace_image:"OTDR trace plot", inspect_connector:"Connector inspection", segment_endface:"SAM 3.1 defect scan",
+  measure_power:"Power meter", get_site_notes:"Field log", set_checklist:"Plan", update_checklist:"Checklist update"};
+let caseData = null, es = null, toolCount = 0;
+
+function routeX(km) { return 40 + (km / caseData.route_km) * 920 }
+function drawRoute(extra = {}) {
+  if (!caseData) return;
+  const svg = $("#routeSvg"); let h = "", prevX = -999, alt = false;
+  h += `<line x1="40" y1="62" x2="960" y2="62" stroke="var(--fibre)" stroke-width="4" stroke-linecap="round"/>`;
+  for (const e of caseData.elements) {
+    const x = routeX(e.route_km), conn = e.type.startsWith("connector");
+    alt = (x - prevX < 64) ? !alt : false; prevX = x;
+    h += conn ? `<rect x="${x-6}" y="53" width="12" height="18" rx="2" fill="var(--upc)"/>`
+              : `<circle cx="${x}" cy="62" r="6" fill="var(--panel)" stroke="var(--ink)" stroke-width="2"/>`;
+    h += `<text class="svg-id" x="${x}" y="${alt ? 14 : 30}" text-anchor="middle">${esc(e.id)}</text>`;
+    h += `<text class="svg-text" x="${x}" y="${alt ? 106 : 92}" text-anchor="middle">${e.route_km.toFixed(2)}</text>`;
+  }
+  h += `<text class="svg-id" x="40" y="132">SITE A  (Tx)</text><text class="svg-id" x="960" y="132" text-anchor="end">(Rx)  SITE B</text>`;
+  h += `<text class="svg-text" x="500" y="132" text-anchor="middle">route km on as-built map</text>`;
+  if (extra.answer) h += pin(extra.answer, "var(--upc)", "agent");
+  if (extra.truth) h += pin(extra.truth, extra.correct ? "var(--ok)" : "var(--bad)", "truth", true);
+  svg.innerHTML = h;
+}
+function pin(loc, colour, label, below) {
+  let km = loc.route_km;
+  if (loc.element_id) { const el = caseData.elements.find(e => e.id === loc.element_id); if (el) km = el.route_km;
+    if (loc.element_id === "A-TX") km = 0; if (loc.element_id === "B-ATT") km = caseData.route_km; }
+  if (km == null) return "";
+  const x = routeX(km), y = below ? 73 : 51, d = below ? 1 : -1;
+  const right = x < 900, tx = right ? x + 10 : x - 10;
+  return `<path d="M${x} ${y} l-7 ${d*12} h14 z" fill="${colour}"/><text class="svg-id" x="${tx}" y="${y + d*10}" text-anchor="${right ? "start" : "end"}" style="fill:${colour}">${label}</text>`;
+}
+
+async function loadCase() {
+  const seed = $("#seed").value, mode = $("#mode").value;
+  caseData = await (await fetch(`/api/case/${seed}?mode=${mode}`)).json();
+  drawRoute();
+  $("#alarms").innerHTML = caseData.alarms.length ? caseData.alarms.map(a =>
+    `<div class="alarm"><span class="sev ${esc(a.severity)}">${esc(a.alarm)}</span><span class="mono" style="font-size:12px">${esc(a.raised)} → ${esc(a.cleared)}</span></div>`).join("")
+    : `<p class="empty">No alarms</p>`;
+  $("#notes").innerHTML = caseData.notes.map(n => `<div class="note"><time>${esc(n.time)}</time>${esc(n.entry)}</div>`).join("");
+  $("#status").innerHTML = `Case ${esc(seed)} · ${esc(mode)} track · ${caseData.route_km.toFixed(2)} km route`;
+}
+
+function resetRun() {
+  $("#timeline").innerHTML = ""; toolCount = 0;
+  $("#checklist ol").innerHTML = `<li class="empty" style="display:block">The agent writes its plan here.</li>`;
+  $("#diagnosis").innerHTML = `<div class="label">Diagnosis</div><p class="empty" style="padding:14px 0">Agent is investigating.</p>`;
+}
+
+function renderChecklist(items) {
+  if (!items || !items.length) return;
+  $("#checklist ol").innerHTML = items.map(i => `<li class="${esc(i.status)}"><span class="mark">${
+    {done:"✓", failed:"✗", skipped:"–", open:"○"}[i.status] || "○"}</span><span>${esc(i.item)}${i.note ? `<span class="n">${esc(i.note)}</span>` : ""}</span></li>`).join("");
+}
+
+function resultView(ev) {
+  const r = ev.result || {};
+  if (r.error) return `<div class="err">${esc(r.error)}</div>`;
+  if (ev.image_url) {
+    const face = ev.name === "inspect_connector" || ev.name === "segment_endface";
+    let extra = "";
+    if (ev.name === "segment_endface") extra = `<p style="margin:6px 0 0"><span class="verdict-chip ${r.verdict?.startsWith("PASS") ? "pass" : "fail"}">${esc(r.verdict)}</span></p>`;
+    return `<img class="${face ? "face" : ""}" src="${esc(ev.image_url)}" alt="${esc(TOOL[ev.name] || ev.name)}">${extra}`;
+  }
+  if (ev.name === "measure_power") return `<div class="reading">${r.power_dbm == null ? esc(r.reading) : esc(r.power_dbm) + " <small>dBm at " + esc(r.point) + "</small>"}</div>`;
+  if (ev.name === "otdr_event_table") {
+    const rows = r.events || [];
+    const worst = Math.max(...rows.filter(e => e.loss_db != null).map(e => e.loss_db), 0);
+    return `<div class="args">${esc(r.wavelength_nm)} nm from site ${esc(r.from_site)} · ${esc(r.test_time || "")}</div><div class="tbl"><table><tr><th>#</th><th>type</th><th>km (fibre)</th><th>loss dB</th><th>refl dB</th></tr>${
+      rows.map(e => `<tr class="${e.loss_db != null && e.loss_db === worst && worst > 0.5 ? "hi" : ""}"><td>${e.event}</td><td>${esc(e.type)}</td><td>${e.distance_km.toFixed(3)}</td><td>${e.loss_db ?? ""}</td><td>${e.reflectance_db ?? ""}</td></tr>`).join("")}</table></div>`;
+  }
+  if (ev.name === "get_pm") {
+    const rows = r.rows || []; const vals = rows.map(x => x.avg ?? x.value);
+    if (!vals.length) return "";
+    const lo = Math.min(...vals), hi = Math.max(...vals), w = 520, hgt = 70;
+    const pts = vals.map((v, i) => `${(i / Math.max(vals.length - 1, 1)) * w},${hgt - ((v - lo) / ((hi - lo) || 1)) * (hgt - 10) - 5}`).join(" ");
+    return `<div class="args">${esc(r.metric)} · ${esc(r.resolution)} · ${lo.toPrecision(3)} to ${hi.toPrecision(3)}</div>
+      <svg viewBox="0 0 ${w} ${hgt}" style="width:100%;max-width:520px;height:70px"><polyline points="${pts}" fill="none" stroke="var(--upc)" stroke-width="2"/></svg>`;
+  }
+  if (ev.name === "get_alarms") return `<div class="args">${(r.alarms || []).length} alarms in 14 days</div>`;
+  if (ev.name === "set_checklist" || ev.name === "update_checklist") return "";
+  return `<details class="raw"><summary>Show result</summary><pre>${esc(JSON.stringify(r, null, 1))}</pre></details>`;
+}
+
+function addThinking(ev) {
+  const text = (ev.reasoning || ev.content || "").trim(); if (!text) return;
+  const short = text.length > 240 ? text.slice(0, 240) + "…" : text;
+  const d = document.createElement("div"); d.className = "think";
+  d.innerHTML = text.length > 240 ? `<details><summary>Reasoning</summary>${esc(text)}</details><div>${esc(short)}</div>` : esc(text);
+  $("#timeline").appendChild(d);
+}
+function addTool(ev) {
+  if (ev.checklist) renderChecklist(ev.checklist);
+  if (ev.name === "update_checklist" || ev.name === "set_checklist") {
+    const it = ev.name === "set_checklist" ? `Plan written: ${(ev.args.items || []).length} checks` :
+      `Checklist ${ev.args.status}: ${(ev.checklist[ev.args.index] || {}).item || ""}`;
+    $("#timeline").insertAdjacentHTML("beforeend", `<div class="args" style="padding:2px 4px" id="call-${ev.result.call_id}">#${ev.result.call_id} · ${esc(it)}</div>`);
+    return;
+  }
+  const id = ev.result && ev.result.call_id;
+  const div = document.createElement("div"); div.className = "step"; if (id) div.id = "call-" + id;
+  const args = ev.args ? Object.entries(ev.args).filter(([k]) => k !== "items").map(([k, v]) => `${k}=${typeof v === "object" ? JSON.stringify(v) : v}`).join("  ") : "";
+  div.innerHTML = `<div class="top">${id ? `<span class="callid">#${id}</span>` : ""}<span class="tname">${esc(TOOL[ev.name] || ev.name)}</span><span class="args">${esc(args)}</span></div><div class="result">${resultView(ev)}</div>`;
+  $("#timeline").appendChild(div); toolCount++;
+  div.scrollIntoView({block: "nearest", behavior: "smooth"});
+}
+function showDone(ev) {
+  const a = ev.answer, g = ev.grade || {}, gr = ev.grounding || {};
+  if (!a) { $("#diagnosis").innerHTML = `<div class="label">Diagnosis</div><p class="err">No diagnosis submitted.</p>`; return; }
+  const where = a.element_id ? a.element_id : (a.route_km != null ? `route km ${Number(a.route_km).toFixed(3)}` : "");
+  const refs = (a.evidence_refs || []).map(r => `<div class="ref"><a href="#call-${r.call_id}" data-call="${r.call_id}">#${r.call_id}</a><span>${esc(r.quote)}</span></div>`).join("");
+  const truthWhere = ev.truth.element_id && !["macrobend","fibre_break"].includes(ev.truth.fault_type) ? ev.truth.element_id : `route km ${Number(ev.truth.route_km).toFixed(3)}`;
+  $("#diagnosis").innerHTML = `<div class="label">Diagnosis</div>
+    <div class="big">${esc(PRETTY[a.fault_type] || a.fault_type)}</div><div class="where">${esc(where)}</div>
+    <div class="action">${esc(ACTION[a.action] || a.action)}</div>
+    <div class="ev">${esc(a.evidence || "")}</div>
+    ${refs ? `<div class="label" style="margin-top:10px">Cited evidence</div><div class="refs">${refs}</div>` : ""}
+    <div class="check">
+      <div class="row"><span>Checked against simulator truth</span><span class="verdict-chip ${g.score ? "pass" : "fail"}">${g.score ? "CORRECT" : "WRONG"}</span></div>
+      <div class="row"><span>Truth</span><span class="mono">${esc(PRETTY[ev.truth.fault_type])} · ${esc(truthWhere)}</span></div>
+      ${g.route_error_km != null ? `<div class="row"><span>Location error</span><span class="mono">${(g.route_error_km * 1000).toFixed(0)} m</span></div>` : ""}
+      <div class="row"><span>Citations grounded in tool outputs</span><span class="mono">${gr.rate == null ? "none cited" : `${gr.grounded}/${gr.refs}`}</span></div>
+    </div>
+    <div class="stats"><div class="stat"><div class="v">${ev.tool_calls}</div><div class="k">tool calls</div></div>
+      <div class="stat"><div class="v">${ev.seconds}s</div><div class="k">time</div></div>
+      <div class="stat"><div class="v">${Math.round((ev.usage.prompt_tokens + ev.usage.completion_tokens) / 1000)}k</div><div class="k">tokens</div></div></div>`;
+  document.querySelectorAll(".ref a").forEach(a => a.addEventListener("click", e => { const el = $("#call-" + a.dataset.call); if (el) { el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash") } }));
+  drawRoute({answer: a, truth: ev.truth, correct: !!g.score});
+}
+
+function listen(url) {
+  if (es) es.close();
+  resetRun(); $("#runBtn").disabled = true;
+  $("#status").innerHTML = `<span class="pulse"></span>Agent working…`;
+  es = new EventSource(url);
+  es.onmessage = m => {
+    const ev = JSON.parse(m.data);
+    if (ev.type === "start" && (!caseData || String(caseData.seed) !== String(ev.seed) || caseData.mode !== ev.mode)) {
+      $("#seed").value = ev.seed; $("#mode").value = ev.mode; loadCase();
+    }
+    if (ev.type === "start") $("#status").innerHTML = `<span class="pulse"></span>${esc(ev.model)} · case ${esc(ev.seed)} · ${esc(ev.mode)} track${ev.replay ? " · replay" : ""}`;
+    else if (ev.type === "thinking") addThinking(ev);
+    else if (ev.type === "tool") addTool(ev);
+    else if (ev.type === "done") { showDone(ev); finish(`Finished in ${ev.seconds}s with ${ev.tool_calls} tool calls`) }
+    else if (ev.type === "error") { $("#timeline").insertAdjacentHTML("beforeend", `<div class="err">${esc(ev.message)}</div>`); finish("Stopped with an error") }
+  };
+  es.onerror = () => finish($("#status").textContent.includes("Finished") ? $("#status").textContent : "Connection closed");
+}
+function finish(msg) { if (es) es.close(); es = null; $("#runBtn").disabled = false; $("#status").textContent = msg; loadRuns() }
+
+async function loadRuns() {
+  const runs = await (await fetch("/api/runs")).json();
+  $("#replay").innerHTML = `<option value="">Saved runs</option>` + runs.map(r => `<option value="${esc(r.run_id)}">${esc(r.run_id)}${r.score == null ? "" : r.score ? "  ✓" : "  ✗"}</option>`).join("");
+}
+
+$("#loadBtn").onclick = loadCase;
+$("#runBtn").onclick = async () => { await loadCase(); listen(`/api/run?seed=${$("#seed").value}&mode=${$("#mode").value}&model=${$("#model").value}&sam=${$("#sam").value}`) };
+$("#replay").onchange = async e => { const id = e.target.value; if (!id) return; const [seed, mode] = id.split("_"); $("#seed").value = seed; $("#mode").value = mode; await loadCase(); listen(`/api/replay/${encodeURIComponent(id)}`) };
+(async () => {
+  const ms = await (await fetch("/api/models")).json();
+  $("#model").innerHTML = ms.map(m => `<option value="${esc(m.id)}">${esc(m.label)}</option>`).join("");
+  await loadCase(); loadRuns();
+})();
+</script>
+</body>
+</html>
