@@ -40,6 +40,17 @@ The NOC view is graded on dispatch: right crew (dirty and damaged connectors are
 | Muse Spark 1.3 (Meta Model API) | hard | 14/14 | 100% |
 | Reference expert (remote-only rules) | hard, cases 0 to 69 | 70/70 | n/a |
 
+## Verification at run time (works on a live network)
+
+Following Meta's guidance for verifiable agents, checks are built into the agent, not left to its choice:
+
+1. **Mandatory submit check** (`gate.py`). `submit_diagnosis` only accepts a diagnosis that is well formed, names a real element or a distance on the route, uses an action that fixes that fault, cites at least two measurements that match the tool outputs they cite, and closes every item of the agent's own checklist. A rejected submission goes back to the agent with the problems listed; after three rejections the ticket is escalated to a human engineer.
+2. **AI reviewer.** A second Meta model (Muse Spark 1.3 or Muse Wonder) reads the diagnosis with the full outputs it cites and approves or rejects it with reasons. A rejection counts as a failed attempt.
+3. **Human sign-off.** The NOC engineer approves the work order before it can be dispatched.
+4. **Proof by measurement in the field.** The field assistant can close a ticket only when a live receiver reading taken after the repair is back in range.
+
+None of these use the simulator's hidden answer, so the same checks run on real tickets. The simulator's truth is used separately, to measure how often the whole system is right:
+
 ## Why it is verifiable
 
 Every case comes from a seeded physics simulator, so the true answer is known. A strict verifier grades each diagnosis: the fault type, the action and the location (element id, or route distance within 100 m) must all be right. Malformed answers, multiple guesses and constant answers score zero.
