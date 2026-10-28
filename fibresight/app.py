@@ -34,6 +34,7 @@ MODELS = {
     "spark-open": ("baseten", None, "Muse Spark Open (open weights, Baseten)"),
     "spark-1.3": ("meta", "muse-spark-1.3", "Muse Spark 1.3 (Meta Model API)"),
     "wonder": ("meta", "muse-wonder-1.0", "Muse Wonder 1.0 (Meta Model API)"),
+    "glimmer": ("glimmer", None, "Muse Glimmer 30B (open weights, own GPU on Modal)"),
 }
 
 app = FastAPI(title="FibreSight")
@@ -58,7 +59,10 @@ def index():
 
 @app.get("/api/models")
 def models():
-    return [{"id": k, "label": v[2]} for k, v in MODELS.items()]
+    from .agent import _load_env
+    _load_env()
+    return [{"id": k, "label": v[2]} for k, v in MODELS.items()
+            if v[0] != "glimmer" or os.environ.get("GLIMMER_BASE_URL")]
 
 
 SITES = ["Harbour POP", "Central DC", "North Exchange", "Airport Hub", "Riverside POP", "Hillcrest Exchange",

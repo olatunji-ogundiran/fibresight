@@ -192,4 +192,7 @@ def make_client(provider: str = "baseten", model: Optional[str] = None):
     if provider == "meta":
         return OpenAI(base_url=os.environ.get("META_BASE_URL", "https://api.meta.ai/v1"),
                       api_key=os.environ["META_API_KEY"]), (model or os.environ.get("META_MODEL", "muse-spark-1.3"))
+    if provider == "glimmer":  # Muse Glimmer 30B served with vLLM on Modal (deploy/modal_glimmer.py)
+        return OpenAI(base_url=os.environ["GLIMMER_BASE_URL"], api_key=os.environ["GLIMMER_API_KEY"],
+                      timeout=1800), (model or "muse-glimmer")
     raise ValueError(provider)
