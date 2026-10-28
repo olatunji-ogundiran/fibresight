@@ -74,6 +74,11 @@ location and the action. Approve when it does. Reject only for a concrete proble
 a location that does not follow from the measurements, or a key alternative cause the evidence does not rule out.
 Do not reject for style. Reply with JSON only: {"verdict": "approve" or "reject", "reasons": ["short reason", ...]}"""
 
+REMOTE_NOTE = """
+This is a remote NOC diagnosis: nobody is on site yet and the crew confirms on arrival. Some things cannot be measured
+remotely (a connector's end face, an attenuator's value, a patch cord at the receiver). Approve when the remote evidence
+points to one cause and location and reasonably rules out the others; do not demand proof only a site visit can give."""
+
 
 def review(client, model: str, answer: dict, tb) -> dict:
     """Second-model check of the claims. Errors never block a submission:
@@ -105,7 +110,8 @@ def review(client, model: str, answer: dict, tb) -> dict:
                           "commissioning_link_loss_db": record["commissioning_link_loss_db"]}, default=str)
     try:
         resp = client.chat.completions.create(model=model, messages=[
-            {"role": "system", "content": REVIEW_PROMPT}, {"role": "user", "content": content}])
+            {"role": "system", "content": REVIEW_PROMPT + (REMOTE_NOTE if getattr(tb, "remote_only", False) else "")},
+            {"role": "user", "content": content}])
         text = resp.choices[0].message.content or ""
         m = re.search(r"\{.*\}", text, re.S)
         out = json.loads(m.group(0)) if m else {}

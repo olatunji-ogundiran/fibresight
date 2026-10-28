@@ -130,7 +130,8 @@ def grounding(answer, calls: list) -> dict:
         if nums:
             hit = all(n in blob or n.rstrip("0").rstrip(".") in blob for n in nums)
         else:
-            hit = all(w.lower() in blob.lower() for w in quote.split() if len(w) > 3)
+            words = [w.strip("\"'.,;:!?()[]{}").lower() for w in quote.split()]
+            hit = all(w in blob.lower() for w in words if len(w) > 3)
         if hit:
             ok += 1
         else:

@@ -186,3 +186,18 @@ def test_right_fix_restores_rx_wrong_fix_does_not(tmp_path, seed):
     fixed = _rx(tb)
     assert fixed is not None and RX_LOW_WARN < fixed < -3.0, (t, before, fixed)
     assert tb.case.truth == t  # grading still uses the original fault
+
+
+def test_grounding_ignores_punctuation_in_text_quotes(tmp_path):
+    from fibresight.verifier import grounding
+    tb = ToolBox(generate_case(6), str(tmp_path))
+    tb.call("get_site_notes", {})
+    entry = tb.calls[0]["result"]["notes"][0]["entry"]
+    words = entry.split()[:4]
+    ans = {"evidence_refs": [{"call_id": 1, "quote": '"' + " ".join(words) + '."'}]}
+    assert grounding(ans, tb.calls)["grounded"] == 1
+
+
+def test_daily_pm_rows_state_their_window(tmp_path):
+    rows = ToolBox(generate_case(3), str(tmp_path)).get_pm("rx_power_dbm")["rows"]
+    assert rows[0]["from"].endswith("08:00") and rows[0]["to"].endswith("07:00") and len(rows) == 14

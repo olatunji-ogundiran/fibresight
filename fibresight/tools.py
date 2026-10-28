@@ -96,10 +96,12 @@ class ToolBox:
             rows = []
             for d in range(PM_DAYS):
                 seg = vals[d * 24:(d + 1) * 24]
-                rows.append({"day": times[d * 24].strftime("%Y-%m-%d"), "min": fmt(seg.min()),
+                rows.append({"from": times[d * 24].strftime("%Y-%m-%d %H:%M"),
+                             "to": times[d * 24 + 23].strftime("%Y-%m-%d %H:%M"), "min": fmt(seg.min()),
                              "avg": fmt(np.exp(np.log(seg).mean()) if metric == "pre_fec_ber" else seg.mean()),
                              "max": fmt(seg.max())})
-            return {"metric": metric, "resolution": "daily (UTC days, 24 hourly samples each)", "rows": rows}
+            return {"metric": metric, "resolution": "daily: 24-hour windows of hourly samples (UTC, from/to inclusive), oldest first",
+                    "rows": rows}
         if resolution == "hourly":
             n = int(min(max(last_hours or 48, 1), 72))
             rows = [{"time": times[k].strftime("%Y-%m-%d %H:%M"), "value": fmt(vals[k])}
