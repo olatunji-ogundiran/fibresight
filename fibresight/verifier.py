@@ -14,7 +14,7 @@ from .sim import ACTION_FOR_FAULT, DISTRIBUTED_FAULTS, FAULT_TYPES, Case
 
 ROUTE_TOLERANCE_KM = 0.10
 HARD_ROUTE_TOLERANCE_KM = 0.05
-ANSWER_KEYS = {"fault_type", "element_id", "route_km", "action", "evidence"}
+ANSWER_KEYS = {"fault_type", "element_id", "route_km", "action", "evidence", "evidence_refs"}
 
 ANSWER_SCHEMA = {
     "type": "object",
@@ -26,6 +26,9 @@ ANSWER_SCHEMA = {
                      "description": "Distance from site A along the as-built route map in km. Required for macrobend and fibre_break."},
         "action": {"type": "string", "enum": sorted(set(ACTION_FOR_FAULT.values()))},
         "evidence": {"type": "string", "description": "Short justification citing the measurements used."},
+        "evidence_refs": {"type": "array", "description": "The key measurements behind the diagnosis: each item cites the call_id of the tool result and quotes the value from it.",
+                          "items": {"type": "object", "properties": {"call_id": {"type": "integer"}, "quote": {"type": "string"}},
+                                    "required": ["call_id", "quote"]}},
     },
     "required": ["fault_type", "action", "evidence"],
 }
@@ -77,3 +80,41 @@ def grade(answer, case: Case) -> dict:
     return {"score": 1.0 if passed else 0.0, "valid": True, "errors": [], "fault_type_ok": ft_ok,
             "action_ok": act_ok, "location_ok": loc_ok,
             "route_error_km": None if loc_err is None else round(loc_err, 3), "truth": truth}
+
+
+def _numbers(text: str) -> list:
+    import re
+    return re.findall(r"-?\d+(?:\.\d+)?", text)
+
+
+def grounding(answer, calls: list) -> dict:
+    """Check each cited measurement against the tool output it cites.
+
+    A citation is grounded when its call_id exists and every number quoted
+    appears in that call's output (or, for text-only quotes, the words do).
+    This catches invented readings, not wrong conclusions: correctness is
+    graded separately by grade().
+    """
+    import json
+    refs = (answer or {}).get("evidence_refs") or []
+    if not isinstance(refs, list) or not refs:
+        return {"refs": 0, "grounded": 0, "rate": None, "ungrounded": []}
+    ok, bad = 0, []
+    for r in refs:
+        try:
+            cid, quote = int(r["call_id"]), str(r["quote"])
+        except (KeyError, TypeError, ValueError):
+            bad.append(r); continue
+        if not 1 <= cid <= len(calls):
+            bad.append(r); continue
+        blob = json.dumps(calls[cid - 1].get("result"), default=str)
+        nums = _numbers(quote)
+        if nums:
+            hit = all(n in blob or n.rstrip("0").rstrip(".") in blob for n in nums)
+        else:
+            hit = all(w.lower() in blob.lower() for w in quote.split() if len(w) > 3)
+        if hit:
+            ok += 1
+        else:
+            bad.append(r)
+    return {"refs": len(refs), "grounded": ok, "rate": round(ok / len(refs), 3), "ungrounded": bad[:5]}

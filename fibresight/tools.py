@@ -41,6 +41,7 @@ class ToolBox:
         os.makedirs(workdir, exist_ok=True)
         self._hist = pm.history(case)
         self.calls = []
+        self.checklist = []
 
     # ------------------------------------------------------------ tools
     def get_link_record(self) -> dict:
@@ -171,6 +172,21 @@ class ToolBox:
                          "B-ODF": "power arriving at site B ODF, before the attenuator",
                          "B-RX": "power at the receiver input, after the attenuator"}[point]}
 
+    def set_checklist(self, items: list) -> dict:
+        if not isinstance(items, list) or not items or not all(isinstance(i, str) for i in items):
+            raise ToolError("items must be a non-empty list of strings")
+        self.checklist = [{"item": i, "status": "open", "note": ""} for i in items[:20]]
+        return {"checklist": self.checklist}
+
+    def update_checklist(self, index: int, status: str, note: str = "") -> dict:
+        if status not in ("done", "skipped", "failed", "open"):
+            raise ToolError("status must be done, skipped, failed or open")
+        try:
+            self.checklist[int(index)].update(status=status, note=str(note)[:300])
+        except (IndexError, ValueError, TypeError):
+            raise ToolError("index must refer to an item in the checklist (0-based)")
+        return {"checklist": self.checklist}
+
     def get_site_notes(self) -> dict:
         return {"notes": self.case.notes}
 
@@ -210,7 +226,9 @@ class ToolBox:
             out = fn(**(args or {}))
         except TypeError as e:
             raise ToolError(f"bad arguments for {name}: {e}")
-        self.calls.append({"tool": name, "args": args})
+        self.calls.append({"tool": name, "args": args, "result": out})
+        if isinstance(out, dict):
+            out = dict(out, call_id=len(self.calls))
         return out
 
 
@@ -252,4 +270,12 @@ TOOL_SPECS = [
 SEGMENT_SPEC = {"name": "segment_endface",
                 "description": "Run Meta SAM 3.1 on a connector end-face image: detects particles (dark spots) and scratches (dark lines), grades them by zone and returns a PASS/FAIL verdict plus an annotated image.",
                 "parameters": {"type": "object", "properties": {"element_id": {"type": "string"}}, "required": ["element_id"]}}
+TOOL_SPECS += [
+    {"name": "set_checklist", "description": "Write the investigation plan as a checklist of checks you will make (call this first).",
+     "parameters": {"type": "object", "properties": {"items": {"type": "array", "items": {"type": "string"}}}, "required": ["items"]}},
+    {"name": "update_checklist", "description": "Mark a checklist item done, skipped or failed, with a short note of the finding.",
+     "parameters": {"type": "object", "properties": {"index": {"type": "integer", "description": "0-based item index"},
+                                                    "status": {"type": "string", "enum": ["done", "skipped", "failed", "open"]},
+                                                    "note": {"type": "string"}}, "required": ["index", "status"]}},
+]
 TOOL_NAMES = {t["name"] for t in TOOL_SPECS} | {"segment_endface"}

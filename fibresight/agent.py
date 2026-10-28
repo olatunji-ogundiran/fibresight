@@ -12,7 +12,7 @@ from typing import Optional
 
 from .sim import Case
 from .tools import TOOL_SPECS, ToolBox, ToolError
-from .verifier import ANSWER_SCHEMA, grade
+from .verifier import ANSWER_SCHEMA, grade, grounding
 
 SUBMIT_SPEC = {"name": "submit_diagnosis",
                "description": "Submit the final diagnosis. Call exactly once, when you are confident. This ends the investigation.",
@@ -22,7 +22,10 @@ BASE_PROMPT = """You are a transmission engineer on call for a fibre network ope
 A 1550 nm service from site A to site B is degraded or down. Investigate with the tools and find the single root cause.
 Finish by calling submit_diagnosis with the fault type, its location and the corrective action.
 Location: give element_id for faults at a connector, splice closure, attenuator (B-ATT) or transmitter (A-TX);
-give route_km (distance from site A on the as-built route map) for a macrobend or a fibre break."""
+give route_km (distance from site A on the as-built route map) for a macrobend or a fibre break.
+Start by writing your plan with set_checklist and keep it updated with update_checklist.
+Every tool result carries a call_id. In submit_diagnosis, list the key measurements behind your diagnosis in
+evidence_refs, each with the call_id it came from and the exact value quoted from that result."""
 
 PLAYBOOK_PROMPT = BASE_PROMPT + """
 
@@ -114,7 +117,7 @@ def run_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_P
         transcript.append(entry)
         if answer is not None:
             break
-    result = {"seed": case.seed, "model": model, "mode": mode, "answer": answer, "grade": grade(answer, case),
+    result = {"seed": case.seed, "model": model, "mode": mode, "answer": answer, "grade": grade(answer, case), "grounding": grounding(answer, tb.calls), "checklist": tb.checklist,
               "steps": len(transcript), "tool_calls": len(tb.calls), "seconds": round(time.time() - t0, 1),
               "usage": usage, "transcript": transcript}
     if log_path:

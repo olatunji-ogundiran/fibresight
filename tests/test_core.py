@@ -91,3 +91,26 @@ def test_truth_not_exposed_by_tools(tmp_path):
                        tb.otdr_event_table(1550, "A"), tb.get_pm("rx_power_dbm")], default=str)
     for word in FAULT_TYPES:
         assert word not in blob
+
+
+def test_grounding_detects_invented_readings(tmp_path):
+    from fibresight.verifier import grounding
+    tb = ToolBox(generate_case(2), str(tmp_path))
+    rec = tb.call("measure_power", {"point": "A-TX"})
+    real = str(rec["power_dbm"])
+    good = {"evidence_refs": [{"call_id": rec["call_id"], "quote": f"A-TX {real} dBm"}]}
+    fake = {"evidence_refs": [{"call_id": rec["call_id"], "quote": "A-TX -9.87 dBm"},
+                              {"call_id": 99, "quote": "1.23 dB"}]}
+    assert grounding(good, tb.calls)["rate"] == 1.0
+    g = grounding(fake, tb.calls)
+    assert g["rate"] == 0.0 and g["refs"] == 2
+    assert grounding({"evidence_refs": []}, tb.calls)["rate"] is None
+
+
+def test_checklist_tools(tmp_path):
+    tb = ToolBox(generate_case(2), str(tmp_path))
+    tb.call("set_checklist", {"items": ["alarms", "equipment"]})
+    out = tb.call("update_checklist", {"index": 1, "status": "done", "note": "Tx normal"})
+    assert out["checklist"][1]["status"] == "done"
+    with pytest.raises(ToolError):
+        tb.call("update_checklist", {"index": 5, "status": "done"})

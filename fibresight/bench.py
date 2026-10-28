@@ -27,7 +27,13 @@ def summarise(rows: list) -> dict:
     per = collections.defaultdict(list)
     for r in rows:
         per[r["fault_type"]].append(r["score"])
+    gr = [r["grounding_rate"] for r in rows if r.get("grounding_rate") is not None]
+    tok = [r["usage"] for r in rows if r.get("usage")]
     return {"n": len(rows), "score": round(sum(r["score"] for r in rows) / max(len(rows), 1), 3),
+            "evidence_grounding_rate": round(sum(gr) / len(gr), 3) if gr else None,
+            "cases_with_citations": len(gr),
+            "avg_prompt_tokens": round(sum(u["prompt_tokens"] for u in tok) / len(tok)) if tok else None,
+            "avg_completion_tokens": round(sum(u["completion_tokens"] for u in tok) / len(tok)) if tok else None,
             "by_fault": {k: f"{int(sum(v))}/{len(v)}" for k, v in sorted(per.items())}}
 
 
@@ -69,7 +75,8 @@ def main(argv=None):
                 res = {"seed": seed, "answer": None, "grade": {"score": 0.0}, "error": repr(e)}
         return {"seed": seed, "fault_type": case.truth["fault_type"], "score": res["grade"]["score"],
                 "answer": res.get("answer"), "truth": case.truth, "error": res.get("error"),
-                "tool_calls": res.get("tool_calls"), "usage": res.get("usage")}
+                "tool_calls": res.get("tool_calls"), "usage": res.get("usage"),
+                "grounding_rate": (res.get("grounding") or {}).get("rate")}
 
     rows = []
     with ThreadPoolExecutor(max_workers=max(1, a.workers if a.solver == "agent" else 1)) as ex:
