@@ -1,0 +1,1696 @@
+{
+ "seed": 1001,
+ "model": "muse-wonder-1.0",
+ "mode": "standard",
+ "answer": {
+  "fault_type": "dirty_connector",
+  "element_id": "B-ODF",
+  "route_km": null,
+  "action": "clean_connector",
+  "evidence": "Step Rx loss ~2.8dB on 23 Oct after patching at site B ODF, with Tx stable. Power budget: A-TX 0.75 to B-ODF -7.29 = 8.04dB vs 5.41dB commissioning (+2.6dB); B-ODF to B-RX = 7.18dB, matching 7dB design attenuator, so TX and attenuator excluded. Bidirectional embedded OTDR shows single anomalous reflective ~2.9dB loss at B-ODF both ways, while SC-01 1.01/-0.89dB pair averages ~0.06dB (G.652/G.655 MFD mismatch) and MID-PP is normal. Inspection: B-ODF shows loose dark particles/smudge, no crack/scratch (not damaged); A-ODF and MID-PP clean. Clean B-ODF.",
+  "evidence_refs": [
+   {
+    "call_id": 6,
+    "quote": "\"day\": \"2026-10-24\", \"min\": -14.66, \"avg\": -14.51, \"max\": -14.41"
+   },
+   {
+    "call_id": 4,
+    "quote": "Patching work at site B ODF: jumpers moved to free a port for a new service."
+   },
+   {
+    "call_id": 12,
+    "quote": "\"point\": \"B-ODF\", \"wavelength_nm\": 1550, \"power_dbm\": -7.29"
+   },
+   {
+    "call_id": 13,
+    "quote": "\"point\": \"B-RX\", \"wavelength_nm\": 1550, \"power_dbm\": -14.47"
+   },
+   {
+    "call_id": 16,
+    "quote": "\"event\": 7, \"distance_km\": 23.152, \"type\": \"reflective\", \"loss_db\": 2.95, \"reflectance_db\": -37.8"
+   },
+   {
+    "call_id": 17,
+    "quote": "\"event\": 1, \"distance_km\": 0.001, \"type\": \"reflective\", \"loss_db\": 2.93, \"reflectance_db\": -34.2"
+   },
+   {
+    "call_id": 19,
+    "quote": "Inspection scope view of the bulkhead-side connector end face (core at centre, cladding disc, ferrule)."
+   },
+   {
+    "call_id": 7,
+    "quote": "\"day\": \"2026-10-24\", \"min\": 0.92, \"avg\": 0.98, \"max\": 1.04"
+   }
+  ]
+ },
+ "grade": {
+  "score": 1.0,
+  "valid": true,
+  "errors": [],
+  "fault_type_ok": true,
+  "action_ok": true,
+  "location_ok": true,
+  "route_error_km": null,
+  "truth": {
+   "fault_type": "dirty_connector",
+   "element_id": "B-ODF",
+   "route_km": 22.51,
+   "action": "clean_connector"
+  }
+ },
+ "grounding": {
+  "refs": 8,
+  "grounded": 8,
+  "rate": 1.0,
+  "ungrounded": []
+ },
+ "checklist": [
+  {
+   "item": "Get link record: route map, elements, design loss, attenuator, commissioning baseline, thresholds",
+   "status": "done",
+   "note": "22.51km G652.D, elements A-ODF 0, SC01 4.628, SC02 8.234, SC03 13.179, SC04 15.585, MID-PP 16.675, SC05 19.626, B-ODF 22.51; B-ATT design 7dB, Rx sens -15, commissioning 5.41dB@1550"
+  },
+  {
+   "item": "Get alarms, PM history (Rx/Tx power, bias, BER, temp) and site notes to characterise degradation vs outage and timing",
+   "status": "done",
+   "note": "Rx step -11.75 to -14.5 on 23 Oct (~2.75dB), TX power/bias stable, BER up ~100x; alarms RX_LOW_WARNING 23 Oct 13:00 after B-ODF patching 11:43"
+  },
+  {
+   "item": "Measure power at A-TX, B-ODF, B-RX to localise loss segment and check TX and attenuator",
+   "status": "done",
+   "note": "A-TX 0.75dBm, B-ODF -7.29, B-RX -14.47 => fibre loss 8.04dB vs 5.41 commissioning (+2.6dB), attenuator 7.18dB ~7 design so attenuator/TX likely OK"
+  },
+  {
+   "item": "Use in-service embedded OTDR (1625 nm) from A and/or B to locate events without interrupting traffic",
+   "status": "done",
+   "note": "Embedded 1625: B-ODF reflective loss 2.95dB from A (-37.8) / 2.93dB from B (-34.2); SC-01 1.01 vs -0.89 gainer = normal MFD mismatch avg 0.06; MID-PP 0.17 normal"
+  },
+  {
+   "item": "If needed, run handheld OTDR at 1550/1310 nm, trace/image analysis to distinguish bend vs splice vs break vs connector (wavelength dependence, reflectance)",
+   "status": "skipped",
+   "note": "Handheld OTDR not needed - would interrupt traffic; bidirectional embedded already shows reflective event at B-ODF not non-reflective bend/splice, ruling out macrobend/break"
+  },
+  {
+   "item": "Inspect connectors (A-ODF, MID-PP, B-ODF) if connector fault suspected",
+   "status": "done",
+   "note": "B-ODF dirty: dark particles/smudge on cladding approaching core, no crack/scratch; A-ODF and MID-PP clean"
+  },
+  {
+   "item": "Correlate event distance to as-built route_km, confirm single root cause, submit diagnosis with evidence refs",
+   "status": "done",
+   "note": "Root cause dirty B-ODF: step loss matches 2.9dB OTDR, inspection dirty, patching at B 23 Oct preceded alarm; TX/ATT/SC01/MID-PP excluded"
+  }
+ ],
+ "steps": 12,
+ "tool_calls": 24,
+ "seconds": 54.1,
+ "usage": {
+  "prompt_tokens": 108274,
+  "completion_tokens": 8261
+ },
+ "transcript": [
+  {
+   "step": 0,
+   "content": "Investigating your A\u2192B 1550 nm fault \u2014 starting with a systematic plan to isolate the single root cause.",
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "set_checklist",
+     "args": {
+      "items": [
+       "Get link record: route map, elements, design loss, attenuator, commissioning baseline, thresholds",
+       "Get alarms, PM history (Rx/Tx power, bias, BER, temp) and site notes to characterise degradation vs outage and timing",
+       "Measure power at A-TX, B-ODF, B-RX to localise loss segment and check TX and attenuator",
+       "Use in-service embedded OTDR (1625 nm) from A and/or B to locate events without interrupting traffic",
+       "If needed, run handheld OTDR at 1550/1310 nm, trace/image analysis to distinguish bend vs splice vs break vs connector (wavelength dependence, reflectance)",
+       "Inspect connectors (A-ODF, MID-PP, B-ODF) if connector fault suspected",
+       "Correlate event distance to as-built route_km, confirm single root cause, submit diagnosis with evidence refs"
+      ]
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record: route map, elements, design loss, attenuator, commissioning baseline, thresholds",
+        "status": "done",
+        "note": "22.51km G652.D, elements A-ODF 0, SC01 4.628, SC02 8.234, SC03 13.179, SC04 15.585, MID-PP 16.675, SC05 19.626, B-ODF 22.51; B-ATT design 7dB, Rx sens -15, commissioning 5.41dB@1550"
+       },
+       {
+        "item": "Get alarms, PM history (Rx/Tx power, bias, BER, temp) and site notes to characterise degradation vs outage and timing",
+        "status": "done",
+        "note": "Rx step -11.75 to -14.5 on 23 Oct (~2.75dB), TX power/bias stable, BER up ~100x; alarms RX_LOW_WARNING 23 Oct 13:00 after B-ODF patching 11:43"
+       },
+       {
+        "item": "Measure power at A-TX, B-ODF, B-RX to localise loss segment and check TX and attenuator",
+        "status": "done",
+        "note": "A-TX 0.75dBm, B-ODF -7.29, B-RX -14.47 => fibre loss 8.04dB vs 5.41 commissioning (+2.6dB), attenuator 7.18dB ~7 design so attenuator/TX likely OK"
+       },
+       {
+        "item": "Use in-service embedded OTDR (1625 nm) from A and/or B to locate events without interrupting traffic",
+        "status": "done",
+        "note": "Embedded 1625: B-ODF reflective loss 2.95dB from A (-37.8) / 2.93dB from B (-34.2); SC-01 1.01 vs -0.89 gainer = normal MFD mismatch avg 0.06; MID-PP 0.17 normal"
+       },
+       {
+        "item": "If needed, run handheld OTDR at 1550/1310 nm, trace/image analysis to distinguish bend vs splice vs break vs connector (wavelength dependence, reflectance)",
+        "status": "skipped",
+        "note": "Handheld OTDR not needed - would interrupt traffic; bidirectional embedded already shows reflective event at B-ODF not non-reflective bend/splice, ruling out macrobend/break"
+       },
+       {
+        "item": "Inspect connectors (A-ODF, MID-PP, B-ODF) if connector fault suspected",
+        "status": "done",
+        "note": "B-ODF dirty: dark particles/smudge on cladding approaching core, no crack/scratch; A-ODF and MID-PP clean"
+       },
+       {
+        "item": "Correlate event distance to as-built route_km, confirm single root cause, submit diagnosis with evidence refs",
+        "status": "done",
+        "note": "Root cause dirty B-ODF: step loss matches 2.9dB OTDR, inspection dirty, patching at B 23 Oct preceded alarm; TX/ATT/SC01/MID-PP excluded"
+       }
+      ],
+      "call_id": 1
+     }
+    }
+   ]
+  },
+  {
+   "step": 1,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_link_record",
+     "args": {},
+     "result": {
+      "link": "Site A to Site B, single-mode G.652.D, route length 22.51 km (as-built route map)",
+      "elements_in_route_order": [
+       {
+        "id": "A-ODF",
+        "type": "connector (ODF/patch panel)",
+        "route_km": 0.0
+       },
+       {
+        "id": "SC-01",
+        "type": "splice closure",
+        "route_km": 4.628,
+        "slack_stored_m": "about 50 (as-built varies)",
+        "note": "joins the original G.652.D cable to a G.655 replacement section"
+       },
+       {
+        "id": "SC-02",
+        "type": "splice closure",
+        "route_km": 8.234,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-03",
+        "type": "splice closure",
+        "route_km": 13.179,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "SC-04",
+        "type": "splice closure",
+        "route_km": 15.585,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "MID-PP",
+        "type": "connector (ODF/patch panel)",
+        "route_km": 16.675
+       },
+       {
+        "id": "SC-05",
+        "type": "splice closure",
+        "route_km": 19.626,
+        "slack_stored_m": "about 50 (as-built varies)"
+       },
+       {
+        "id": "B-ODF",
+        "type": "connector (ODF/patch panel)",
+        "route_km": 22.51
+       }
+      ],
+      "cable": {
+       "fibre_excess_length_over_cable_pct": "1.0 to 1.8 (manufacturer spec)",
+       "slack_loops": "spare fibre is coiled at each splice closure"
+      },
+      "service": {
+       "direction": "site A transmits, site B receives, 1550 nm",
+       "A-TX": "10G 1550 nm transceiver, launch power spec -1.0 to +2.0 dBm",
+       "B-ATT": "fixed in-line attenuator at site B between ODF and receiver, design value 7 dB",
+       "B-RX": "receiver sensitivity -15.0 dBm, overload -1.0 dBm",
+       "available_attenuator_values_db": [
+        0,
+        3,
+        5,
+        7,
+        10,
+        15
+       ]
+      },
+      "commissioning_link_loss_db": {
+       "1310": 8.78,
+       "1550": 5.41,
+       "note": "A-ODF to B-ODF, bidirectional average, at commissioning"
+      },
+      "alarm_thresholds_dbm": {
+       "RX_LOW_WARNING": -13.0,
+       "RX_LOW_ALARM": -16.0,
+       "RX_LOS": -25.0,
+       "RX_HIGH_WARNING": -3.0,
+       "RX_HIGH_ALARM": -1.0
+      },
+      "answer_ids": {
+       "elements": [
+        "A-ODF",
+        "SC-01",
+        "SC-02",
+        "SC-03",
+        "SC-04",
+        "MID-PP",
+        "SC-05",
+        "B-ODF"
+       ],
+       "equipment": [
+        "A-TX",
+        "B-ATT"
+       ]
+      },
+      "call_id": 2
+     }
+    },
+    {
+     "name": "get_alarms",
+     "args": {},
+     "result": {
+      "now": "2026-10-27 08:00 UTC",
+      "alarms": [
+       {
+        "alarm": "RX_LOW_WARNING",
+        "severity": "minor",
+        "raised": "2026-10-23 13:00 UTC",
+        "cleared": "active",
+        "entity": "B-RX (1550 nm service from site A)"
+       }
+      ],
+      "call_id": 3
+     }
+    },
+    {
+     "name": "get_site_notes",
+     "args": {},
+     "result": {
+      "notes": [
+       {
+        "time": "2026-10-20 00:00 UTC",
+        "entry": "Power works at site B; equipment ran on battery for 40 minutes, no traffic impact."
+       },
+       {
+        "time": "2026-10-20 21:30 UTC",
+        "entry": "Connector at street cabinet patch panel inspected and cleaned during routine maintenance. Passed inspection."
+       },
+       {
+        "time": "2026-10-23 11:43 UTC",
+        "entry": "Patching work at site B ODF: jumpers moved to free a port for a new service."
+       }
+      ],
+      "call_id": 4
+     }
+    }
+   ]
+  },
+  {
+   "step": 2,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 0,
+      "note": "22.51km G652.D, elements A-ODF 0, SC01 4.628, SC02 8.234, SC03 13.179, SC04 15.585, MID-PP 16.675, SC05 19.626, B-ODF 22.51; B-ATT design 7dB, Rx sens -15, commissioning 5.41dB@1550",
+      "status": "done"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record: route map, elements, design loss, attenuator, commissioning baseline, thresholds",
+        "status": "done",
+        "note": "22.51km G652.D, elements A-ODF 0, SC01 4.628, SC02 8.234, SC03 13.179, SC04 15.585, MID-PP 16.675, SC05 19.626, B-ODF 22.51; B-ATT design 7dB, Rx sens -15, commissioning 5.41dB@1550"
+       },
+       {
+        "item": "Get alarms, PM history (Rx/Tx power, bias, BER, temp) and site notes to characterise degradation vs outage and timing",
+        "status": "done",
+        "note": "Rx step -11.75 to -14.5 on 23 Oct (~2.75dB), TX power/bias stable, BER up ~100x; alarms RX_LOW_WARNING 23 Oct 13:00 after B-ODF patching 11:43"
+       },
+       {
+        "item": "Measure power at A-TX, B-ODF, B-RX to localise loss segment and check TX and attenuator",
+        "status": "done",
+        "note": "A-TX 0.75dBm, B-ODF -7.29, B-RX -14.47 => fibre loss 8.04dB vs 5.41 commissioning (+2.6dB), attenuator 7.18dB ~7 design so attenuator/TX likely OK"
+       },
+       {
+        "item": "Use in-service embedded OTDR (1625 nm) from A and/or B to locate events without interrupting traffic",
+        "status": "done",
+        "note": "Embedded 1625: B-ODF reflective loss 2.95dB from A (-37.8) / 2.93dB from B (-34.2); SC-01 1.01 vs -0.89 gainer = normal MFD mismatch avg 0.06; MID-PP 0.17 normal"
+       },
+       {
+        "item": "If needed, run handheld OTDR at 1550/1310 nm, trace/image analysis to distinguish bend vs splice vs break vs connector (wavelength dependence, reflectance)",
+        "status": "skipped",
+        "note": "Handheld OTDR not needed - would interrupt traffic; bidirectional embedded already shows reflective event at B-ODF not non-reflective bend/splice, ruling out macrobend/break"
+       },
+       {
+        "item": "Inspect connectors (A-ODF, MID-PP, B-ODF) if connector fault suspected",
+        "status": "done",
+        "note": "B-ODF dirty: dark particles/smudge on cladding approaching core, no crack/scratch; A-ODF and MID-PP clean"
+       },
+       {
+        "item": "Correlate event distance to as-built route_km, confirm single root cause, submit diagnosis with evidence refs",
+        "status": "done",
+        "note": "Root cause dirty B-ODF: step loss matches 2.9dB OTDR, inspection dirty, patching at B 23 Oct preceded alarm; TX/ATT/SC01/MID-PP excluded"
+       }
+      ],
+      "call_id": 5
+     }
+    }
+   ]
+  },
+  {
+   "step": 3,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "rx_power_dbm",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "rx_power_dbm",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": -11.97,
+        "avg": -11.76,
+        "max": -11.62
+       },
+       {
+        "day": "2026-10-14",
+        "min": -11.89,
+        "avg": -11.74,
+        "max": -11.64
+       },
+       {
+        "day": "2026-10-15",
+        "min": -11.87,
+        "avg": -11.75,
+        "max": -11.64
+       },
+       {
+        "day": "2026-10-16",
+        "min": -11.86,
+        "avg": -11.75,
+        "max": -11.59
+       },
+       {
+        "day": "2026-10-17",
+        "min": -11.9,
+        "avg": -11.74,
+        "max": -11.62
+       },
+       {
+        "day": "2026-10-18",
+        "min": -11.89,
+        "avg": -11.77,
+        "max": -11.66
+       },
+       {
+        "day": "2026-10-19",
+        "min": -11.82,
+        "avg": -11.74,
+        "max": -11.63
+       },
+       {
+        "day": "2026-10-20",
+        "min": -11.85,
+        "avg": -11.75,
+        "max": -11.65
+       },
+       {
+        "day": "2026-10-21",
+        "min": -11.86,
+        "avg": -11.75,
+        "max": -11.64
+       },
+       {
+        "day": "2026-10-22",
+        "min": -11.86,
+        "avg": -11.74,
+        "max": -11.65
+       },
+       {
+        "day": "2026-10-23",
+        "min": -14.63,
+        "avg": -13.92,
+        "max": -11.72
+       },
+       {
+        "day": "2026-10-24",
+        "min": -14.66,
+        "avg": -14.51,
+        "max": -14.41
+       },
+       {
+        "day": "2026-10-25",
+        "min": -14.59,
+        "avg": -14.5,
+        "max": -14.41
+       },
+       {
+        "day": "2026-10-26",
+        "min": -14.6,
+        "avg": -14.5,
+        "max": -14.39
+       }
+      ],
+      "call_id": 6
+     }
+    },
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "tx_power_dbm",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "tx_power_dbm",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": 0.89,
+        "avg": 0.98,
+        "max": 1.11
+       },
+       {
+        "day": "2026-10-14",
+        "min": 0.88,
+        "avg": 0.97,
+        "max": 1.07
+       },
+       {
+        "day": "2026-10-15",
+        "min": 0.89,
+        "avg": 0.97,
+        "max": 1.07
+       },
+       {
+        "day": "2026-10-16",
+        "min": 0.81,
+        "avg": 0.96,
+        "max": 1.05
+       },
+       {
+        "day": "2026-10-17",
+        "min": 0.91,
+        "avg": 0.98,
+        "max": 1.1
+       },
+       {
+        "day": "2026-10-18",
+        "min": 0.83,
+        "avg": 0.96,
+        "max": 1.07
+       },
+       {
+        "day": "2026-10-19",
+        "min": 0.85,
+        "avg": 0.98,
+        "max": 1.08
+       },
+       {
+        "day": "2026-10-20",
+        "min": 0.92,
+        "avg": 0.97,
+        "max": 1.06
+       },
+       {
+        "day": "2026-10-21",
+        "min": 0.89,
+        "avg": 0.97,
+        "max": 1.06
+       },
+       {
+        "day": "2026-10-22",
+        "min": 0.86,
+        "avg": 0.98,
+        "max": 1.12
+       },
+       {
+        "day": "2026-10-23",
+        "min": 0.81,
+        "avg": 0.96,
+        "max": 1.09
+       },
+       {
+        "day": "2026-10-24",
+        "min": 0.92,
+        "avg": 0.98,
+        "max": 1.04
+       },
+       {
+        "day": "2026-10-25",
+        "min": 0.85,
+        "avg": 0.98,
+        "max": 1.07
+       },
+       {
+        "day": "2026-10-26",
+        "min": 0.91,
+        "avg": 0.97,
+        "max": 1.05
+       }
+      ],
+      "call_id": 7
+     }
+    },
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "pre_fec_ber",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "pre_fec_ber",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": 1e-15,
+        "avg": 1.05e-15,
+        "max": 1.29e-15
+       },
+       {
+        "day": "2026-10-14",
+        "min": 1e-15,
+        "avg": 1.05e-15,
+        "max": 1.24e-15
+       },
+       {
+        "day": "2026-10-15",
+        "min": 1e-15,
+        "avg": 1.06e-15,
+        "max": 1.38e-15
+       },
+       {
+        "day": "2026-10-16",
+        "min": 1e-15,
+        "avg": 1.05e-15,
+        "max": 1.34e-15
+       },
+       {
+        "day": "2026-10-17",
+        "min": 1e-15,
+        "avg": 1.09e-15,
+        "max": 1.6e-15
+       },
+       {
+        "day": "2026-10-18",
+        "min": 1e-15,
+        "avg": 1.05e-15,
+        "max": 1.51e-15
+       },
+       {
+        "day": "2026-10-19",
+        "min": 1e-15,
+        "avg": 1.06e-15,
+        "max": 1.28e-15
+       },
+       {
+        "day": "2026-10-20",
+        "min": 1e-15,
+        "avg": 1.08e-15,
+        "max": 1.33e-15
+       },
+       {
+        "day": "2026-10-21",
+        "min": 1e-15,
+        "avg": 1.06e-15,
+        "max": 1.38e-15
+       },
+       {
+        "day": "2026-10-22",
+        "min": 1e-15,
+        "avg": 1.07e-15,
+        "max": 1.56e-15
+       },
+       {
+        "day": "2026-10-23",
+        "min": 1e-15,
+        "avg": 5.22e-14,
+        "max": 2.9e-13
+       },
+       {
+        "day": "2026-10-24",
+        "min": 8.9e-14,
+        "avg": 1.65e-13,
+        "max": 2.6e-13
+       },
+       {
+        "day": "2026-10-25",
+        "min": 7.61e-14,
+        "avg": 1.56e-13,
+        "max": 3.38e-13
+       },
+       {
+        "day": "2026-10-26",
+        "min": 1.07e-13,
+        "avg": 1.58e-13,
+        "max": 2.53e-13
+       }
+      ],
+      "call_id": 8
+     }
+    },
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "tx_bias_ma",
+      "resolution": "daily"
+     },
+     "result": {
+      "metric": "tx_bias_ma",
+      "resolution": "daily (UTC days, 24 hourly samples each)",
+      "rows": [
+       {
+        "day": "2026-10-13",
+        "min": 35.39,
+        "avg": 36.31,
+        "max": 37.22
+       },
+       {
+        "day": "2026-10-14",
+        "min": 35.23,
+        "avg": 36.27,
+        "max": 37.36
+       },
+       {
+        "day": "2026-10-15",
+        "min": 35.19,
+        "avg": 36.2,
+        "max": 37.15
+       },
+       {
+        "day": "2026-10-16",
+        "min": 35.35,
+        "avg": 36.35,
+        "max": 37.33
+       },
+       {
+        "day": "2026-10-17",
+        "min": 35.12,
+        "avg": 36.24,
+        "max": 37.12
+       },
+       {
+        "day": "2026-10-18",
+        "min": 35.21,
+        "avg": 36.26,
+        "max": 37.16
+       },
+       {
+        "day": "2026-10-19",
+        "min": 34.99,
+        "avg": 36.19,
+        "max": 37.17
+       },
+       {
+        "day": "2026-10-20",
+        "min": 35.13,
+        "avg": 36.26,
+        "max": 37.32
+       },
+       {
+        "day": "2026-10-21",
+        "min": 34.95,
+        "avg": 36.29,
+        "max": 37.21
+       },
+       {
+        "day": "2026-10-22",
+        "min": 35.17,
+        "avg": 36.17,
+        "max": 37.28
+       },
+       {
+        "day": "2026-10-23",
+        "min": 35.29,
+        "avg": 36.27,
+        "max": 37.35
+       },
+       {
+        "day": "2026-10-24",
+        "min": 35.29,
+        "avg": 36.23,
+        "max": 37.21
+       },
+       {
+        "day": "2026-10-25",
+        "min": 35.46,
+        "avg": 36.21,
+        "max": 37.28
+       },
+       {
+        "day": "2026-10-26",
+        "min": 35.11,
+        "avg": 36.23,
+        "max": 37.43
+       }
+      ],
+      "call_id": 9
+     }
+    }
+   ]
+  },
+  {
+   "step": 4,
+   "content": "Rx power fell ~2.8 dB on 23 Oct while Tx stayed stable \u2014 a step loss, not transmitter ageing. Checking hourly timing and live power levels to localise it.",
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "get_pm",
+     "args": {
+      "metric": "rx_power_dbm",
+      "resolution": "hourly",
+      "last_hours": 72
+     },
+     "result": {
+      "metric": "rx_power_dbm",
+      "resolution": "hourly, last 72 hours",
+      "rows": [
+       {
+        "time": "2026-10-24 08:00",
+        "value": -14.52
+       },
+       {
+        "time": "2026-10-24 09:00",
+        "value": -14.5
+       },
+       {
+        "time": "2026-10-24 10:00",
+        "value": -14.54
+       },
+       {
+        "time": "2026-10-24 11:00",
+        "value": -14.49
+       },
+       {
+        "time": "2026-10-24 12:00",
+        "value": -14.43
+       },
+       {
+        "time": "2026-10-24 13:00",
+        "value": -14.49
+       },
+       {
+        "time": "2026-10-24 14:00",
+        "value": -14.57
+       },
+       {
+        "time": "2026-10-24 15:00",
+        "value": -14.51
+       },
+       {
+        "time": "2026-10-24 16:00",
+        "value": -14.44
+       },
+       {
+        "time": "2026-10-24 17:00",
+        "value": -14.6
+       },
+       {
+        "time": "2026-10-24 18:00",
+        "value": -14.53
+       },
+       {
+        "time": "2026-10-24 19:00",
+        "value": -14.66
+       },
+       {
+        "time": "2026-10-24 20:00",
+        "value": -14.52
+       },
+       {
+        "time": "2026-10-24 21:00",
+        "value": -14.55
+       },
+       {
+        "time": "2026-10-24 22:00",
+        "value": -14.43
+       },
+       {
+        "time": "2026-10-24 23:00",
+        "value": -14.41
+       },
+       {
+        "time": "2026-10-25 00:00",
+        "value": -14.54
+       },
+       {
+        "time": "2026-10-25 01:00",
+        "value": -14.48
+       },
+       {
+        "time": "2026-10-25 02:00",
+        "value": -14.52
+       },
+       {
+        "time": "2026-10-25 03:00",
+        "value": -14.49
+       },
+       {
+        "time": "2026-10-25 04:00",
+        "value": -14.43
+       },
+       {
+        "time": "2026-10-25 05:00",
+        "value": -14.53
+       },
+       {
+        "time": "2026-10-25 06:00",
+        "value": -14.57
+       },
+       {
+        "time": "2026-10-25 07:00",
+        "value": -14.44
+       },
+       {
+        "time": "2026-10-25 08:00",
+        "value": -14.46
+       },
+       {
+        "time": "2026-10-25 09:00",
+        "value": -14.45
+       },
+       {
+        "time": "2026-10-25 10:00",
+        "value": -14.46
+       },
+       {
+        "time": "2026-10-25 11:00",
+        "value": -14.57
+       },
+       {
+        "time": "2026-10-25 12:00",
+        "value": -14.58
+       },
+       {
+        "time": "2026-10-25 13:00",
+        "value": -14.48
+       },
+       {
+        "time": "2026-10-25 14:00",
+        "value": -14.59
+       },
+       {
+        "time": "2026-10-25 15:00",
+        "value": -14.45
+       },
+       {
+        "time": "2026-10-25 16:00",
+        "value": -14.44
+       },
+       {
+        "time": "2026-10-25 17:00",
+        "value": -14.49
+       },
+       {
+        "time": "2026-10-25 18:00",
+        "value": -14.57
+       },
+       {
+        "time": "2026-10-25 19:00",
+        "value": -14.44
+       },
+       {
+        "time": "2026-10-25 20:00",
+        "value": -14.53
+       },
+       {
+        "time": "2026-10-25 21:00",
+        "value": -14.54
+       },
+       {
+        "time": "2026-10-25 22:00",
+        "value": -14.5
+       },
+       {
+        "time": "2026-10-25 23:00",
+        "value": -14.41
+       },
+       {
+        "time": "2026-10-26 00:00",
+        "value": -14.48
+       },
+       {
+        "time": "2026-10-26 01:00",
+        "value": -14.49
+       },
+       {
+        "time": "2026-10-26 02:00",
+        "value": -14.48
+       },
+       {
+        "time": "2026-10-26 03:00",
+        "value": -14.55
+       },
+       {
+        "time": "2026-10-26 04:00",
+        "value": -14.49
+       },
+       {
+        "time": "2026-10-26 05:00",
+        "value": -14.42
+       },
+       {
+        "time": "2026-10-26 06:00",
+        "value": -14.54
+       },
+       {
+        "time": "2026-10-26 07:00",
+        "value": -14.48
+       },
+       {
+        "time": "2026-10-26 08:00",
+        "value": -14.5
+       },
+       {
+        "time": "2026-10-26 09:00",
+        "value": -14.5
+       },
+       {
+        "time": "2026-10-26 10:00",
+        "value": -14.52
+       },
+       {
+        "time": "2026-10-26 11:00",
+        "value": -14.46
+       },
+       {
+        "time": "2026-10-26 12:00",
+        "value": -14.49
+       },
+       {
+        "time": "2026-10-26 13:00",
+        "value": -14.45
+       },
+       {
+        "time": "2026-10-26 14:00",
+        "value": -14.53
+       },
+       {
+        "time": "2026-10-26 15:00",
+        "value": -14.52
+       },
+       {
+        "time": "2026-10-26 16:00",
+        "value": -14.48
+       },
+       {
+        "time": "2026-10-26 17:00",
+        "value": -14.47
+       },
+       {
+        "time": "2026-10-26 18:00",
+        "value": -14.53
+       },
+       {
+        "time": "2026-10-26 19:00",
+        "value": -14.5
+       },
+       {
+        "time": "2026-10-26 20:00",
+        "value": -14.39
+       },
+       {
+        "time": "2026-10-26 21:00",
+        "value": -14.55
+       },
+       {
+        "time": "2026-10-26 22:00",
+        "value": -14.39
+       },
+       {
+        "time": "2026-10-26 23:00",
+        "value": -14.55
+       },
+       {
+        "time": "2026-10-27 00:00",
+        "value": -14.57
+       },
+       {
+        "time": "2026-10-27 01:00",
+        "value": -14.52
+       },
+       {
+        "time": "2026-10-27 02:00",
+        "value": -14.6
+       },
+       {
+        "time": "2026-10-27 03:00",
+        "value": -14.48
+       },
+       {
+        "time": "2026-10-27 04:00",
+        "value": -14.57
+       },
+       {
+        "time": "2026-10-27 05:00",
+        "value": -14.53
+       },
+       {
+        "time": "2026-10-27 06:00",
+        "value": -14.43
+       },
+       {
+        "time": "2026-10-27 07:00",
+        "value": -14.49
+       }
+      ],
+      "call_id": 10
+     }
+    },
+    {
+     "name": "measure_power",
+     "args": {
+      "point": "A-TX"
+     },
+     "result": {
+      "point": "A-TX",
+      "wavelength_nm": 1550,
+      "power_dbm": 0.75,
+      "note": "transmitter output at site A patch cord",
+      "call_id": 11
+     }
+    },
+    {
+     "name": "measure_power",
+     "args": {
+      "point": "B-ODF"
+     },
+     "result": {
+      "point": "B-ODF",
+      "wavelength_nm": 1550,
+      "power_dbm": -7.29,
+      "note": "power arriving at site B ODF, before the attenuator",
+      "call_id": 12
+     }
+    },
+    {
+     "name": "measure_power",
+     "args": {
+      "point": "B-RX"
+     },
+     "result": {
+      "point": "B-RX",
+      "wavelength_nm": 1550,
+      "power_dbm": -14.47,
+      "note": "power at the receiver input, after the attenuator",
+      "call_id": 13
+     }
+    }
+   ]
+  },
+  {
+   "step": 5,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 1,
+      "note": "Rx step -11.75 to -14.5 on 23 Oct (~2.75dB), TX power/bias stable, BER up ~100x; alarms RX_LOW_WARNING 23 Oct 13:00 after B-ODF patching 11:43",
+      "status": "done"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record: route map, elements, design loss, attenuator, commissioning baseline, thresholds",
+        "status": "done",
+        "note": "22.51km G652.D, elements A-ODF 0, SC01 4.628, SC02 8.234, SC03 13.179, SC04 15.585, MID-PP 16.675, SC05 19.626, B-ODF 22.51; B-ATT design 7dB, Rx sens -15, commissioning 5.41dB@1550"
+       },
+       {
+        "item": "Get alarms, PM history (Rx/Tx power, bias, BER, temp) and site notes to characterise degradation vs outage and timing",
+        "status": "done",
+        "note": "Rx step -11.75 to -14.5 on 23 Oct (~2.75dB), TX power/bias stable, BER up ~100x; alarms RX_LOW_WARNING 23 Oct 13:00 after B-ODF patching 11:43"
+       },
+       {
+        "item": "Measure power at A-TX, B-ODF, B-RX to localise loss segment and check TX and attenuator",
+        "status": "done",
+        "note": "A-TX 0.75dBm, B-ODF -7.29, B-RX -14.47 => fibre loss 8.04dB vs 5.41 commissioning (+2.6dB), attenuator 7.18dB ~7 design so attenuator/TX likely OK"
+       },
+       {
+        "item": "Use in-service embedded OTDR (1625 nm) from A and/or B to locate events without interrupting traffic",
+        "status": "done",
+        "note": "Embedded 1625: B-ODF reflective loss 2.95dB from A (-37.8) / 2.93dB from B (-34.2); SC-01 1.01 vs -0.89 gainer = normal MFD mismatch avg 0.06; MID-PP 0.17 normal"
+       },
+       {
+        "item": "If needed, run handheld OTDR at 1550/1310 nm, trace/image analysis to distinguish bend vs splice vs break vs connector (wavelength dependence, reflectance)",
+        "status": "skipped",
+        "note": "Handheld OTDR not needed - would interrupt traffic; bidirectional embedded already shows reflective event at B-ODF not non-reflective bend/splice, ruling out macrobend/break"
+       },
+       {
+        "item": "Inspect connectors (A-ODF, MID-PP, B-ODF) if connector fault suspected",
+        "status": "done",
+        "note": "B-ODF dirty: dark particles/smudge on cladding approaching core, no crack/scratch; A-ODF and MID-PP clean"
+       },
+       {
+        "item": "Correlate event distance to as-built route_km, confirm single root cause, submit diagnosis with evidence refs",
+        "status": "done",
+        "note": "Root cause dirty B-ODF: step loss matches 2.9dB OTDR, inspection dirty, patching at B 23 Oct preceded alarm; TX/ATT/SC01/MID-PP excluded"
+       }
+      ],
+      "call_id": 14
+     }
+    },
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 2,
+      "note": "A-TX 0.75dBm, B-ODF -7.29, B-RX -14.47 => fibre loss 8.04dB vs 5.41 commissioning (+2.6dB), attenuator 7.18dB ~7 design so attenuator/TX likely OK",
+      "status": "done"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record: route map, elements, design loss, attenuator, commissioning baseline, thresholds",
+        "status": "done",
+        "note": "22.51km G652.D, elements A-ODF 0, SC01 4.628, SC02 8.234, SC03 13.179, SC04 15.585, MID-PP 16.675, SC05 19.626, B-ODF 22.51; B-ATT design 7dB, Rx sens -15, commissioning 5.41dB@1550"
+       },
+       {
+        "item": "Get alarms, PM history (Rx/Tx power, bias, BER, temp) and site notes to characterise degradation vs outage and timing",
+        "status": "done",
+        "note": "Rx step -11.75 to -14.5 on 23 Oct (~2.75dB), TX power/bias stable, BER up ~100x; alarms RX_LOW_WARNING 23 Oct 13:00 after B-ODF patching 11:43"
+       },
+       {
+        "item": "Measure power at A-TX, B-ODF, B-RX to localise loss segment and check TX and attenuator",
+        "status": "done",
+        "note": "A-TX 0.75dBm, B-ODF -7.29, B-RX -14.47 => fibre loss 8.04dB vs 5.41 commissioning (+2.6dB), attenuator 7.18dB ~7 design so attenuator/TX likely OK"
+       },
+       {
+        "item": "Use in-service embedded OTDR (1625 nm) from A and/or B to locate events without interrupting traffic",
+        "status": "done",
+        "note": "Embedded 1625: B-ODF reflective loss 2.95dB from A (-37.8) / 2.93dB from B (-34.2); SC-01 1.01 vs -0.89 gainer = normal MFD mismatch avg 0.06; MID-PP 0.17 normal"
+       },
+       {
+        "item": "If needed, run handheld OTDR at 1550/1310 nm, trace/image analysis to distinguish bend vs splice vs break vs connector (wavelength dependence, reflectance)",
+        "status": "skipped",
+        "note": "Handheld OTDR not needed - would interrupt traffic; bidirectional embedded already shows reflective event at B-ODF not non-reflective bend/splice, ruling out macrobend/break"
+       },
+       {
+        "item": "Inspect connectors (A-ODF, MID-PP, B-ODF) if connector fault suspected",
+        "status": "done",
+        "note": "B-ODF dirty: dark particles/smudge on cladding approaching core, no crack/scratch; A-ODF and MID-PP clean"
+       },
+       {
+        "item": "Correlate event distance to as-built route_km, confirm single root cause, submit diagnosis with evidence refs",
+        "status": "done",
+        "note": "Root cause dirty B-ODF: step loss matches 2.9dB OTDR, inspection dirty, patching at B 23 Oct preceded alarm; TX/ATT/SC01/MID-PP excluded"
+       }
+      ],
+      "call_id": 15
+     }
+    }
+   ]
+  },
+  {
+   "step": 6,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "embedded_otdr",
+     "args": {
+      "from_site": "A",
+      "time": "now"
+     },
+     "result": {
+      "wavelength_nm": 1625,
+      "from_site": "A",
+      "test_time": "2026-10-27 08:00 UTC",
+      "pulse_width_ns": 100,
+      "group_index": 1.4682,
+      "note": "Distances are fibre distances from the ODF at the shooting site. Launch and receive cords of 1.000 km were used; the receive cord ends in an open connector.",
+      "fibre_attenuation_db_per_km": 0.228,
+      "events": [
+       {
+        "event": 1,
+        "distance_km": -0.001,
+        "type": "reflective",
+        "loss_db": 0.27,
+        "reflectance_db": -52.4
+       },
+       {
+        "event": 2,
+        "distance_km": 4.737,
+        "type": "non-reflective",
+        "loss_db": 1.01,
+        "reflectance_db": null
+       },
+       {
+        "event": 3,
+        "distance_km": 13.558,
+        "type": "non-reflective",
+        "loss_db": 0.05,
+        "reflectance_db": null
+       },
+       {
+        "event": 4,
+        "distance_km": 16.06,
+        "type": "non-reflective",
+        "loss_db": 0.05,
+        "reflectance_db": null
+       },
+       {
+        "event": 5,
+        "distance_km": 17.185,
+        "type": "reflective",
+        "loss_db": 0.17,
+        "reflectance_db": -53.1
+       },
+       {
+        "event": 6,
+        "distance_km": 20.2,
+        "type": "non-reflective",
+        "loss_db": 0.05,
+        "reflectance_db": null
+       },
+       {
+        "event": 7,
+        "distance_km": 23.152,
+        "type": "reflective",
+        "loss_db": 2.95,
+        "reflectance_db": -37.8
+       },
+       {
+        "event": 8,
+        "distance_km": 24.15,
+        "type": "end",
+        "loss_db": null,
+        "reflectance_db": -15.0
+       }
+      ],
+      "instrument": "embedded in-service OTDR (line card), 1625 nm out of band, no traffic interruption",
+      "call_id": 16
+     }
+    },
+    {
+     "name": "embedded_otdr",
+     "args": {
+      "from_site": "B",
+      "time": "now"
+     },
+     "result": {
+      "wavelength_nm": 1625,
+      "from_site": "B",
+      "test_time": "2026-10-27 08:00 UTC",
+      "pulse_width_ns": 100,
+      "group_index": 1.4682,
+      "note": "Distances are fibre distances from the ODF at the shooting site. Launch and receive cords of 1.000 km were used; the receive cord ends in an open connector.",
+      "fibre_attenuation_db_per_km": 0.231,
+      "events": [
+       {
+        "event": 1,
+        "distance_km": 0.001,
+        "type": "reflective",
+        "loss_db": 2.93,
+        "reflectance_db": -34.2
+       },
+       {
+        "event": 2,
+        "distance_km": 2.948,
+        "type": "non-reflective",
+        "loss_db": 0.05,
+        "reflectance_db": null
+       },
+       {
+        "event": 3,
+        "distance_km": 5.966,
+        "type": "reflective",
+        "loss_db": 0.17,
+        "reflectance_db": -53.1
+       },
+       {
+        "event": 4,
+        "distance_km": 7.091,
+        "type": "non-reflective",
+        "loss_db": -0.05,
+        "reflectance_db": null
+       },
+       {
+        "event": 5,
+        "distance_km": 14.685,
+        "type": "non-reflective",
+        "loss_db": 0.09,
+        "reflectance_db": null
+       },
+       {
+        "event": 6,
+        "distance_km": 18.413,
+        "type": "non-reflective",
+        "loss_db": -0.89,
+        "reflectance_db": null
+       },
+       {
+        "event": 7,
+        "distance_km": 23.15,
+        "type": "reflective",
+        "loss_db": 0.26,
+        "reflectance_db": -53.0
+       },
+       {
+        "event": 8,
+        "distance_km": 24.151,
+        "type": "end",
+        "loss_db": null,
+        "reflectance_db": -14.3
+       }
+      ],
+      "instrument": "embedded in-service OTDR (line card), 1625 nm out of band, no traffic interruption",
+      "call_id": 17
+     }
+    }
+   ]
+  },
+  {
+   "step": 7,
+   "content": "Embedded OTDR shows a ~2.9 dB reflective event at B-ODF, while the SC-01 splice shows a loss/gainer pair averaging ~0.06 dB \u2014 normal for a G.652/G.655 joint. Inspecting the connectors to tell dirt from damage.",
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 3,
+      "note": "Embedded 1625: B-ODF reflective loss 2.95dB from A (-37.8) / 2.93dB from B (-34.2); SC-01 1.01 vs -0.89 gainer = normal MFD mismatch avg 0.06; MID-PP 0.17 normal",
+      "status": "done"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record: route map, elements, design loss, attenuator, commissioning baseline, thresholds",
+        "status": "done",
+        "note": "22.51km G652.D, elements A-ODF 0, SC01 4.628, SC02 8.234, SC03 13.179, SC04 15.585, MID-PP 16.675, SC05 19.626, B-ODF 22.51; B-ATT design 7dB, Rx sens -15, commissioning 5.41dB@1550"
+       },
+       {
+        "item": "Get alarms, PM history (Rx/Tx power, bias, BER, temp) and site notes to characterise degradation vs outage and timing",
+        "status": "done",
+        "note": "Rx step -11.75 to -14.5 on 23 Oct (~2.75dB), TX power/bias stable, BER up ~100x; alarms RX_LOW_WARNING 23 Oct 13:00 after B-ODF patching 11:43"
+       },
+       {
+        "item": "Measure power at A-TX, B-ODF, B-RX to localise loss segment and check TX and attenuator",
+        "status": "done",
+        "note": "A-TX 0.75dBm, B-ODF -7.29, B-RX -14.47 => fibre loss 8.04dB vs 5.41 commissioning (+2.6dB), attenuator 7.18dB ~7 design so attenuator/TX likely OK"
+       },
+       {
+        "item": "Use in-service embedded OTDR (1625 nm) from A and/or B to locate events without interrupting traffic",
+        "status": "done",
+        "note": "Embedded 1625: B-ODF reflective loss 2.95dB from A (-37.8) / 2.93dB from B (-34.2); SC-01 1.01 vs -0.89 gainer = normal MFD mismatch avg 0.06; MID-PP 0.17 normal"
+       },
+       {
+        "item": "If needed, run handheld OTDR at 1550/1310 nm, trace/image analysis to distinguish bend vs splice vs break vs connector (wavelength dependence, reflectance)",
+        "status": "skipped",
+        "note": "Handheld OTDR not needed - would interrupt traffic; bidirectional embedded already shows reflective event at B-ODF not non-reflective bend/splice, ruling out macrobend/break"
+       },
+       {
+        "item": "Inspect connectors (A-ODF, MID-PP, B-ODF) if connector fault suspected",
+        "status": "done",
+        "note": "B-ODF dirty: dark particles/smudge on cladding approaching core, no crack/scratch; A-ODF and MID-PP clean"
+       },
+       {
+        "item": "Correlate event distance to as-built route_km, confirm single root cause, submit diagnosis with evidence refs",
+        "status": "done",
+        "note": "Root cause dirty B-ODF: step loss matches 2.9dB OTDR, inspection dirty, patching at B 23 Oct preceded alarm; TX/ATT/SC01/MID-PP excluded"
+       }
+      ],
+      "call_id": 18
+     }
+    }
+   ]
+  },
+  {
+   "step": 8,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "inspect_connector",
+     "args": {
+      "element_id": "B-ODF"
+     },
+     "result": {
+      "element_id": "B-ODF",
+      "note": "Inspection scope view of the bulkhead-side connector end face (core at centre, cladding disc, ferrule).",
+      "call_id": 19,
+      "image": "attached in the next message"
+     }
+    },
+    {
+     "name": "inspect_connector",
+     "args": {
+      "element_id": "A-ODF"
+     },
+     "result": {
+      "element_id": "A-ODF",
+      "note": "Inspection scope view of the bulkhead-side connector end face (core at centre, cladding disc, ferrule).",
+      "call_id": 20,
+      "image": "attached in the next message"
+     }
+    },
+    {
+     "name": "inspect_connector",
+     "args": {
+      "element_id": "MID-PP"
+     },
+     "result": {
+      "element_id": "MID-PP",
+      "note": "Inspection scope view of the bulkhead-side connector end face (core at centre, cladding disc, ferrule).",
+      "call_id": 21,
+      "image": "attached in the next message"
+     }
+    }
+   ]
+  },
+  {
+   "step": 9,
+   "content": "B-ODF inspection (first image) shows loose dark particles/smudging over the cladding near the core \u2014 no crack or scratch \u2014 while A-ODF and MID-PP are clean. That matches a dirty, reflective B-ODF rather than damage or a bend.",
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 5,
+      "note": "B-ODF dirty: dark particles/smudge on cladding approaching core, no crack/scratch; A-ODF and MID-PP clean",
+      "status": "done"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record: route map, elements, design loss, attenuator, commissioning baseline, thresholds",
+        "status": "done",
+        "note": "22.51km G652.D, elements A-ODF 0, SC01 4.628, SC02 8.234, SC03 13.179, SC04 15.585, MID-PP 16.675, SC05 19.626, B-ODF 22.51; B-ATT design 7dB, Rx sens -15, commissioning 5.41dB@1550"
+       },
+       {
+        "item": "Get alarms, PM history (Rx/Tx power, bias, BER, temp) and site notes to characterise degradation vs outage and timing",
+        "status": "done",
+        "note": "Rx step -11.75 to -14.5 on 23 Oct (~2.75dB), TX power/bias stable, BER up ~100x; alarms RX_LOW_WARNING 23 Oct 13:00 after B-ODF patching 11:43"
+       },
+       {
+        "item": "Measure power at A-TX, B-ODF, B-RX to localise loss segment and check TX and attenuator",
+        "status": "done",
+        "note": "A-TX 0.75dBm, B-ODF -7.29, B-RX -14.47 => fibre loss 8.04dB vs 5.41 commissioning (+2.6dB), attenuator 7.18dB ~7 design so attenuator/TX likely OK"
+       },
+       {
+        "item": "Use in-service embedded OTDR (1625 nm) from A and/or B to locate events without interrupting traffic",
+        "status": "done",
+        "note": "Embedded 1625: B-ODF reflective loss 2.95dB from A (-37.8) / 2.93dB from B (-34.2); SC-01 1.01 vs -0.89 gainer = normal MFD mismatch avg 0.06; MID-PP 0.17 normal"
+       },
+       {
+        "item": "If needed, run handheld OTDR at 1550/1310 nm, trace/image analysis to distinguish bend vs splice vs break vs connector (wavelength dependence, reflectance)",
+        "status": "skipped",
+        "note": "Handheld OTDR not needed - would interrupt traffic; bidirectional embedded already shows reflective event at B-ODF not non-reflective bend/splice, ruling out macrobend/break"
+       },
+       {
+        "item": "Inspect connectors (A-ODF, MID-PP, B-ODF) if connector fault suspected",
+        "status": "done",
+        "note": "B-ODF dirty: dark particles/smudge on cladding approaching core, no crack/scratch; A-ODF and MID-PP clean"
+       },
+       {
+        "item": "Correlate event distance to as-built route_km, confirm single root cause, submit diagnosis with evidence refs",
+        "status": "done",
+        "note": "Root cause dirty B-ODF: step loss matches 2.9dB OTDR, inspection dirty, patching at B 23 Oct preceded alarm; TX/ATT/SC01/MID-PP excluded"
+       }
+      ],
+      "call_id": 22
+     }
+    },
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 4,
+      "note": "Handheld OTDR not needed - would interrupt traffic; bidirectional embedded already shows reflective event at B-ODF not non-reflective bend/splice, ruling out macrobend/break",
+      "status": "skipped"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record: route map, elements, design loss, attenuator, commissioning baseline, thresholds",
+        "status": "done",
+        "note": "22.51km G652.D, elements A-ODF 0, SC01 4.628, SC02 8.234, SC03 13.179, SC04 15.585, MID-PP 16.675, SC05 19.626, B-ODF 22.51; B-ATT design 7dB, Rx sens -15, commissioning 5.41dB@1550"
+       },
+       {
+        "item": "Get alarms, PM history (Rx/Tx power, bias, BER, temp) and site notes to characterise degradation vs outage and timing",
+        "status": "done",
+        "note": "Rx step -11.75 to -14.5 on 23 Oct (~2.75dB), TX power/bias stable, BER up ~100x; alarms RX_LOW_WARNING 23 Oct 13:00 after B-ODF patching 11:43"
+       },
+       {
+        "item": "Measure power at A-TX, B-ODF, B-RX to localise loss segment and check TX and attenuator",
+        "status": "done",
+        "note": "A-TX 0.75dBm, B-ODF -7.29, B-RX -14.47 => fibre loss 8.04dB vs 5.41 commissioning (+2.6dB), attenuator 7.18dB ~7 design so attenuator/TX likely OK"
+       },
+       {
+        "item": "Use in-service embedded OTDR (1625 nm) from A and/or B to locate events without interrupting traffic",
+        "status": "done",
+        "note": "Embedded 1625: B-ODF reflective loss 2.95dB from A (-37.8) / 2.93dB from B (-34.2); SC-01 1.01 vs -0.89 gainer = normal MFD mismatch avg 0.06; MID-PP 0.17 normal"
+       },
+       {
+        "item": "If needed, run handheld OTDR at 1550/1310 nm, trace/image analysis to distinguish bend vs splice vs break vs connector (wavelength dependence, reflectance)",
+        "status": "skipped",
+        "note": "Handheld OTDR not needed - would interrupt traffic; bidirectional embedded already shows reflective event at B-ODF not non-reflective bend/splice, ruling out macrobend/break"
+       },
+       {
+        "item": "Inspect connectors (A-ODF, MID-PP, B-ODF) if connector fault suspected",
+        "status": "done",
+        "note": "B-ODF dirty: dark particles/smudge on cladding approaching core, no crack/scratch; A-ODF and MID-PP clean"
+       },
+       {
+        "item": "Correlate event distance to as-built route_km, confirm single root cause, submit diagnosis with evidence refs",
+        "status": "done",
+        "note": "Root cause dirty B-ODF: step loss matches 2.9dB OTDR, inspection dirty, patching at B 23 Oct preceded alarm; TX/ATT/SC01/MID-PP excluded"
+       }
+      ],
+      "call_id": 23
+     }
+    }
+   ]
+  },
+  {
+   "step": 10,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "update_checklist",
+     "args": {
+      "index": 6,
+      "note": "Root cause dirty B-ODF: step loss matches 2.9dB OTDR, inspection dirty, patching at B 23 Oct preceded alarm; TX/ATT/SC01/MID-PP excluded",
+      "status": "done"
+     },
+     "result": {
+      "checklist": [
+       {
+        "item": "Get link record: route map, elements, design loss, attenuator, commissioning baseline, thresholds",
+        "status": "done",
+        "note": "22.51km G652.D, elements A-ODF 0, SC01 4.628, SC02 8.234, SC03 13.179, SC04 15.585, MID-PP 16.675, SC05 19.626, B-ODF 22.51; B-ATT design 7dB, Rx sens -15, commissioning 5.41dB@1550"
+       },
+       {
+        "item": "Get alarms, PM history (Rx/Tx power, bias, BER, temp) and site notes to characterise degradation vs outage and timing",
+        "status": "done",
+        "note": "Rx step -11.75 to -14.5 on 23 Oct (~2.75dB), TX power/bias stable, BER up ~100x; alarms RX_LOW_WARNING 23 Oct 13:00 after B-ODF patching 11:43"
+       },
+       {
+        "item": "Measure power at A-TX, B-ODF, B-RX to localise loss segment and check TX and attenuator",
+        "status": "done",
+        "note": "A-TX 0.75dBm, B-ODF -7.29, B-RX -14.47 => fibre loss 8.04dB vs 5.41 commissioning (+2.6dB), attenuator 7.18dB ~7 design so attenuator/TX likely OK"
+       },
+       {
+        "item": "Use in-service embedded OTDR (1625 nm) from A and/or B to locate events without interrupting traffic",
+        "status": "done",
+        "note": "Embedded 1625: B-ODF reflective loss 2.95dB from A (-37.8) / 2.93dB from B (-34.2); SC-01 1.01 vs -0.89 gainer = normal MFD mismatch avg 0.06; MID-PP 0.17 normal"
+       },
+       {
+        "item": "If needed, run handheld OTDR at 1550/1310 nm, trace/image analysis to distinguish bend vs splice vs break vs connector (wavelength dependence, reflectance)",
+        "status": "skipped",
+        "note": "Handheld OTDR not needed - would interrupt traffic; bidirectional embedded already shows reflective event at B-ODF not non-reflective bend/splice, ruling out macrobend/break"
+       },
+       {
+        "item": "Inspect connectors (A-ODF, MID-PP, B-ODF) if connector fault suspected",
+        "status": "done",
+        "note": "B-ODF dirty: dark particles/smudge on cladding approaching core, no crack/scratch; A-ODF and MID-PP clean"
+       },
+       {
+        "item": "Correlate event distance to as-built route_km, confirm single root cause, submit diagnosis with evidence refs",
+        "status": "done",
+        "note": "Root cause dirty B-ODF: step loss matches 2.9dB OTDR, inspection dirty, patching at B 23 Oct preceded alarm; TX/ATT/SC01/MID-PP excluded"
+       }
+      ],
+      "call_id": 24
+     }
+    }
+   ]
+  },
+  {
+   "step": 11,
+   "content": null,
+   "reasoning": null,
+   "tool_calls": [
+    {
+     "name": "submit_diagnosis",
+     "args": {
+      "fault_type": "dirty_connector",
+      "element_id": "B-ODF",
+      "route_km": null,
+      "action": "clean_connector",
+      "evidence": "Step Rx loss ~2.8dB on 23 Oct after patching at site B ODF, with Tx stable. Power budget: A-TX 0.75 to B-ODF -7.29 = 8.04dB vs 5.41dB commissioning (+2.6dB); B-ODF to B-RX = 7.18dB, matching 7dB design attenuator, so TX and attenuator excluded. Bidirectional embedded OTDR shows single anomalous reflective ~2.9dB loss at B-ODF both ways, while SC-01 1.01/-0.89dB pair averages ~0.06dB (G.652/G.655 MFD mismatch) and MID-PP is normal. Inspection: B-ODF shows loose dark particles/smudge, no crack/scratch (not damaged); A-ODF and MID-PP clean. Clean B-ODF.",
+      "evidence_refs": [
+       {
+        "call_id": 6,
+        "quote": "\"day\": \"2026-10-24\", \"min\": -14.66, \"avg\": -14.51, \"max\": -14.41"
+       },
+       {
+        "call_id": 4,
+        "quote": "Patching work at site B ODF: jumpers moved to free a port for a new service."
+       },
+       {
+        "call_id": 12,
+        "quote": "\"point\": \"B-ODF\", \"wavelength_nm\": 1550, \"power_dbm\": -7.29"
+       },
+       {
+        "call_id": 13,
+        "quote": "\"point\": \"B-RX\", \"wavelength_nm\": 1550, \"power_dbm\": -14.47"
+       },
+       {
+        "call_id": 16,
+        "quote": "\"event\": 7, \"distance_km\": 23.152, \"type\": \"reflective\", \"loss_db\": 2.95, \"reflectance_db\": -37.8"
+       },
+       {
+        "call_id": 17,
+        "quote": "\"event\": 1, \"distance_km\": 0.001, \"type\": \"reflective\", \"loss_db\": 2.93, \"reflectance_db\": -34.2"
+       },
+       {
+        "call_id": 19,
+        "quote": "Inspection scope view of the bulkhead-side connector end face (core at centre, cladding disc, ferrule)."
+       },
+       {
+        "call_id": 7,
+        "quote": "\"day\": \"2026-10-24\", \"min\": 0.92, \"avg\": 0.98, \"max\": 1.04"
+       }
+      ]
+     },
+     "result": {
+      "status": "submitted"
+     }
+    }
+   ]
+  }
+ ]
+}
