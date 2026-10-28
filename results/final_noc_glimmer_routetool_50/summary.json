@@ -1,0 +1,804 @@
+{
+ "summary": {
+  "run": "final_noc_glimmer_routetool_50",
+  "view": "noc",
+  "solver": "agent",
+  "verify": true,
+  "reviewer": null,
+  "route_tool": true,
+  "model": "muse-glimmer",
+  "prompt": "base",
+  "seeds": [
+   3000,
+   3013
+  ],
+  "n": 14,
+  "score": 1.0,
+  "strict_score": 1.0,
+  "escalated": 0,
+  "first_try_accepted": 8,
+  "evidence_grounding_rate": 1.0,
+  "cases_with_citations": 14,
+  "avg_prompt_tokens": 202487,
+  "avg_completion_tokens": 6970,
+  "by_fault": {
+   "bad_splice": "2/2",
+   "damaged_connector": "2/2",
+   "dirty_connector": "2/2",
+   "fibre_break": "2/2",
+   "macrobend": "2/2",
+   "tx_degradation": "2/2",
+   "wrong_attenuator": "2/2"
+  }
+ },
+ "rows": [
+  {
+   "seed": 3000,
+   "fault_type": "fibre_break",
+   "score": 1.0,
+   "strict": 1.0,
+   "attempts": 1,
+   "escalated": false,
+   "answer": {
+    "fault_type": "fibre_break",
+    "route_km": 25.05,
+    "action": "repair_break",
+    "evidence": "OTDR from A shows end at fibre 25.696 km mapping to route 25.056 km between SC-06 and SC-07, and OTDR from B shows end at fibre 20.867 km mapping to route 25.043 km at same segment, confirming a break. RX power is -40 dBm LOS since 2026-10-22 and alarm RX_LOS raised 2026-10-21 12:00 UTC coinciding with road works reported near route km 27 on 2026-10-21 11:55 UTC. TX power remains normal ~0.9 dBm, ruling out transmitter failure.",
+    "evidence_refs": [
+     {
+      "call_id": 12,
+      "quote": "distance_km: 25.696, type: end"
+     },
+     {
+      "call_id": 14,
+      "quote": "distance_km: 20.867, type: end"
+     },
+     {
+      "call_id": 16,
+      "quote": "route_km: 25.056, between: [SC-06, SC-07]"
+     },
+     {
+      "call_id": 17,
+      "quote": "route_km: 25.043, between: [SC-06, SC-07]"
+     },
+     {
+      "call_id": 4,
+      "quote": "alarm: RX_LOS, raised: 2026-10-21 12:00 UTC"
+     },
+     {
+      "call_id": 6,
+      "quote": "value: -40.0"
+     }
+    ]
+   },
+   "truth": {
+    "fault_type": "fibre_break",
+    "element_id": null,
+    "route_km": 25.051,
+    "action": "repair_break"
+   },
+   "error": null,
+   "tool_calls": 23,
+   "usage": {
+    "prompt_tokens": 242116,
+    "completion_tokens": 3893
+   },
+   "grounding_rate": 1.0
+  },
+  {
+   "seed": 3001,
+   "fault_type": "wrong_attenuator",
+   "score": 1.0,
+   "strict": 1.0,
+   "attempts": 1,
+   "escalated": false,
+   "answer": {
+    "fault_type": "wrong_attenuator",
+    "element_id": "B-ATT",
+    "route_km": null,
+    "action": "replace_attenuator",
+    "evidence": "RX power dropped ~12 dB on 22 Oct after receiver replacement and attenuator refit from spares at site B. TX power remained stable ~0.3 dBm. Alarms RX_LOW_ALARM and PRE_FEC_BER_HIGH raised 2026-10-22 04:00 UTC. Embedded OTDR from A and B shows no fibre break or macrobend; events are within normal splice losses (e.g., 0.8 dB at SC-05). Commissioning loss 8.34 dB @1550 and design B-ATT 3 dB are consistent with pre-fault RX ~-11.3 dBm. Current RX ~-23.3 dBm indicates excess attenuation at site B, consistent with wrong attenuator value fitted on 22 Oct.",
+    "evidence_refs": [
+     {
+      "call_id": 4,
+      "quote": "RX_LOW_ALARM raised 2026-10-22 04:00 UTC cleared active"
+     },
+     {
+      "call_id": 10,
+      "quote": "Receiver module at site B replaced under RMA. Attenuator refitted from spares box."
+     },
+     {
+      "call_id": 21,
+      "quote": "from 2026-10-21 08:00 to 2026-10-22 07:00 min -23.37 avg -13.29 max -11.18"
+     },
+     {
+      "call_id": 21,
+      "quote": "from 2026-10-22 08:00 to 2026-10-23 07:00 min -23.46 avg -23.29 max -23.16"
+     },
+     {
+      "call_id": 2,
+      "quote": "B-ATT fixed in-line attenuator at site B between ODF and receiver, design value 3 dB"
+     }
+    ]
+   },
+   "truth": {
+    "fault_type": "wrong_attenuator",
+    "element_id": "B-ATT",
+    "route_km": 35.02,
+    "action": "replace_attenuator"
+   },
+   "error": null,
+   "tool_calls": 22,
+   "usage": {
+    "prompt_tokens": 211494,
+    "completion_tokens": 7565
+   },
+   "grounding_rate": 1.0
+  },
+  {
+   "seed": 3002,
+   "fault_type": "tx_degradation",
+   "score": 1.0,
+   "strict": 1.0,
+   "attempts": 2,
+   "escalated": false,
+   "answer": {
+    "fault_type": "tx_degradation",
+    "element_id": "A-TX",
+    "route_km": null,
+    "action": "replace_transmitter",
+    "evidence": "TX power fell from ~+0.39 dBm avg (2026-10-23) to -2.72 dBm avg (2026-10-27) while RX power fell by same ~3.1 dB, indicating source degradation. TX bias increased from ~67 mA to 68.5 mA, BER degraded to 4.59e-13. OTDR from A and B shows no new passive loss events; events at SC-03 10.545 km and MID-PP 12.692 km match commissioning, with apparent -0.84 dB non-reflective event at 10.842 km fibre explained by G.652.D to G.655 transition at SC-03. Recent site work at SC-04 and flooding near km12 do not correlate with measured OTDR loss.",
+    "evidence_refs": [
+     {
+      "call_id": 7,
+      "quote": "min -3.49, avg -2.72, max -2.01"
+     },
+     {
+      "call_id": 6,
+      "quote": "min -15.49, avg -14.77, max -14.01"
+     },
+     {
+      "call_id": 23,
+      "quote": "min 67.42, avg 68.51, max 69.8"
+     },
+     {
+      "call_id": 8,
+      "quote": "min 2.99e-14, avg 4.59e-13, max 6.03e-12"
+     },
+     {
+      "call_id": 12,
+      "quote": "distance_km 10.842, type non-reflective, loss_db -0.84"
+     },
+     {
+      "call_id": 16,
+      "quote": "route_km 10.545, at_element SC-03"
+     }
+    ]
+   },
+   "truth": {
+    "fault_type": "tx_degradation",
+    "element_id": "A-TX",
+    "route_km": 0.0,
+    "action": "replace_transmitter"
+   },
+   "error": null,
+   "tool_calls": 28,
+   "usage": {
+    "prompt_tokens": 302105,
+    "completion_tokens": 11932
+   },
+   "grounding_rate": 1.0
+  },
+  {
+   "seed": 3003,
+   "fault_type": "dirty_connector",
+   "score": 1.0,
+   "strict": 1.0,
+   "attempts": 2,
+   "escalated": false,
+   "answer": {
+    "fault_type": "dirty_connector",
+    "element_id": "B-ODF",
+    "action": "clean_connector",
+    "evidence": "RX power degraded ~1.4 dB from baseline ~-12.1 dBm to ~-13.5 dBm after 19 Oct, RX_LOW_WARNING active since 2026-10-19 00:00 UTC. TX power remained stable ~1.87 dBm. Site B ODF patching on 2026-10-18 23:33 UTC precedes degradation. Embedded OTDR from A shows reflective event at 15.242 km fibre distance with loss_db 1.74 mapped to B-ODF route 14.93 km. Embedded OTDR from B shows reflective event at 0 km with loss_db 1.74 confirming connector loss at B-ODF. The 1.74 dB reflective loss matches the PM drop and timing.",
+    "evidence_refs": [
+     {
+      "call_id": 6,
+      "quote": "\"avg\": -12.09"
+     },
+     {
+      "call_id": 6,
+      "quote": "\"avg\": -13.51"
+     },
+     {
+      "call_id": 7,
+      "quote": "\"avg\": 1.87"
+     },
+     {
+      "call_id": 4,
+      "quote": "\"raised\": \"2026-10-19 00:00 UTC\""
+     },
+     {
+      "call_id": 9,
+      "quote": "\"entry\": \"Patching work at site B ODF: jumpers moved to free a port for a new service.\""
+     },
+     {
+      "call_id": 11,
+      "quote": "\"distance_km\": 15.242, \"type\": \"reflective\", \"loss_db\": 1.74"
+     },
+     {
+      "call_id": 12,
+      "quote": "\"distance_km\": -0.0, \"type\": \"reflective\", \"loss_db\": 1.74"
+     },
+     {
+      "call_id": 15,
+      "quote": "\"route_km\": 14.93, \"at_element\": \"B-ODF\""
+     }
+    ]
+   },
+   "truth": {
+    "fault_type": "dirty_connector",
+    "element_id": "B-ODF",
+    "route_km": 14.93,
+    "action": "clean_connector"
+   },
+   "error": null,
+   "tool_calls": 21,
+   "usage": {
+    "prompt_tokens": 181271,
+    "completion_tokens": 7823
+   },
+   "grounding_rate": 1.0
+  },
+  {
+   "seed": 3004,
+   "fault_type": "damaged_connector",
+   "score": 1.0,
+   "strict": 1.0,
+   "attempts": 1,
+   "escalated": false,
+   "answer": {
+    "fault_type": "damaged_connector",
+    "element_id": "MID-PP",
+    "route_km": 14.964,
+    "action": "replace_connector",
+    "evidence": "RX power dropped ~2.3 dB after 2026-10-22 patch work at street cabinet, OTDR from A shows 2.6 dB reflective loss at 15.311 km fibre distance and OTDR from B shows 2.6 dB reflective loss at 16.325 km, both mapping to route km 14.964 at MID-PP. Cleaning on 2026-10-23 did not restore power, indicating damaged connector end face.",
+    "evidence_refs": [
+     {
+      "call_id": 6,
+      "quote": "\"avg\": -11.15"
+     },
+     {
+      "call_id": 6,
+      "quote": "\"avg\": -13.39"
+     },
+     {
+      "call_id": 12,
+      "quote": "\"distance_km\": 15.311, \"type\": \"reflective\", \"loss_db\": 2.6, \"reflectance_db\": -25.5"
+     },
+     {
+      "call_id": 14,
+      "quote": "\"distance_km\": 16.325, \"type\": \"reflective\", \"loss_db\": 2.6, \"reflectance_db\": -25.3"
+     },
+     {
+      "call_id": 16,
+      "quote": "\"route_km\": 14.964, \"at_element\": \"MID-PP\""
+     },
+     {
+      "call_id": 10,
+      "quote": "\"entry\": \"Patching work at street cabinet patch panel: jumpers moved to free a port for a new service.\""
+     }
+    ]
+   },
+   "truth": {
+    "fault_type": "damaged_connector",
+    "element_id": "MID-PP",
+    "route_km": 14.964,
+    "action": "replace_connector"
+   },
+   "error": null,
+   "tool_calls": 20,
+   "usage": {
+    "prompt_tokens": 162622,
+    "completion_tokens": 4378
+   },
+   "grounding_rate": 1.0
+  },
+  {
+   "seed": 3005,
+   "fault_type": "macrobend",
+   "score": 1.0,
+   "strict": 1.0,
+   "attempts": 2,
+   "escalated": false,
+   "answer": {
+    "fault_type": "macrobend",
+    "route_km": 16.0,
+    "action": "relieve_bend",
+    "evidence": "RX_LOW_WARNING active since 2026-10-23 13:00 UTC with ~2.1 dB drop in received power and BER increase; TX power unchanged. Embedded OTDR from A shows 3.36 dB non-reflective loss at 16.303 km fibre, and OTDR from B shows matching 3.37 dB loss at 12.024 km fibre. Mapping places the loss between splice closures SC-03 and SC-04 at ~16 km route km, consistent with a macrobend induced after utility work near the route on 2026-10-22.",
+    "evidence_refs": [
+     {
+      "call_id": 4,
+      "quote": "RX_LOW_WARNING raised 2026-10-23 13:00 UTC"
+     },
+     {
+      "call_id": 6,
+      "quote": "from 2026-10-23 08:00 to 2026-10-24 07:00 min -13.85 avg -13.32 max -11.59"
+     },
+     {
+      "call_id": 12,
+      "quote": "distance_km 16.303 type non-reflective loss_db 3.36"
+     },
+     {
+      "call_id": 14,
+      "quote": "distance_km 12.024 type non-reflective loss_db 3.37"
+     },
+     {
+      "call_id": 16,
+      "quote": "route_km 15.994 between SC-03 SC-04"
+     }
+    ]
+   },
+   "truth": {
+    "fault_type": "macrobend",
+    "element_id": null,
+    "route_km": 16.007,
+    "action": "relieve_bend"
+   },
+   "error": null,
+   "tool_calls": 20,
+   "usage": {
+    "prompt_tokens": 159551,
+    "completion_tokens": 6882
+   },
+   "grounding_rate": 1.0
+  },
+  {
+   "seed": 3006,
+   "fault_type": "bad_splice",
+   "score": 1.0,
+   "strict": 1.0,
+   "attempts": 1,
+   "escalated": false,
+   "answer": {
+    "fault_type": "bad_splice",
+    "element_id": "SC-01",
+    "action": "resplice",
+    "evidence": "RX power dropped ~1.7 dB after SC-01 re-entry on 2026-10-24 22:07, alarm RX_LOW_WARNING raised 2026-10-24 23:00, OTDR from A shows 1.72 dB loss at 5.176 km mapped to SC-01 route 5.078 km, OTDR from B shows 1.73 dB loss at 39.219 km mapped to same closure, TX power unchanged",
+    "evidence_refs": [
+     {
+      "call_id": 6,
+      "quote": "\"min\": -11.76, \"avg\": -11.69, \"max\": -11.56"
+     },
+     {
+      "call_id": 6,
+      "quote": "\"min\": -13.45, \"avg\": -12.32, \"max\": -11.58"
+     },
+     {
+      "call_id": 7,
+      "quote": "\"min\": 1.68, \"avg\": 1.79, \"max\": 1.88"
+     },
+     {
+      "call_id": 12,
+      "quote": "\"distance_km\": 5.176, \"type\": \"non-reflective\", \"loss_db\": 1.72"
+     },
+     {
+      "call_id": 14,
+      "quote": "\"distance_km\": 39.219, \"type\": \"non-reflective\", \"loss_db\": 1.73"
+     },
+     {
+      "call_id": 16,
+      "quote": "\"route_km\": 5.078, \"at_element\": \"SC-01\""
+     },
+     {
+      "call_id": 10,
+      "quote": "\"time\": \"2026-10-24 22:07 UTC\", \"entry\": \"Splicing crew re-entered closure SC-01 to add a branch cable for a new customer. Closure resealed.\""
+     }
+    ]
+   },
+   "truth": {
+    "fault_type": "bad_splice",
+    "element_id": "SC-01",
+    "route_km": 5.078,
+    "action": "resplice"
+   },
+   "error": null,
+   "tool_calls": 28,
+   "usage": {
+    "prompt_tokens": 256955,
+    "completion_tokens": 7177
+   },
+   "grounding_rate": 1.0
+  },
+  {
+   "seed": 3007,
+   "fault_type": "fibre_break",
+   "score": 1.0,
+   "strict": 1.0,
+   "attempts": 1,
+   "escalated": false,
+   "answer": {
+    "fault_type": "fibre_break",
+    "route_km": 13.03,
+    "action": "repair_break",
+    "evidence": "RX_LOS alarm active since 2026-10-20 15:00 with RX power -40 dBm. OTDR from A shows end at fibre 13.327 km mapped to route km 13.023 between SC-03 and SC-04; OTDR from B shows end at fibre 4.737 km mapped to route km 13.048 between SC-03 and SC-04. Site notes report road works around route km 12 on 2026-10-20 14:46.",
+    "evidence_refs": [
+     {
+      "call_id": 4,
+      "quote": "RX_LOS, severity critical, raised 2026-10-20 15:00 UTC, cleared active"
+     },
+     {
+      "call_id": 6,
+      "quote": "rx_power_dbm value -40.0"
+     },
+     {
+      "call_id": 12,
+      "quote": "events: distance_km 13.327 type end"
+     },
+     {
+      "call_id": 16,
+      "quote": "route_km 13.023 between SC-03 SC-04"
+     },
+     {
+      "call_id": 13,
+      "quote": "events: distance_km 4.737 type end"
+     },
+     {
+      "call_id": 18,
+      "quote": "route_km 13.048 between SC-03 SC-04"
+     }
+    ]
+   },
+   "truth": {
+    "fault_type": "fibre_break",
+    "element_id": null,
+    "route_km": 13.033,
+    "action": "repair_break"
+   },
+   "error": null,
+   "tool_calls": 20,
+   "usage": {
+    "prompt_tokens": 189853,
+    "completion_tokens": 4138
+   },
+   "grounding_rate": 1.0
+  },
+  {
+   "seed": 3008,
+   "fault_type": "wrong_attenuator",
+   "score": 1.0,
+   "strict": 1.0,
+   "attempts": 2,
+   "escalated": false,
+   "answer": {
+    "fault_type": "wrong_attenuator",
+    "element_id": "B-ATT",
+    "route_km": null,
+    "action": "replace_attenuator",
+    "evidence": "RX power fell from average -12.13 dBm on 2026-10-17 08:00 to 2026-10-18 07:00 to average -19.14 dBm on 2026-10-18 08:00 to 2026-10-19 07:00, a ~7 dB drop exactly when alarms raised. TX power remained ~0.73 dBm, ruling out transmitter degradation. Pre-FEC BER rose from ~1.1e-15 to 4.28e-06. Site note 2026-10-18 07:17 records receiver module replacement at site B and attenuator refitted from spares box. Link record shows design attenuator 3 dB at B-ATT. OTDR from A and B shows no new fiber break or macrobend; fibre end ~43.86 km both directions, events at SC-06 mapped to route km 24.651 with only a -0.75 dB artifact. Therefore root cause is wrong attenuator installed at B during the 2026-10-18 maintenance.",
+    "evidence_refs": [
+     {
+      "call_id": 6,
+      "quote": "\"from\": \"2026-10-17 08:00\", \"to\": \"2026-10-18 07:00\", \"min\": -12.27, \"avg\": -12.13, \"max\": -12.05"
+     },
+     {
+      "call_id": 6,
+      "quote": "\"from\": \"2026-10-18 08:00\", \"to\": \"2026-10-19 07:00\", \"min\": -19.28, \"avg\": -19.14, \"max\": -19.04"
+     },
+     {
+      "call_id": 7,
+      "quote": "\"from\": \"2026-10-18 08:00\", \"to\": \"2026-10-19 07:00\", \"min\": 0.64, \"avg\": 0.73, \"max\": 0.82"
+     },
+     {
+      "call_id": 8,
+      "quote": "\"from\": \"2026-10-18 08:00\", \"to\": \"2026-10-19 07:00\", \"min\": 2.97e-06, \"avg\": 4.28e-06, \"max\": 6.73e-06"
+     },
+     {
+      "call_id": 4,
+      "quote": "\"alarm\": \"RX_LOW_ALARM\", \"severity\": \"major\", \"raised\": \"2026-10-18 08:00 UTC\", \"cleared\": \"active\""
+     },
+     {
+      "call_id": 10,
+      "quote": "\"time\": \"2026-10-18 07:17 UTC\", \"entry\": \"Receiver module at site B replaced under RMA. Attenuator refitted from spares box.\""
+     },
+     {
+      "call_id": 2,
+      "quote": "\"B-ATT\": \"fixed in-line attenuator at site B between ODF and receiver, design value 3 dB\""
+     },
+     {
+      "call_id": 12,
+      "quote": "\"event\": 11, \"distance_km\": 43.862, \"type\": \"end\""
+     }
+    ]
+   },
+   "truth": {
+    "fault_type": "wrong_attenuator",
+    "element_id": "B-ATT",
+    "route_km": 41.86,
+    "action": "replace_attenuator"
+   },
+   "error": null,
+   "tool_calls": 24,
+   "usage": {
+    "prompt_tokens": 232508,
+    "completion_tokens": 11237
+   },
+   "grounding_rate": 1.0
+  },
+  {
+   "seed": 3009,
+   "fault_type": "tx_degradation",
+   "score": 1.0,
+   "strict": 1.0,
+   "attempts": 1,
+   "escalated": false,
+   "answer": {
+    "fault_type": "tx_degradation",
+    "element_id": "A-TX",
+    "route_km": null,
+    "action": "replace_transmitter",
+    "evidence": "TX power dropped from ~1.13 dBm average to -2.33 dBm average with TX bias rising, while OTDR traces show no excess loss or new macrobends and the link loss remained consistent with commissioning. RX power degradation follows TX degradation.",
+    "evidence_refs": [
+     {
+      "call_id": 7,
+      "quote": "\"avg\": -2.33"
+     },
+     {
+      "call_id": 6,
+      "quote": "\"avg\": -15.9"
+     },
+     {
+      "call_id": 16,
+      "quote": "\"avg\": 61.33"
+     }
+    ]
+   },
+   "truth": {
+    "fault_type": "tx_degradation",
+    "element_id": "A-TX",
+    "route_km": 0.0,
+    "action": "replace_transmitter"
+   },
+   "error": null,
+   "tool_calls": 23,
+   "usage": {
+    "prompt_tokens": 205697,
+    "completion_tokens": 6013
+   },
+   "grounding_rate": 1.0
+  },
+  {
+   "seed": 3010,
+   "fault_type": "dirty_connector",
+   "score": 1.0,
+   "strict": 1.0,
+   "attempts": 2,
+   "escalated": false,
+   "answer": {
+    "fault_type": "dirty_connector",
+    "element_id": "B-ODF",
+    "action": "clean_connector",
+    "evidence": "RX power dropped ~2.2 dB from -11.3 to -13.5 dBm after site B ODF patching on 2026-10-17 21:36 UTC, alarm raised 22:00 UTC. OTDR from A shows 2.5 dB reflective loss at 27.421 km fibre distance mapped to B-ODF route km 26.74. OTDR from B shows 2.46 dB reflective loss near site B ODF with reflectance -32 dB indicating dirty connector face. TX power unchanged.",
+    "evidence_refs": [
+     {
+      "call_id": 4,
+      "quote": "RX_LOW_WARNING raised 2026-10-17 22:00 UTC"
+     },
+     {
+      "call_id": 6,
+      "quote": "avg -11.33 from 2026-10-16 08:00 to 2026-10-17 07:00"
+     },
+     {
+      "call_id": 6,
+      "quote": "avg -13.5 from 2026-10-18 08:00 to 2026-10-19 07:00"
+     },
+     {
+      "call_id": 8,
+      "quote": "Patching work at site B ODF: jumpers moved to free a port for a new service. time 2026-10-17 21:36 UTC"
+     },
+     {
+      "call_id": 10,
+      "quote": "distance_km 27.421, loss_db 2.5, reflectance_db -30.8"
+     },
+     {
+      "call_id": 14,
+      "quote": "route_km 26.74 at_element B-ODF"
+     },
+     {
+      "call_id": 12,
+      "quote": "distance_km -0.012, loss_db 2.46, reflectance_db -32.0"
+     }
+    ]
+   },
+   "truth": {
+    "fault_type": "dirty_connector",
+    "element_id": "B-ODF",
+    "route_km": 26.74,
+    "action": "clean_connector"
+   },
+   "error": null,
+   "tool_calls": 22,
+   "usage": {
+    "prompt_tokens": 194978,
+    "completion_tokens": 9281
+   },
+   "grounding_rate": 1.0
+  },
+  {
+   "seed": 3011,
+   "fault_type": "damaged_connector",
+   "score": 1.0,
+   "strict": 1.0,
+   "attempts": 1,
+   "escalated": false,
+   "answer": {
+    "fault_type": "damaged_connector",
+    "element_id": "A-ODF",
+    "route_km": null,
+    "action": "replace_connector",
+    "evidence": "RX power dropped ~2.2 dB after 2026-10-25 06:00 with TX stable and BER rising; site notes show patching at A-ODF 2026-10-25 04:53 UTC and cleaning on 2026-10-26 with no improvement. Embedded OTDR from A shows a reflective event at 0.011 km fibre distance with loss 2.42 dB at A-ODF, mapped to route km 0.011. OTDR from B shows matching reflective loss 2.43 dB at 38.103 km fibre distance, confirming the same A-ODF end. This is a high reflective loss consistent with damaged connector rather than dirt.",
+    "evidence_refs": [
+     {
+      "call_id": 6,
+      "quote": "min -13.53, avg -13.41, max -13.32 for 2026-10-25 08:00 to 2026-10-26 07:00"
+     },
+     {
+      "call_id": 7,
+      "quote": "min 0.69, avg 0.76, max 0.92 for 2026-10-25 08:00 to 2026-10-26 07:00"
+     },
+     {
+      "call_id": 10,
+      "quote": "Patching work at site A ODF: jumpers moved to free a port for a new service."
+     },
+     {
+      "call_id": 12,
+      "quote": "event 1, distance_km 0.011, type reflective, loss_db 2.42"
+     },
+     {
+      "call_id": 16,
+      "quote": "route_km 0.011, at_element A-ODF"
+     },
+     {
+      "call_id": 13,
+      "quote": "event 10, distance_km 38.103, type reflective, loss_db 2.43"
+     },
+     {
+      "call_id": 20,
+      "quote": "route_km 0.0, at_element A-ODF"
+     }
+    ]
+   },
+   "truth": {
+    "fault_type": "damaged_connector",
+    "element_id": "A-ODF",
+    "route_km": 0.0,
+    "action": "replace_connector"
+   },
+   "error": null,
+   "tool_calls": 23,
+   "usage": {
+    "prompt_tokens": 191255,
+    "completion_tokens": 6119
+   },
+   "grounding_rate": 1.0
+  },
+  {
+   "seed": 3012,
+   "fault_type": "macrobend",
+   "score": 1.0,
+   "strict": 1.0,
+   "attempts": 2,
+   "escalated": false,
+   "answer": {
+    "fault_type": "macrobend",
+    "route_km": 35.385,
+    "action": "relieve_bend",
+    "evidence": "RX_LOW_WARNING raised 2026-10-25 12:00 UTC; Rx power avg fell from ~-10.87 dBm to -13.4 dBm after 25 Oct while Tx power stayed ~1.11 dBm; pre-FEC BER rose; embedded OTDR from A shows non-reflective loss 5.96 dB at 36.18 km fibre distance and from B shows 5.97 dB at 16.219 km, both mapping to route km 35.385 at SC-09; field log records SC-09 re-entered 2026-10-25 11:03 UTC, indicating a macrobend from slack mishandling just after the closure.",
+    "evidence_refs": [
+     {
+      "call_id": 3,
+      "quote": "RX_LOW_WARNING"
+     },
+     {
+      "call_id": 4,
+      "quote": "avg -10.87"
+     },
+     {
+      "call_id": 4,
+      "quote": "avg -13.4"
+     },
+     {
+      "call_id": 8,
+      "quote": "avg 1.11"
+     },
+     {
+      "call_id": 13,
+      "quote": "loss_db 5.96"
+     },
+     {
+      "call_id": 14,
+      "quote": "loss_db 5.97"
+     },
+     {
+      "call_id": 17,
+      "quote": "route_km 35.385"
+     },
+     {
+      "call_id": 10,
+      "quote": "Splicing crew re-entered closure SC-09"
+     }
+    ]
+   },
+   "truth": {
+    "fault_type": "macrobend",
+    "element_id": "SC-09",
+    "route_km": 35.385,
+    "action": "relieve_bend"
+   },
+   "error": null,
+   "tool_calls": 23,
+   "usage": {
+    "prompt_tokens": 133813,
+    "completion_tokens": 7084
+   },
+   "grounding_rate": 1.0
+  },
+  {
+   "seed": 3013,
+   "fault_type": "bad_splice",
+   "score": 1.0,
+   "strict": 1.0,
+   "attempts": 1,
+   "escalated": false,
+   "answer": {
+    "fault_type": "bad_splice",
+    "element_id": "SC-05",
+    "action": "resplice",
+    "evidence": "RX power dropped ~1.6 dB starting 2026-10-18 with TX stable, coinciding with SC-05 re-entry on 2026-10-17. Embedded OTDR from A shows 1.73 dB non-reflective loss at 22.213 km fibre distance mapped to SC-05 at route km 21.552; OTDR from B shows 1.71 dB loss at 1.632 km fibre distance also mapped to SC-05. This excess loss explains RX_LOW_WARNING.",
+    "evidence_refs": [
+     {
+      "call_id": 6,
+      "quote": "\"avg\": -11.77"
+     },
+     {
+      "call_id": 6,
+      "quote": "\"avg\": -13.41"
+     },
+     {
+      "call_id": 4,
+      "quote": "\"alarm\": \"RX_LOW_WARNING\", \"raised\": \"2026-10-18 00:00 UTC\""
+     },
+     {
+      "call_id": 10,
+      "quote": "\"Splicing crew re-entered closure SC-05 to add a branch cable for a new customer. Closure resealed.\""
+     },
+     {
+      "call_id": 12,
+      "quote": "\"distance_km\": 22.213, \"type\": \"non-reflective\", \"loss_db\": 1.73"
+     },
+     {
+      "call_id": 19,
+      "quote": "\"route_km\": 21.552, \"at_element\": \"SC-05\""
+     },
+     {
+      "call_id": 13,
+      "quote": "\"distance_km\": 1.632, \"type\": \"non-reflective\", \"loss_db\": 1.71"
+     }
+    ]
+   },
+   "truth": {
+    "fault_type": "bad_splice",
+    "element_id": "SC-05",
+    "route_km": 21.552,
+    "action": "resplice"
+   },
+   "error": null,
+   "tool_calls": 22,
+   "usage": {
+    "prompt_tokens": 170600,
+    "completion_tokens": 4059
+   },
+   "grounding_rate": 1.0
+  }
+ ]
+}

@@ -31,14 +31,39 @@ It must name the fault, its exact location and the corrective action.
 
 The NOC view is graded on dispatch: right crew (dirty and damaged connectors are one visit) and right place, with the same strict location rule.
 
-### NOC results so far (held-out cases 1000 to 1013, two of each fault type)
+## Results
 
-| Model (NOC view, remote data only) | Track | Right crew, right place | Citations grounded |
-|---|---|---|---|
-| Muse Spark Open (open weights, Baseten) | standard | 14/14 | 100% |
-| Muse Spark Open (open weights, Baseten) | hard | 14/14 | 99% |
-| Muse Spark 1.3 (Meta Model API) | hard | 14/14 | 100% |
-| Reference expert (remote-only rules) | hard, cases 0 to 69 | 70/70 | n/a |
+Correct means the right fault type at the right place (NOC view: right crew, right place; route km within 100 m). Every case comes from the simulator with a known answer; seeds 1000+ were never used while building, and the 2000+ and 3000+ batches were run fresh at the end. Citations grounded = share of quoted readings that match the tool output they cite.
+
+**Meta hosted models** (cases 1000 to 1013, two of each fault type)
+
+| Investigator | View | Track | Correct | Citations grounded |
+|---|---|---|---|---|
+| Muse Spark Open (open weights, Baseten) | NOC | standard | 14/14 | 100% |
+| Muse Spark Open, with the runtime gate | NOC | standard | 14/14, all accepted first try | 100% |
+| Muse Spark Open | NOC | hard | 14/14 | 99% |
+| Muse Spark 1.3 (Meta Model API) | NOC | hard | 14/14 | 100% |
+| Muse Spark Open | field | standard | 21/21 | |
+| Muse Spark 1.3 / Muse Wonder | field | standard | 7/7 each | 100% |
+
+**Muse Glimmer 30B on our own GPU** (vLLM on one H200 via Modal; runtime gate on)
+
+| Setup | NOC, 14 cases | Field, 7 cases |
+|---|---|---|
+| Glimmer alone (cases 1000+) | 13/14 standard, 13/14 hard | 5/7 |
+| Glimmer + Muse Wonder reviewer (1000+) | 14/14 | 6/7 |
+| Glimmer alone (fresh 2000+) | 12/14 | 5/7 |
+| Glimmer + Muse Wonder reviewer (fresh 2000+) | 13/14 (the miss was a correct answer escalated to a human) | 7/7 |
+| Glimmer alone (final 3000+) | 14/14 | 5/7 |
+| Glimmer + Muse Wonder reviewer (final 3000+) | 13/14 | 6/7 (miss: no answer within 30 steps) |
+| **Glimmer + route mapper, 50 steps (final 3000+)** | **14/14** | **7/7** |
+
+What the numbers say:
+
+- Glimmer finds the right fault almost every time. Its misses were nearly all one mistake: reading OTDR fibre distance as route distance (fibre is 1 to 2% longer than the route, plus slack loops at closures), which puts the crew about 500 m from the fault.
+- Muse Wonder as reviewer caught that mistake and bend-versus-splice confusions (it compares loss at 1625 nm with the drop at 1550 nm), but not every time. Muse Spark 1.3 as reviewer missed the distance error.
+- Doing the distance conversion in code (the route mapper) removed the error: every location within 25 m. That is the product setting.
+- The runtime gate sent back about a third of Glimmer's first submissions (an open checklist item, a misquoted reading, too few citations); all were fixed after feedback.
 
 ## Verification at run time (works on a live network)
 
