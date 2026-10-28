@@ -201,3 +201,19 @@ def test_grounding_ignores_punctuation_in_text_quotes(tmp_path):
 def test_daily_pm_rows_state_their_window(tmp_path):
     rows = ToolBox(generate_case(3), str(tmp_path)).get_pm("rx_power_dbm")["rows"]
     assert rows[0]["from"].endswith("08:00") and rows[0]["to"].endswith("07:00") and len(rows) == 14
+
+
+def test_map_to_route_locates_breaks_and_bends(tmp_path):
+    for seed in range(40):
+        ft = ["fibre_break", "macrobend"][seed % 2]
+        case = generate_case(seed, ft)
+        tb = ToolBox(case, str(tmp_path), remote_only=True, route_tool=True)
+        out = tb.call("embedded_otdr", {"from_site": "A"})
+        if ft == "fibre_break":
+            f = out["events"][-1]["distance_km"]
+        else:
+            f = [e for e in case.events if e["kind"] == "bend"][0]["fibre_km"]
+        m = tb.call("map_to_route", {"call_id": out["call_id"], "fibre_km": f})
+        assert abs(m["route_km"] - case.truth["route_km"]) <= 0.17, (seed, m, case.truth)
+    with pytest.raises(ToolError):
+        tb.call("map_to_route", {"call_id": 99, "fibre_km": 1.0})

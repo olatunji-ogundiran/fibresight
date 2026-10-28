@@ -83,7 +83,7 @@ TICKET = "Ticket: customer reports problems on the A to B 1550 nm service. Find 
 def iter_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_PROMPT,
                max_steps: int = 30, images: bool = True, temperature: Optional[float] = None,
                mode: str = "standard", vision_client=None, ticket: str = TICKET, remote_only: bool = False,
-               verify: bool = True, reviewer=None):
+               verify: bool = True, reviewer=None, route_tool: bool = False):
     """Run the agent and yield events as it works (used by the demo app).
 
     Events: {"type": "thinking"}, {"type": "tool"}, and a final {"type": "done"}
@@ -93,7 +93,7 @@ def iter_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_
     submissions go back to the agent, and after MAX_ATTEMPTS the ticket is
     escalated. reviewer: optional (client, model) for the second-model review.
     """
-    tb = ToolBox(case, workdir, mode, vision_client=vision_client, remote_only=remote_only)
+    tb = ToolBox(case, workdir, mode, vision_client=vision_client, remote_only=remote_only, route_tool=route_tool)
     messages = [{"role": "system", "content": prompt}, {"role": "user", "content": ticket}]
     transcript, answer, usage = [], None, {"prompt_tokens": 0, "completion_tokens": 0}
     attempts, escalated, checks = 0, False, []
@@ -187,11 +187,11 @@ def iter_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_
 def run_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_PROMPT,
               max_steps: int = 30, images: bool = True, temperature: Optional[float] = None,
               log_path: Optional[str] = None, mode: str = "standard", vision_client=None,
-              remote_only: bool = False, verify: bool = True, reviewer=None) -> dict:
+              remote_only: bool = False, verify: bool = True, reviewer=None, route_tool: bool = False) -> dict:
     result = None
     ticket = NOC_TICKET if remote_only else TICKET
     for ev in iter_agent(case, client, model, workdir, prompt, max_steps, images, temperature, mode, vision_client,
-                         ticket, remote_only, verify, reviewer):
+                         ticket, remote_only, verify, reviewer, route_tool):
         if ev["type"] == "done":
             result = {k: v for k, v in ev.items() if k != "type"}
     if log_path:

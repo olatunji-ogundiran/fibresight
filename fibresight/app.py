@@ -146,7 +146,7 @@ def run(seed: int, mode: str = "standard", model: str = "spark-open", sam: bool 
         try:
             for ev in iter_agent(case, client, mid, workdir, NOC_PROMPT if noc else BASE_PROMPT, mode=mode,
                                  vision_client=vision, ticket=NOC_TICKET if noc else TICKET, remote_only=noc,
-                                 verify=True, reviewer=rev):
+                                 verify=True, reviewer=rev, route_tool=True):
                 if ev["type"] == "tool":
                     ev["image_url"] = _url(ev.pop("image_path"))
                 if ev["type"] == "done":

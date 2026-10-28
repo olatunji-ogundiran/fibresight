@@ -29,7 +29,7 @@ class ToolError(Exception):
 
 class ToolBox:
     def __init__(self, case: Case, workdir: str, mode: str = "standard", vision_client=None,
-                 remote_only: bool = False):
+                 remote_only: bool = False, route_tool: bool = False):
         """mode: 'standard' (OTDR auto event table), 'raw' (traces only) or 'hard'
         (event tables, but at most OTDR_BUDGET distinct OTDR tests per ticket).
         remote_only: the NOC view. Only data a NOC engineer can reach without
@@ -44,6 +44,8 @@ class ToolBox:
             self.specs = self.specs + [SEGMENT_SPEC]
         if remote_only:
             self.specs = [t for t in self.specs if t["name"] in REMOTE_TOOLS]
+        if route_tool:  # product setting: OTDR distance to route position done by code, not by the model
+            self.specs = self.specs + [MAP_SPEC]
         self.names = {t["name"] for t in self.specs}
         self.workdir = workdir
         os.makedirs(workdir, exist_ok=True)
@@ -207,6 +209,36 @@ class ToolBox:
                          "B-ODF": "power arriving at site B ODF, before the attenuator",
                          "B-RX": "power at the receiver input, after the attenuator"}[point]}
 
+    def map_to_route(self, call_id: int, fibre_km: float) -> dict:
+        """Convert an OTDR distance (fibre km from the shooting end) to a position on the as-built route
+        map, using the splice-closure events found in that same OTDR result as anchors."""
+        from .expert import _anchors, _event_positions, _fibre_to_route
+        try:
+            cid, f = int(call_id), float(fibre_km)
+        except (TypeError, ValueError):
+            raise ToolError("call_id must be an integer and fibre_km a number")
+        if not 1 <= cid <= len(self.calls) or self.calls[cid - 1]["tool"] not in ("otdr_event_table", "embedded_otdr"):
+            raise ToolError("call_id must refer to an earlier otdr_event_table or embedded_otdr result")
+        tab = self.calls[cid - 1]["result"]
+        site = tab["from_site"]
+        rec = self.get_link_record()
+        elems = rec["elements_in_route_order"]
+        L = elems[-1]["route_km"]
+        end = tab["events"][-1]["distance_km"]
+        if not 0.0 <= f <= end + 0.05:
+            raise ToolError(f"fibre_km must lie on this trace (0 to {end:.3f} km)")
+        anchors = [a for a in _anchors(rec, site, _event_positions([tab])) if a[1] < end - 0.02 or a[1] == 0.0]
+        r = min(max(_fibre_to_route(anchors, f, site, L), 0.0), L)
+        at = next((a[2] for a in anchors if a[4] and abs(a[1] - f) <= 0.04), None)
+        before = max((e for e in elems if e["route_km"] <= r + 1e-9), key=lambda e: e["route_km"], default=None)
+        after = min((e for e in elems if e["route_km"] > r + 1e-9), key=lambda e: e["route_km"], default=None)
+        return {"from_site": site, "fibre_km": f, "route_km": round(r, 3), "at_element": at,
+                "between": [before and before["id"], after and after["id"]],
+                "metres_past_previous": before and round((r - before["route_km"]) * 1000),
+                "metres_before_next": after and round((after["route_km"] - r) * 1000),
+                "closures_matched": sum(1 for a in anchors if a[4]) - 1,
+                "method": "interpolated between splice-closure events matched to the route map (slack loops and cable excess removed)"}
+
     def set_checklist(self, items: list) -> dict:
         if not isinstance(items, list) or not items or not all(isinstance(i, str) for i in items):
             raise ToolError("items must be a non-empty list of strings")
@@ -317,4 +349,8 @@ TOOL_SPECS += [
                                                     "status": {"type": "string", "enum": ["done", "skipped", "failed", "open"]},
                                                     "note": {"type": "string"}}, "required": ["index", "status"]}},
 ]
-TOOL_NAMES = {t["name"] for t in TOOL_SPECS} | {"segment_endface"}
+MAP_SPEC = {"name": "map_to_route",
+            "description": "Convert an OTDR distance (fibre km from the shooting end) into route km on the as-built map, using the splice-closure events in that OTDR result as anchors. Pass the call_id of an earlier otdr_event_table or embedded_otdr result and the fibre_km of the event or fibre end.",
+            "parameters": {"type": "object", "properties": {"call_id": {"type": "integer"}, "fibre_km": {"type": "number"}},
+                           "required": ["call_id", "fibre_km"]}}
+TOOL_NAMES = {t["name"] for t in TOOL_SPECS} | {"segment_endface", "map_to_route"}
