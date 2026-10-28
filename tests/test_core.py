@@ -114,3 +114,75 @@ def test_checklist_tools(tmp_path):
     assert out["checklist"][1]["status"] == "done"
     with pytest.raises(ToolError):
         tb.call("update_checklist", {"index": 5, "status": "done"})
+
+
+# ---------------------------------------------------------------- NOC view
+from fibresight.expert import solve_remote
+from fibresight.verifier import grade_dispatch
+from fibresight.tools import REMOTE_TOOLS
+
+
+def test_noc_toolbox_has_remote_tools_only(tmp_path):
+    tb = ToolBox(generate_case(3), str(tmp_path), remote_only=True, vision_client=object())
+    assert tb.names == REMOTE_TOOLS
+    for name, args in [("measure_power", {"point": "B-ODF"}), ("inspect_connector", {"element_id": "B-ODF"}),
+                       ("otdr_event_table", {"wavelength_nm": 1550, "from_site": "A"}),
+                       ("segment_endface", {"element_id": "B-ODF"})]:
+        with pytest.raises(ToolError):
+            tb.call(name, args)
+
+
+@pytest.mark.parametrize("hard", [False, True])
+def test_remote_expert_dispatches_correctly(tmp_path, hard):
+    for seed in range(70):
+        case = generate_case(seed, FAULT_TYPES[seed % 7], hard=hard)
+        ans = solve_remote(ToolBox(case, str(tmp_path), remote_only=True))
+        assert grade_dispatch(ans, case)["score"] == 1.0, (seed, ans, case.truth)
+
+
+def test_dispatch_grade_groups_connectors_but_keeps_location_strict():
+    case = generate_case(5, "damaged_connector")
+    t = case.truth
+    ok = {"fault_type": "dirty_connector", "element_id": t["element_id"], "action": "clean_connector", "evidence": "x"}
+    assert grade_dispatch(ok, case)["score"] == 1.0 and grade(ok, case)["score"] == 0.0
+    wrong_place = dict(ok, element_id="SC-01" if t["element_id"] != "SC-01" else "SC-02")
+    assert grade_dispatch(wrong_place, case)["score"] == 0.0
+    assert grade_dispatch({"fault_type": "bad_splice"}, case)["score"] == 0.0
+    splice = {"fault_type": "bad_splice", "element_id": t["element_id"], "action": "resplice", "evidence": "x"}
+    assert grade_dispatch(splice, case)["score"] == 0.0
+
+
+# ---------------------------------------------------------------- repairs
+from fibresight.repair import apply_fix
+from fibresight.sim import RX_LOW_WARN
+
+
+def _rx(tb):
+    return tb.call("measure_power", {"point": "B-RX"})["power_dbm"]
+
+
+@pytest.mark.parametrize("seed", range(0, 42))
+def test_right_fix_restores_rx_wrong_fix_does_not(tmp_path, seed):
+    case = generate_case(seed, FAULT_TYPES[seed % 7])
+    t = case.truth
+    tb = ToolBox(case, str(tmp_path))
+    before = _rx(tb)
+    # A plausible wrong fix first: clean instead of replace, or the right action 1 km away / wrong element.
+    if t["fault_type"] == "damaged_connector":
+        tb.apply_fix("clean_connector", t["element_id"])
+    elif t["fault_type"] in ("macrobend", "fibre_break"):
+        tb.apply_fix(t["action"], None, t["route_km"] + 1.0)
+    elif t["fault_type"] in ("dirty_connector", "bad_splice"):
+        other = next(e.id for e in case.elements if e.id != t["element_id"] and e.kind == case._healthy.elements[0].kind) \
+            if t["fault_type"] == "dirty_connector" else next(e.id for e in case.elements if e.id.startswith("SC-") and e.id != t["element_id"])
+        tb.apply_fix(t["action"], other)
+    else:
+        tb.apply_fix("clean_connector", "B-ODF")
+    assert not getattr(tb.case, "repaired", False)
+    after_wrong = _rx(tb)
+    assert after_wrong is None if before is None else abs(after_wrong - before) < 0.3
+    tb.apply_fix(t["action"], t["element_id"], t["route_km"])
+    assert tb.case.repaired
+    fixed = _rx(tb)
+    assert fixed is not None and RX_LOW_WARN < fixed < -3.0, (t, before, fixed)
+    assert tb.case.truth == t  # grading still uses the original fault

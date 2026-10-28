@@ -34,14 +34,18 @@ def _sam_boxes(client, path: str, phrase: str) -> list:
     return out
 
 
-def _zone(box) -> str:
+def _zone(box, size=(2 * C, 2 * C)) -> str:
+    """Zone of a detection, for an end face centred in the picture. Radii scale
+    with picture size (rendered scope views are 320 px; phone scope photos vary)."""
+    k = min(size) / (2 * C)
+    cx0, cy0 = size[0] / 2, size[1] / 2
     cx, cy = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
-    r = math.hypot(cx - C, cy - C)
+    r = math.hypot(cx - cx0, cy - cy0)
     # A long scratch can pass through the core even if its centre does not.
-    reach = min(math.hypot(x - C, y - C) for x in (box[0], box[2], cx) for y in (box[1], box[3], cy))
-    if r <= R_CORE * 3 or reach <= R_CORE * 2:
+    reach = min(math.hypot(x - cx0, y - cy0) for x in (box[0], box[2], cx) for y in (box[1], box[3], cy))
+    if r <= R_CORE * 3 * k or reach <= R_CORE * 2 * k:
         return "core"
-    if r <= R_CLAD:
+    if r <= R_CLAD * k:
         return "cladding"
     return "ferrule"
 
@@ -49,9 +53,10 @@ def _zone(box) -> str:
 def segment_endface(client, path: str, out_path: str) -> dict:
     """Run SAM 3.1 on an end-face image, grade it and save an annotated copy."""
     found = []
+    size = Image.open(path).size
     for kind, phrase in CONCEPTS.items():
         for b in _sam_boxes(client, path, phrase):
-            found.append({"kind": kind, "box": [round(v) for v in b], "zone": _zone(b)})
+            found.append({"kind": kind, "box": [round(v) for v in b], "zone": _zone(b, size)})
     graded = [f for f in found if f["zone"] in ("core", "cladding")]
     scratches = [f for f in graded if f["kind"] == "scratch"]
     particles = [f for f in graded if f["kind"] == "particle"]
@@ -64,7 +69,8 @@ def segment_endface(client, path: str, out_path: str) -> dict:
 
     im = Image.open(path).convert("RGB")
     d = ImageDraw.Draw(im)
-    d.ellipse([C - R_CLAD, C - R_CLAD, C + R_CLAD, C + R_CLAD], outline=(80, 160, 255), width=1)
+    k, cx0, cy0 = min(size) / (2 * C), size[0] / 2, size[1] / 2
+    d.ellipse([cx0 - R_CLAD * k, cy0 - R_CLAD * k, cx0 + R_CLAD * k, cy0 + R_CLAD * k], outline=(80, 160, 255), width=1)
     for f in found:
         colour = (255, 60, 60) if f["kind"] == "scratch" else (255, 200, 0)
         if f["zone"] == "ferrule":

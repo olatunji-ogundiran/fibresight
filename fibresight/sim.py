@@ -17,6 +17,8 @@ by ``fibresight.tools.ToolBox`` from the hidden ``Case`` object.
 """
 from __future__ import annotations
 
+import copy
+
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -376,6 +378,7 @@ def generate_case(seed: int, fault_type: Optional[str] = None, hard: bool = Fals
     case.commissioning_loss = {wl: round(link_loss(case, wl, False) + rng.normal(0, 0.05), 2)
                                for wl in WAVELENGTHS}
     case.att_installed_db = case.att_design_db
+    healthy = copy.deepcopy(case)  # pre-fault state, used to simulate repairs (no rng use)
     _inject_fault(case, fault_type, rng)
     case.hard = hard
     if hard and fault_type == "macrobend" and rng.random() < 0.6:
@@ -384,6 +387,7 @@ def generate_case(seed: int, fault_type: Optional[str] = None, hard: bool = Fals
     _onset(case, rng)
     _notes(case, rng)
     _add_1625(case, rng)
+    case._healthy = healthy
     return case
 
 

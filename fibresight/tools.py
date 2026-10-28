@@ -19,6 +19,8 @@ from .sim import (ATTENUATOR_VALUES, NOW, PM_DAYS, RX_HIGH_ALARM, RX_HIGH_WARN, 
 CONNECTOR_IDS = ("A-ODF", "MID-PP", "B-ODF")
 OTDR_BUDGET = 3
 POWER_POINTS = ("A-TX", "B-ODF", "B-RX")
+REMOTE_TOOLS = {"get_link_record", "get_alarms", "get_pm", "embedded_otdr", "get_site_notes",
+                "set_checklist", "update_checklist"}
 
 
 class ToolError(Exception):
@@ -26,22 +28,29 @@ class ToolError(Exception):
 
 
 class ToolBox:
-    def __init__(self, case: Case, workdir: str, mode: str = "standard", vision_client=None):
+    def __init__(self, case: Case, workdir: str, mode: str = "standard", vision_client=None,
+                 remote_only: bool = False):
         """mode: 'standard' (OTDR auto event table), 'raw' (traces only) or 'hard'
-        (event tables, but at most OTDR_BUDGET distinct OTDR tests per ticket)."""
+        (event tables, but at most OTDR_BUDGET distinct OTDR tests per ticket).
+        remote_only: the NOC view. Only data a NOC engineer can reach without
+        anyone on site (alarms, PM, embedded OTDR, records, field log)."""
         self.case = case
         self.mode = mode
+        self.remote_only = remote_only
         self.otdr_runs = set()
         self.specs = [t for t in TOOL_SPECS if not (mode == "raw" and t["name"] == "otdr_event_table")]
-        self.vision_client = vision_client  # Meta Model API client: enables SAM 3.1 segmentation
-        if vision_client is not None:
+        self.vision_client = None if remote_only else vision_client  # enables SAM 3.1 segmentation
+        if self.vision_client is not None:
             self.specs = self.specs + [SEGMENT_SPEC]
+        if remote_only:
+            self.specs = [t for t in self.specs if t["name"] in REMOTE_TOOLS]
         self.names = {t["name"] for t in self.specs}
         self.workdir = workdir
         os.makedirs(workdir, exist_ok=True)
         self._hist = pm.history(case)
         self.calls = []
         self.checklist = []
+        self.fixes = []
 
     # ------------------------------------------------------------ tools
     def get_link_record(self) -> dict:
@@ -167,12 +176,22 @@ class ToolBox:
         out["element_id"] = element_id
         return out
 
+    def apply_fix(self, action: str, element_id: str = None, route_km: float = None) -> dict:
+        """The technician reports work done. Live readings after this reflect it;
+        history (PM, alarms) stays as it was."""
+        from .repair import apply_fix
+        self.case, fixed = apply_fix(self.case, action, element_id, route_km)
+        self.fixes.append({"action": action, "element_id": element_id, "route_km": route_km})
+        return {"work_done": action, "element_id": element_id, "route_km": route_km}
+
     def measure_power(self, point: str) -> dict:  # measured now (08:00 UTC)
         if point not in POWER_POINTS:
             raise ToolError(f"point must be one of {list(POWER_POINTS)}")
         c = self.case
         rng = np.random.default_rng([c.seed, 99, POWER_POINTS.index(point), len(self.calls)])
         tx_now = float(self._hist["tx_power_dbm"][-1] - 0.2)
+        if getattr(c, "repaired", False) and c.truth["fault_type"] == "tx_degradation":
+            tx_now = c.tx_dbm  # new transmitter at nominal output
         if point == "A-TX":
             v = tx_now
         else:
@@ -285,7 +304,7 @@ SEGMENT_SPEC = {"name": "segment_endface",
                 "description": "Run Meta SAM 3.1 on a connector end-face image: detects particles (dark spots) and scratches (dark lines), grades them by zone and returns a PASS/FAIL verdict plus an annotated image.",
                 "parameters": {"type": "object", "properties": {"element_id": {"type": "string"}}, "required": ["element_id"]}}
 TOOL_SPECS += [
-    {"name": "embedded_otdr", "description": "Event table from the OTDR built into the line equipment at site A or B. Tests in service at 1625 nm (out of band), so it does not interrupt traffic and does not count against the OTDR test budget. Lower resolution than a handheld OTDR.",
+    {"name": "embedded_otdr", "description": "Event table from the OTDR built into the line equipment at site A or B. Tests in service at 1625 nm (out of band), so it does not interrupt traffic and does not count against the OTDR test budget.",
      "parameters": {"type": "object", "properties": {
          "from_site": {"type": "string", "enum": ["A", "B"]},
          "time": {"type": "string", "enum": ["now", "night"], "description": "now (08:00 UTC) or tonight's window (02:00 UTC)"}}, "required": ["from_site"]}},

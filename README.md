@@ -1,6 +1,11 @@
 # FibreSight
 
-A verifiable AI agent that diagnoses fibre network faults the way a senior field engineer does, built on Meta's Muse models for the Meta Global AI Developer Hackathon (October to November 2026).
+A verifiable AI agent that diagnoses fibre network faults the way a senior transmission engineer does, built on Meta's Muse models for the Meta Global AI Developer Hackathon (October to November 2026).
+
+It serves the two people who fix a fibre fault:
+
+- **NOC engineer (remote).** From alarms, performance history and the OTDR built into the line equipment, FibreSight finds the fault and its exact location without anyone on site, then writes the dispatch work order: who to send, where exactly (distance from the nearest closure), what to carry and how to verify the fix.
+- **Field technician (on site).** A chat assistant on the phone. The technician sends voice notes (Muse Voice Transcribe), connector end-face pictures (checked by SAM 3.1) and instrument readings; the assistant guides one step at a time and can close the ticket only when a live reading after the repair is back in range.
 
 > Work in progress during the hackathon build week. Full documentation, results and demo come before submission.
 
@@ -16,6 +21,24 @@ A 1550 nm service between two sites is degraded or down. The agent investigates 
 - field engineering notes (some misleading)
 
 It must name the fault, its exact location and the corrective action.
+
+## NOC and field workflow
+
+1. **Alarm queue.** Open tickets, most severe first.
+2. **Remote diagnosis.** The agent uses only what a NOC can reach: link record, alarm log, 14 days of PM, the embedded in-service OTDR at 1625 nm from both ends (it can schedule a night-time scan for faults that come and go with temperature) and the field log. Bends lose far more at 1625 nm than at 1550 nm, so comparing the OTDR event with the receiver's power drop separates a bend from a bad splice without taking the service down.
+3. **Work order.** Fault, priority, location relative to landmarks, crew, kit and the check that proves the fix. A connector cannot be inspected remotely, so a connector fault goes out as inspect, clean, re-inspect, replace if damaged.
+4. **Field assistant.** The technician confirms on site: SAM 3.1 tells a dirty end face from a scratched one, the assistant reads live receiver power from the network before and after the work, and the simulator applies the repair. Only the right action at the right place restores the signal; cleaning a scratched connector or splicing the wrong closure changes nothing, and the next reading shows it.
+
+The NOC view is graded on dispatch: right crew (dirty and damaged connectors are one visit) and right place, with the same strict location rule.
+
+### NOC results so far (held-out cases 1000 to 1013, two of each fault type)
+
+| Model (NOC view, remote data only) | Track | Right crew, right place | Citations grounded |
+|---|---|---|---|
+| Muse Spark Open (open weights, Baseten) | standard | 14/14 | 100% |
+| Muse Spark Open (open weights, Baseten) | hard | 14/14 | 99% |
+| Muse Spark 1.3 (Meta Model API) | hard | 14/14 | 100% |
+| Reference expert (remote-only rules) | hard, cases 0 to 69 | 70/70 | n/a |
 
 ## Why it is verifiable
 
@@ -39,9 +62,14 @@ fibresight/sim.py       seeded link and fault simulator
 fibresight/otdr.py      OTDR trace synthesis and event analysis
 fibresight/pm.py        performance history and alarms
 fibresight/images.py    connector end-face images and trace plots
-fibresight/tools.py     the tools the agent can call
-fibresight/verifier.py  strict grading
-fibresight/expert.py    reference expert solver (100% on 700 cases)
+fibresight/tools.py     the tools the agent can call (remote_only=True for the NOC view)
+fibresight/verifier.py  strict grading, dispatch grading, citation grounding
+fibresight/expert.py    reference expert solvers: full toolkit and remote-only NOC
+fibresight/workorder.py dispatch work order from a diagnosis
+fibresight/repair.py    simulated repairs (only the right fix works)
+fibresight/field.py     field assistant session (voice, pictures, readings, verified close)
+fibresight/vision.py    connector end-face defect detection with SAM 3.1
+fibresight/voice.py     speech to text with Muse Voice Transcribe (realtime)
 fibresight/agent.py     tool-calling agent loop (OpenAI-compatible endpoints)
 fibresight/bench.py     benchmark runner
 tests/                  test suite
@@ -55,13 +83,18 @@ python -m pytest -q
 python -m fibresight.bench --solver expert --n 21
 # with a key in .env (BASETEN_API_KEY=...)
 python -m fibresight.bench --solver agent --provider baseten --n 21
+python -m fibresight.bench --solver agent --provider baseten --view noc --n 14   # NOC: remote data only
 ```
 
 ## Demo app
 
 ```
-pip install -r requirements.txt fastapi uvicorn
+pip install -r requirements.txt
 python -m fibresight.app      # open http://localhost:8000
 ```
 
-Pick a case and a model, press **Run agent**, and watch the investigation: the agent's checklist, every instrument it uses (OTDR event tables and traces, connector end faces scanned by SAM 3.1, power readings), its cited evidence, and the final diagnosis checked against the simulator's ground truth. Every run is saved and can be replayed offline from the Replay menu.
+Voice notes need `ffmpeg` on the machine running the app, and the browser must reach the app on `localhost` or HTTPS for microphone access.
+
+**NOC console.** Pick a ticket from the alarm queue and press **Diagnose remotely**. Watch the investigation (checklist, every reading, embedded OTDR tables, cited evidence), the diagnosis checked against the simulator's truth, and the dispatch work order. **Send to field technician** hands the job over.
+
+**Field assistant.** The technician's chat: type, record a voice note or send a connector picture; use the simulated instruments (power meter, scope, OTDR) and report work done. The ticket closes only after a live reading proves the fix. Every NOC run is saved and can be replayed offline from the Replay menu.

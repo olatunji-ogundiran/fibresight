@@ -59,6 +59,7 @@ header { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; ma
 .svg-text { fill: var(--muted); font: 11px var(--mono) }
 .svg-id { fill: var(--ink); font: 600 11px var(--mono) }
 
+[hidden] { display: none !important }
 .grid { display: grid; grid-template-columns: minmax(230px, 1fr) minmax(0, 2.3fr) minmax(250px, 1.1fr); gap: 14px; align-items: start }
 @media (max-width: 1100px) { .grid { grid-template-columns: 1fr } }
 .stack { display: flex; flex-direction: column; gap: 14px; min-width: 0 }
@@ -114,6 +115,21 @@ details.raw pre { background: var(--code); padding: 8px; border-radius: 6px; ove
 .ref a { color: var(--upc); text-decoration: none }
 .check { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; display: flex; flex-direction: column; gap: 6px; font-size: 13.5px }
 .check .row { display: flex; justify-content: space-between; gap: 8px }
+.wo-grid { display: grid; grid-template-columns: 74px 1fr; gap: 6px 10px; font-size: 13.5px; margin-top: 8px }
+.wo-grid .k { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; padding-top: 2px }
+.tabs { display: flex; gap: 4px; background: var(--chip); padding: 4px; border-radius: 8px }
+.tab { border: 0; background: transparent; padding: 7px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; color: var(--muted) }
+.tab[aria-selected="true"] { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px rgb(0 0 0 / .12) }
+.queue { display: flex; flex-direction: column; gap: 6px; margin-top: 8px }
+.tk { text-align: left; border: 1px solid var(--line); background: var(--panel); border-radius: 7px; padding: 8px 10px; cursor: pointer; display: grid; gap: 2px }
+.tk:hover { border-color: var(--muted) }
+.tk[aria-current="true"] { border-color: var(--upc); box-shadow: inset 3px 0 0 var(--upc) }
+.tk .l1 { display: flex; justify-content: space-between; gap: 8px; align-items: baseline }
+.tk .id { font: 600 12px var(--mono) }
+.tk .link { font-size: 13.5px; font-weight: 600 }
+.tk .l3 { font-size: 12px; color: var(--muted) }
+.tk .done { font: 600 11px var(--mono) }
+.hint { font-size: 12.5px; color: var(--muted); margin: 6px 0 0 }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px }
 .stat .v { font: 600 18px var(--mono) }
 .stat .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em }
@@ -123,41 +139,101 @@ details.raw pre { background: var(--code); padding: 8px; border-radius: 6px; ove
 @media (prefers-reduced-motion: reduce) { .pulse { animation: none } }
 .flash { animation: fl 1.2s ease-out }
 @keyframes fl { from { box-shadow: 0 0 0 3px var(--upc) } to { box-shadow: 0 0 0 0 transparent } }
+/* ---------- field assistant */
+#fieldView { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(0, 1.6fr); gap: 14px; align-items: start }
+@media (max-width: 900px) { #fieldView { grid-template-columns: 1fr } #fieldView .side { order: 2 } }
+.chat { display: flex; flex-direction: column; min-height: 520px; max-height: calc(100vh - 150px); padding: 0; overflow: hidden }
+.chat .head { padding: 12px 14px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; gap: 8px; align-items: center; flex-wrap: wrap }
+.msgs { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px }
+.bubble { max-width: 85%; padding: 9px 12px; border-radius: 12px; font-size: 14.5px; white-space: pre-wrap; overflow-wrap: anywhere }
+.bubble.ai { background: var(--chip); align-self: flex-start; border-bottom-left-radius: 4px }
+.bubble.tech { background: var(--upc); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px }
+.bubble .via { display: block; font-size: 11px; opacity: .8; margin-bottom: 2px }
+.card { align-self: stretch; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 13px }
+.card .k { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted) }
+.card .v { font: 600 18px var(--mono) }
+.card.tech { margin-left: 15% }
+.card.closed { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 8%, transparent) }
+.card.refused { border-color: var(--warn) }
+.photos { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px }
+.photos img { width: 160px; max-width: 46%; border-radius: 6px; border: 1px solid var(--line); background: #fff }
+.composer { border-top: 1px solid var(--line); padding: 10px; display: flex; gap: 8px; align-items: center }
+.composer input[type=text] { flex: 1; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 18px; padding: 9px 14px }
+.round { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); cursor: pointer; display: grid; place-items: center; flex: none }
+.round svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
+.round.rec { background: var(--bad); color: #fff; border-color: var(--bad) }
+.round.send { background: var(--ink); color: var(--bg); border: 0 }
+.typing { color: var(--muted); font-size: 13px; display: flex; gap: 8px; align-items: center }
+.inst { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: end; margin-top: 8px }
+.inst .row2 { display: flex; gap: 6px; min-width: 0 }
+.inst select, .inst input { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; min-width: 0; flex: 1 }
+.inst .btn { padding: 7px 12px }
+.side .label + .hint { margin-top: 2px }
 </style>
 </head>
 <body>
 <header>
-  <div class="brand"><h1>Fibre<span>Sight</span></h1><p>Verifiable fault-finding agent for fibre links, on Meta Muse models</p></div>
+  <div class="brand"><h1>Fibre<span>Sight</span></h1><p>Fibre fault-finding agent for NOC engineers and field technicians, on Meta Muse models</p></div>
+  <div class="tabs" role="tablist" aria-label="View">
+    <button class="tab" role="tab" id="tabNoc" aria-selected="true">NOC console</button>
+    <button class="tab" role="tab" id="tabField" aria-selected="false">Field assistant</button>
+  </div>
   <div class="controls">
-    <label>Case <input id="seed" type="number" value="1001" min="0"></label>
     <label>Track <select id="mode"><option value="standard">Standard</option><option value="hard">Hard</option></select></label>
     <label>Model <select id="model"></select></label>
-    <label>Connector vision <select id="sam"><option value="true">SAM 3.1 on</option><option value="false">Off</option></select></label>
-    <button class="btn ghost" id="loadBtn">Load case</button>
-    <button class="btn" id="runBtn">Run agent</button>
-    <label>Replay <select id="replay"><option value="">Saved runs</option></select></label>
+    <label class="fieldOnly" hidden>Connector vision <select id="sam"><option value="true">SAM 3.1 on</option><option value="false">Off</option></select></label>
+    <label class="nocOnly">Ticket <input id="seed" type="number" value="1005" min="0"></label>
+    <button class="btn nocOnly" id="runBtn">Diagnose remotely</button>
+    <label class="nocOnly">Replay <select id="replay"><option value="">Saved runs</option></select></label>
   </div>
 </header>
 
 <section id="route" class="panel">
-  <div class="head"><span class="label">Link under test</span><span class="status" id="status">Load a case to begin</span></div>
+  <div class="head"><span class="label" id="linkName">Link</span><span class="status" id="status">Pick a ticket</span></div>
   <div class="tbl"><svg id="routeSvg" viewBox="0 0 1000 140" role="img" aria-label="Route map from site A to site B"></svg></div>
 </section>
 
-<div class="grid">
+<div class="grid" id="nocView">
   <div class="stack">
-    <section class="panel"><div class="label">Ticket</div><p style="margin:6px 0 0">Customer reports problems on the site A to site B 1550 nm service. Find the root cause.</p></section>
+    <section class="panel"><div class="label">Alarm queue</div><p class="hint">Open tickets, most severe first. Diagnosis uses remote data only: alarms, performance history and the embedded OTDR.</p><div class="queue" id="queue"></div></section>
     <section class="panel"><div class="label">Latest alarms</div><div id="alarms"></div></section>
     <section class="panel"><div class="label">Field log</div><div id="notes"></div></section>
   </div>
   <section class="stack">
     <div class="panel"><div class="label">Agent investigation</div></div>
-    <div id="timeline"><div class="empty">Press Run agent to watch FibreSight work the case step by step.</div></div>
+    <div id="timeline"><div class="empty">Press Diagnose remotely to watch FibreSight work the ticket step by step.</div></div>
   </section>
   <div class="stack">
     <section class="panel" id="checklist"><div class="label">Investigation checklist</div><ol><li class="empty" style="display:block">The agent writes its plan here.</li></ol></section>
     <section class="panel" id="diagnosis"><div class="label">Diagnosis</div><p class="empty" style="padding:14px 0">Waiting for the agent.</p></section>
+    <section class="panel" id="workorder" hidden><div class="label">Dispatch work order</div><div id="wo"></div></section>
   </div>
+</div>
+
+<div id="fieldView" hidden>
+  <div class="stack side">
+    <section class="panel"><div class="label">Work order</div><div id="fwo"><p class="hint">No NOC diagnosis for this ticket yet. Run Diagnose remotely in the NOC console and press Send to field technician, or start without one.</p></div></section>
+    <section class="panel"><div class="label">Instruments (simulated)</div>
+      <p class="hint">On a real job these come from the technician's power meter, inspection scope and OTDR.</p>
+      <div class="inst"><div class="row2"><select id="ppoint" aria-label="Power meter point"><option>A-TX</option><option>B-ODF</option><option selected>B-RX</option></select></div><button class="btn ghost" data-inst="power">Power meter</button></div>
+      <div class="inst"><div class="row2"><select id="sconn" aria-label="Connector to inspect"></select></div><button class="btn ghost" data-inst="scope">Scope picture</button></div>
+      <div class="inst"><div class="row2"><select id="owl" aria-label="OTDR wavelength"><option>1550</option><option>1310</option></select><select id="osite" aria-label="OTDR from site"><option value="A">from A</option><option value="B">from B</option></select></div><button class="btn ghost" data-inst="otdr">OTDR</button></div>
+    </section>
+    <section class="panel"><div class="label">Report work done</div>
+      <div class="inst"><div class="row2"><select id="wact" aria-label="Work done"></select></div><span></span></div>
+      <div class="inst"><div class="row2"><select id="wel" aria-label="Where"></select><input id="wkm" type="number" step="0.001" placeholder="route km" aria-label="Route km"></div><button class="btn ghost" id="wdone">Report</button></div>
+    </section>
+  </div>
+  <section class="panel chat" aria-label="Chat with the field assistant">
+    <div class="head"><span><span class="label">Field assistant</span> <span class="mono" id="fticket" style="font-size:12px"></span></span><button class="btn ghost" id="fstart">Start session</button></div>
+    <div class="msgs" id="msgs"><div class="empty">Start a session for the selected ticket. The technician can type, send a voice note or a connector picture.</div></div>
+    <form class="composer" id="composer">
+      <button type="button" class="round" id="mic" aria-label="Record voice note" title="Voice note (Muse Voice Transcribe)"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+      <label class="round" title="Send a connector picture (SAM 3.1)" aria-label="Send a picture"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><input id="photo" type="file" accept="image/*" capture="environment" hidden></label>
+      <input type="text" id="ftext" placeholder="Message the assistant" autocomplete="off">
+      <button class="round send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </form>
+  </section>
 </div>
 
 <script>
@@ -165,14 +241,20 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const PRETTY = {dirty_connector:"Dirty connector", damaged_connector:"Damaged connector", macrobend:"Macrobend",
   bad_splice:"Bad splice", fibre_break:"Fibre break", wrong_attenuator:"Wrong attenuator", tx_degradation:"Failing transmitter"};
-const ACTION = {clean_connector:"Clean and re-inspect the connector", replace_connector:"Replace the connector",
-  relieve_bend:"Find and relieve the bend", resplice:"Re-splice the joint", repair_break:"Dispatch crew to repair the break",
+const ACTION = {clean_connector:"Inspect, clean and re-inspect the connector (replace it if damaged)", replace_connector:"Replace the connector",
+  relieve_bend:"Find and relieve the bend", resplice:"Re-splice the joint", repair_break:"Repair the break",
   replace_attenuator:"Fit the correct attenuator", replace_transmitter:"Replace the transmitter"};
+const WORK = {clean_connector:"Cleaned connector", replace_connector:"Replaced connector / patch cord", resplice:"Re-spliced joint",
+  relieve_bend:"Relieved bend", repair_break:"Repaired break", replace_attenuator:"Fitted correct attenuator", replace_transmitter:"Replaced transmitter"};
 const TOOL = {get_link_record:"Link record", get_alarms:"Alarm log", get_pm:"Performance history", otdr_event_table:"OTDR event table",
   otdr_trace:"OTDR trace", otdr_trace_image:"OTDR trace plot", inspect_connector:"Connector inspection", segment_endface:"SAM 3.1 defect scan",
-  measure_power:"Power meter", get_site_notes:"Field log", set_checklist:"Plan", update_checklist:"Checklist update"};
-let caseData = null, es = null, toolCount = 0;
+  measure_power:"Power meter", get_site_notes:"Field log", set_checklist:"Plan", update_checklist:"Checklist update",
+  embedded_otdr:"Embedded OTDR (in service, 1625 nm)"};
+let caseData = null, es = null, toolCount = 0, view = "noc";
+const nocRuns = {};       // seed -> latest NOC "done" event (answer + work order)
+let field = null;         // {session, seed}
 
+/* ---------------------------------------------------------------- route map */
 function routeX(km) { return 40 + (km / caseData.route_km) * 920 }
 function drawRoute(extra = {}) {
   if (!caseData) return;
@@ -186,7 +268,7 @@ function drawRoute(extra = {}) {
     h += `<text class="svg-id" x="${x}" y="${alt ? 14 : 30}" text-anchor="middle">${esc(e.id)}</text>`;
     h += `<text class="svg-text" x="${x}" y="${alt ? 106 : 92}" text-anchor="middle">${e.route_km.toFixed(2)}</text>`;
   }
-  h += `<text class="svg-id" x="40" y="132">SITE A  (Tx)</text><text class="svg-id" x="960" y="132" text-anchor="end">(Rx)  SITE B</text>`;
+  h += `<text class="svg-id" x="40" y="132">A · ${esc(caseData.site_a)} (Tx)</text><text class="svg-id" x="960" y="132" text-anchor="end">(Rx) ${esc(caseData.site_b)} · B</text>`;
   h += `<text class="svg-text" x="500" y="132" text-anchor="middle">route km on as-built map</text>`;
   if (extra.answer) h += pin(extra.answer, "var(--upc)", "agent");
   if (extra.truth) h += pin(extra.truth, extra.correct ? "var(--ok)" : "var(--bad)", "truth", true);
@@ -202,29 +284,60 @@ function pin(loc, colour, label, below) {
   return `<path d="M${x} ${y} l-7 ${d*12} h14 z" fill="${colour}"/><text class="svg-id" x="${tx}" y="${y + d*10}" text-anchor="${right ? "start" : "end"}" style="fill:${colour}">${label}</text>`;
 }
 
+/* ---------------------------------------------------------------- tickets */
+async function loadQueue() {
+  const items = await (await fetch(`/api/queue?mode=${$("#mode").value}`)).json();
+  $("#queue").innerHTML = items.map(t => {
+    const r = nocRuns[t.seed];
+    const badge = r ? `<span class="done" style="color:${r.dispatch && r.dispatch.score ? "var(--ok)" : "var(--bad)"}">${r.answer ? esc(PRETTY[r.answer.fault_type] || "") : "no answer"}</span>` : "";
+    return `<button class="tk" data-seed="${t.seed}" aria-current="${String(t.seed) === $("#seed").value}">
+      <span class="l1"><span class="id">${esc(t.ticket)}</span><span class="sev ${esc(t.severity)}">${esc(t.alarm)}</span></span>
+      <span class="link">${esc(t.link)}</span>
+      <span class="l3">Service ${esc(t.service)} · since ${esc((t.since || "").replace(" UTC", ""))} · ${esc(t.state)}</span>${badge}</button>`;
+  }).join("");
+  document.querySelectorAll(".tk").forEach(b => b.onclick = async () => { $("#seed").value = b.dataset.seed; await selectTicket() });
+}
+async function selectTicket() {
+  await loadCase();
+  document.querySelectorAll(".tk").forEach(b => b.setAttribute("aria-current", String(b.dataset.seed === $("#seed").value)));
+  const prev = nocRuns[$("#seed").value];
+  resetRun();
+  if (prev) showDone(prev);
+  if (view === "field") showFieldTicket();
+}
 async function loadCase() {
   const seed = $("#seed").value, mode = $("#mode").value;
   caseData = await (await fetch(`/api/case/${seed}?mode=${mode}`)).json();
   drawRoute();
+  $("#linkName").textContent = `FS-${seed} · ${caseData.site_a} to ${caseData.site_b}`;
   $("#alarms").innerHTML = caseData.alarms.length ? caseData.alarms.map(a =>
     `<div class="alarm"><span class="sev ${esc(a.severity)}">${esc(a.alarm)}</span><span class="mono" style="font-size:12px">${esc(a.raised)} → ${esc(a.cleared)}</span></div>`).join("")
     : `<p class="empty">No alarms</p>`;
   $("#notes").innerHTML = caseData.notes.map(n => `<div class="note"><time>${esc(n.time)}</time>${esc(n.entry)}</div>`).join("");
-  $("#status").innerHTML = `Case ${esc(seed)} · ${esc(mode)} track · ${caseData.route_km.toFixed(2)} km route`;
+  $("#status").innerHTML = `${esc(mode)} track · ${caseData.route_km.toFixed(2)} km route`;
+  const conns = caseData.elements.filter(e => e.type.startsWith("connector")).map(e => e.id);
+  $("#sconn").innerHTML = conns.map(c => `<option>${esc(c)}</option>`).join("");
+  $("#wel").innerHTML = `<option value="">(route km)</option>` + caseData.elements.map(e => `<option>${esc(e.id)}</option>`).join("") + `<option>B-ATT</option><option>A-TX</option>`;
 }
 
+/* ---------------------------------------------------------------- NOC run view */
 function resetRun() {
-  $("#timeline").innerHTML = ""; toolCount = 0;
+  $("#timeline").innerHTML = `<div class="empty">Press Diagnose remotely to watch FibreSight work the ticket step by step.</div>`; toolCount = 0;
   $("#checklist ol").innerHTML = `<li class="empty" style="display:block">The agent writes its plan here.</li>`;
-  $("#diagnosis").innerHTML = `<div class="label">Diagnosis</div><p class="empty" style="padding:14px 0">Agent is investigating.</p>`;
+  $("#diagnosis").innerHTML = `<div class="label">Diagnosis</div><p class="empty" style="padding:14px 0">Waiting for the agent.</p>`;
+  $("#workorder").hidden = true;
 }
-
 function renderChecklist(items) {
   if (!items || !items.length) return;
   $("#checklist ol").innerHTML = items.map(i => `<li class="${esc(i.status)}"><span class="mark">${
     {done:"✓", failed:"✗", skipped:"–", open:"○"}[i.status] || "○"}</span><span>${esc(i.item)}${i.note ? `<span class="n">${esc(i.note)}</span>` : ""}</span></li>`).join("");
 }
-
+function eventTable(r) {
+  const rows = r.events || [];
+  const worst = Math.max(...rows.filter(e => e.loss_db != null).map(e => e.loss_db), 0);
+  return `<div class="args">${esc(r.wavelength_nm)} nm from site ${esc(r.from_site)} · ${esc(r.test_time || "")}</div><div class="tbl"><table><tr><th>#</th><th>type</th><th>km (fibre)</th><th>loss dB</th><th>refl dB</th></tr>${
+    rows.map(e => `<tr class="${e.loss_db != null && e.loss_db === worst && worst > 0.5 ? "hi" : ""}"><td>${e.event}</td><td>${esc(e.type)}</td><td>${Number(e.distance_km).toFixed(3)}</td><td>${e.loss_db ?? ""}</td><td>${e.reflectance_db ?? ""}</td></tr>`).join("")}</table></div>`;
+}
 function resultView(ev) {
   const r = ev.result || {};
   if (r.error) return `<div class="err">${esc(r.error)}</div>`;
@@ -235,12 +348,7 @@ function resultView(ev) {
     return `<img class="${face ? "face" : ""}" src="${esc(ev.image_url)}" alt="${esc(TOOL[ev.name] || ev.name)}">${extra}`;
   }
   if (ev.name === "measure_power") return `<div class="reading">${r.power_dbm == null ? esc(r.reading) : esc(r.power_dbm) + " <small>dBm at " + esc(r.point) + "</small>"}</div>`;
-  if (ev.name === "otdr_event_table") {
-    const rows = r.events || [];
-    const worst = Math.max(...rows.filter(e => e.loss_db != null).map(e => e.loss_db), 0);
-    return `<div class="args">${esc(r.wavelength_nm)} nm from site ${esc(r.from_site)} · ${esc(r.test_time || "")}</div><div class="tbl"><table><tr><th>#</th><th>type</th><th>km (fibre)</th><th>loss dB</th><th>refl dB</th></tr>${
-      rows.map(e => `<tr class="${e.loss_db != null && e.loss_db === worst && worst > 0.5 ? "hi" : ""}"><td>${e.event}</td><td>${esc(e.type)}</td><td>${e.distance_km.toFixed(3)}</td><td>${e.loss_db ?? ""}</td><td>${e.reflectance_db ?? ""}</td></tr>`).join("")}</table></div>`;
-  }
+  if (ev.name === "otdr_event_table" || ev.name === "embedded_otdr") return eventTable(r);
   if (ev.name === "get_pm") {
     const rows = r.rows || []; const vals = rows.map(x => x.avg ?? x.value);
     if (!vals.length) return "";
@@ -253,7 +361,6 @@ function resultView(ev) {
   if (ev.name === "set_checklist" || ev.name === "update_checklist") return "";
   return `<details class="raw"><summary>Show result</summary><pre>${esc(JSON.stringify(r, null, 1))}</pre></details>`;
 }
-
 function addThinking(ev) {
   const text = (ev.reasoning || ev.content || "").trim(); if (!text) return;
   const short = text.length > 240 ? text.slice(0, 240) + "…" : text;
@@ -276,62 +383,194 @@ function addTool(ev) {
   $("#timeline").appendChild(div); toolCount++;
   div.scrollIntoView({block: "nearest", behavior: "smooth"});
 }
+function whereText(loc) {
+  if (!loc) return "";
+  if (loc.element_id && !["macrobend", "fibre_break"].includes(loc.fault_type)) return loc.element_id;
+  return loc.route_km != null ? `route km ${Number(loc.route_km).toFixed(3)}` : (loc.element_id || "");
+}
 function showDone(ev) {
-  const a = ev.answer, g = ev.grade || {}, gr = ev.grounding || {};
+  const a = ev.answer, g = ev.grade || {}, gr = ev.grounding || {}, noc = ev.view === "noc", dp = ev.dispatch || {};
   if (!a) { $("#diagnosis").innerHTML = `<div class="label">Diagnosis</div><p class="err">No diagnosis submitted.</p>`; return; }
-  const where = a.element_id ? a.element_id : (a.route_km != null ? `route km ${Number(a.route_km).toFixed(3)}` : "");
   const refs = (a.evidence_refs || []).map(r => `<div class="ref"><a href="#call-${r.call_id}" data-call="${r.call_id}">#${r.call_id}</a><span>${esc(r.quote)}</span></div>`).join("");
-  const truthWhere = ev.truth.element_id && !["macrobend","fibre_break"].includes(ev.truth.fault_type) ? ev.truth.element_id : `route km ${Number(ev.truth.route_km).toFixed(3)}`;
-  $("#diagnosis").innerHTML = `<div class="label">Diagnosis</div>
-    <div class="big">${esc(PRETTY[a.fault_type] || a.fault_type)}</div><div class="where">${esc(where)}</div>
+  const ok = noc ? !!dp.score : !!g.score;
+  const conn = noc && dp.score && !g.score && /connector/.test(ev.truth.fault_type);
+  const err = (noc ? dp.route_error_km : g.route_error_km);
+  $("#diagnosis").innerHTML = `<div class="label">${noc ? "Remote diagnosis" : "Diagnosis"}</div>
+    <div class="big">${esc(PRETTY[a.fault_type] || a.fault_type)}</div><div class="where">${esc(whereText(a))}</div>
     <div class="action">${esc(ACTION[a.action] || a.action)}</div>
     <div class="ev">${esc(a.evidence || "")}</div>
     ${refs ? `<div class="label" style="margin-top:10px">Cited evidence</div><div class="refs">${refs}</div>` : ""}
     <div class="check">
-      <div class="row"><span>Checked against simulator truth</span><span class="verdict-chip ${g.score ? "pass" : "fail"}">${g.score ? "CORRECT" : "WRONG"}</span></div>
-      <div class="row"><span>Truth</span><span class="mono">${esc(PRETTY[ev.truth.fault_type])} · ${esc(truthWhere)}</span></div>
-      ${g.route_error_km != null ? `<div class="row"><span>Location error</span><span class="mono">${(g.route_error_km * 1000).toFixed(0)} m</span></div>` : ""}
+      <div class="row"><span>${noc ? "Dispatch check: right crew, right place" : "Checked against simulator truth"}</span><span class="verdict-chip ${ok ? "pass" : "fail"}">${ok ? "CORRECT" : "WRONG"}</span></div>
+      <div class="row"><span>Truth</span><span class="mono">${esc(PRETTY[ev.truth.fault_type])} · ${esc(whereText(ev.truth))}</span></div>
+      ${conn ? `<div class="row"><span>Dirty or damaged</span><span>confirmed on site with the scope</span></div>` : ""}
+      ${err != null ? `<div class="row"><span>Location error</span><span class="mono">${(err * 1000).toFixed(0)} m</span></div>` : ""}
       <div class="row"><span>Citations grounded in tool outputs</span><span class="mono">${gr.rate == null ? "none cited" : `${gr.grounded}/${gr.refs}`}</span></div>
     </div>
     <div class="stats"><div class="stat"><div class="v">${ev.tool_calls}</div><div class="k">tool calls</div></div>
       <div class="stat"><div class="v">${ev.seconds}s</div><div class="k">time</div></div>
-      <div class="stat"><div class="v">${Math.round((ev.usage.prompt_tokens + ev.usage.completion_tokens) / 1000)}k</div><div class="k">tokens</div></div></div>`;
-  document.querySelectorAll(".ref a").forEach(a => a.addEventListener("click", e => { const el = $("#call-" + a.dataset.call); if (el) { el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash") } }));
-  drawRoute({answer: a, truth: ev.truth, correct: !!g.score});
+      <div class="stat"><div class="v">${Math.round(((ev.usage || {}).prompt_tokens + (ev.usage || {}).completion_tokens) / 1000) || 0}k</div><div class="k">tokens</div></div></div>`;
+  document.querySelectorAll(".ref a").forEach(a => a.addEventListener("click", () => { const el = $("#call-" + a.dataset.call); if (el) { el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash") } }));
+  drawRoute({answer: a, truth: ev.truth, correct: ok});
+  const w = ev.work_order;
+  if (w && w.ticket) {
+    const text = `WORK ORDER ${w.ticket}  [${w.priority}]\nLink: ${caseData.site_a} to ${caseData.site_b}\nFault: ${PRETTY[w.fault] || w.fault}\nLocation: ${w.location}\nSend: ${w.send}\nCarry: ${w.carry.join(", ")}\nAction: ${ACTION[w.action] || w.action}\nVerify after fix: ${w.verify_after_fix}`;
+    $("#wo").innerHTML = woGrid(w) + `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn" id="toField">Send to field technician</button><button class="btn ghost" id="copyWo">Copy work order</button></div>`;
+    $("#workorder").hidden = false;
+    $("#copyWo").onclick = async () => { try { await navigator.clipboard.writeText(text); $("#copyWo").textContent = "Copied" } catch { $("#copyWo").textContent = "Copy failed" } };
+    $("#toField").onclick = () => { setView("field"); startField() };
+  }
+}
+function woGrid(w) {
+  return `<div class="wo-grid">
+    <span class="k">Ticket</span><span class="mono">${esc(w.ticket)} · ${esc(w.priority)}</span>
+    <span class="k">Location</span><span>${esc(w.location)}</span>
+    <span class="k">Send</span><span>${esc(w.send)}</span>
+    <span class="k">Carry</span><span>${w.carry.map(esc).join("<br>")}</span>
+    <span class="k">Action</span><span>${esc(ACTION[w.action] || w.action)}</span>
+    <span class="k">Verify</span><span>${esc(w.verify_after_fix)}</span></div>`;
 }
 
 function listen(url) {
   if (es) es.close();
-  resetRun(); $("#runBtn").disabled = true;
+  resetRun(); $("#timeline").innerHTML = ""; $("#runBtn").disabled = true;
   $("#status").innerHTML = `<span class="pulse"></span>Agent working…`;
   es = new EventSource(url);
-  es.onmessage = m => {
+  es.onmessage = async m => {
     const ev = JSON.parse(m.data);
     if (ev.type === "start" && (!caseData || String(caseData.seed) !== String(ev.seed) || caseData.mode !== ev.mode)) {
-      $("#seed").value = ev.seed; $("#mode").value = ev.mode; loadCase();
+      $("#seed").value = ev.seed; $("#mode").value = ev.mode; await loadCase(); loadQueue();
     }
-    if (ev.type === "start") $("#status").innerHTML = `<span class="pulse"></span>${esc(ev.model)} · case ${esc(ev.seed)} · ${esc(ev.mode)} track${ev.replay ? " · replay" : ""}`;
+    if (ev.type === "start") $("#status").innerHTML = `<span class="pulse"></span>${esc(ev.model)} · ${ev.view === "noc" ? "remote diagnosis" : "full field toolkit"}${ev.replay ? " · replay" : ""}`;
     else if (ev.type === "thinking") addThinking(ev);
     else if (ev.type === "tool") addTool(ev);
-    else if (ev.type === "done") { showDone(ev); finish(`Finished in ${ev.seconds}s with ${ev.tool_calls} tool calls`) }
+    else if (ev.type === "done") { ev.view = ev.view || "field"; nocRuns[ev.seed] = ev; showDone(ev); finish(`Finished in ${ev.seconds}s with ${ev.tool_calls} tool calls`); loadQueue() }
     else if (ev.type === "error") { $("#timeline").insertAdjacentHTML("beforeend", `<div class="err">${esc(ev.message)}</div>`); finish("Stopped with an error") }
   };
   es.onerror = () => finish($("#status").textContent.includes("Finished") ? $("#status").textContent : "Connection closed");
 }
 function finish(msg) { if (es) es.close(); es = null; $("#runBtn").disabled = false; $("#status").textContent = msg; loadRuns() }
-
 async function loadRuns() {
   const runs = await (await fetch("/api/runs")).json();
   $("#replay").innerHTML = `<option value="">Saved runs</option>` + runs.map(r => `<option value="${esc(r.run_id)}">${esc(r.run_id)}${r.score == null ? "" : r.score ? "  ✓" : "  ✗"}</option>`).join("");
 }
 
-$("#loadBtn").onclick = loadCase;
-$("#runBtn").onclick = async () => { await loadCase(); listen(`/api/run?seed=${$("#seed").value}&mode=${$("#mode").value}&model=${$("#model").value}&sam=${$("#sam").value}`) };
+/* ---------------------------------------------------------------- views */
+function setView(v) {
+  view = v;
+  $("#tabNoc").setAttribute("aria-selected", String(v === "noc")); $("#tabField").setAttribute("aria-selected", String(v === "field"));
+  $("#nocView").hidden = v !== "noc"; $("#fieldView").hidden = v !== "field";
+  document.querySelectorAll(".nocOnly").forEach(e => e.hidden = v !== "noc");
+  document.querySelectorAll(".fieldOnly").forEach(e => e.hidden = v !== "field");
+  if (v === "field") showFieldTicket();
+}
+function showFieldTicket() {
+  const seed = $("#seed").value, r = nocRuns[seed];
+  $("#fticket").textContent = `FS-${seed} · ${caseData ? caseData.site_a + " to " + caseData.site_b : ""}`;
+  $("#fwo").innerHTML = r && r.work_order && r.work_order.ticket ? woGrid(r.work_order)
+    : `<p class="hint">No NOC diagnosis for this ticket yet. Run Diagnose remotely in the NOC console and press Send to field technician, or start without one.</p>`;
+  if (!field || String(field.seed) !== String(seed)) {
+    field = null;
+    $("#msgs").innerHTML = `<div class="empty">Start a session for FS-${esc(seed)}. The technician can type, send a voice note or a connector picture.</div>`;
+    $("#fstart").textContent = "Start session";
+  }
+}
+
+/* ---------------------------------------------------------------- field chat */
+function addMsg(html) { const m = $("#msgs"); m.insertAdjacentHTML("beforeend", html); m.scrollTop = m.scrollHeight }
+function renderField(ev) {
+  if (ev.type === "tech_text") addMsg(`<div class="bubble tech">${ev.voice ? `<span class="via">Voice note · Muse Voice Transcribe</span>` : ""}${esc(ev.text)}</div>`);
+  else if (ev.type === "assistant") addMsg(`<div class="bubble ai">${esc(ev.text)}</div>`);
+  else if (ev.type === "work_done") addMsg(`<div class="card tech"><div class="k">Work reported</div>${esc(ev.text.replace("[Work done] ", ""))}</div>`);
+  else if (ev.type === "reading" && ev.instrument === "otdr") addMsg(`<div class="card tech"><div class="k">Handheld OTDR</div>${eventTable({events: ev.events, wavelength_nm: ev.wavelength_nm, from_site: ev.from_site})}</div>`);
+  else if (ev.type === "reading") addMsg(`<div class="card ${ev.instrument === "nms" ? "" : "tech"}"><div class="k">${ev.instrument === "nms" ? "Live Rx from the network (read by the assistant)" : "Power meter · " + esc(ev.point)}</div><div class="v">${ev.value == null ? "no light" : esc(ev.value.toFixed(2)) + " dBm"}</div></div>`);
+  else if (ev.type === "photo") addMsg(`<div class="card tech"><div class="k">End-face picture${ev.label ? " · " + esc(ev.label) : ""}</div>
+      <div class="photos"><img src="${esc(ev.image_url)}" alt="End face as captured">${ev.sam_image_url ? `<img src="${esc(ev.sam_image_url)}" alt="SAM 3.1 detections">` : ""}</div>
+      ${ev.verdict ? `<p style="margin:6px 0 0"><span class="verdict-chip ${ev.verdict.startsWith("PASS") ? "pass" : "fail"}">SAM 3.1 · ${esc(ev.verdict)}</span></p>` : ""}${ev.sam_error ? `<div class="err">${esc(ev.sam_error)}</div>` : ""}</div>`);
+  else if (ev.type === "close" && ev.ok) {
+    const r = ev.report || {};
+    addMsg(`<div class="card closed"><div class="k">Ticket closed · verified by measurement</div>
+      <div style="margin:4px 0"><b>${esc(r.fault_confirmed)}</b></div><div>${esc(r.work_done)}</div>
+      <div class="mono" style="margin-top:4px">Checked: ${esc(r.reading_checked)}${r.reading_before ? " · before: " + esc(r.reading_before) : ""}</div>
+      <div style="margin-top:4px">${esc(r.summary)}</div>
+      <div class="check"><div class="row"><span>Simulator truth: fault removed</span><span class="verdict-chip ${r.fault_removed ? "pass" : "fail"}">${r.fault_removed ? "YES" : "NO"}</span></div></div></div>`);
+  }
+  else if (ev.type === "close") addMsg(`<div class="card refused"><div class="k">Close refused</div>${esc(ev.result.error)}</div>`);
+  else if (ev.type === "error") addMsg(`<div class="err">${esc(ev.message)}</div>`);
+}
+function busy(on, label = "Assistant is thinking…") {
+  const t = $("#typing"); if (t) t.remove();
+  if (on) addMsg(`<div class="typing" id="typing"><span class="pulse"></span>${esc(label)}</div>`);
+  document.querySelectorAll("#composer button, [data-inst], #wdone").forEach(b => b.disabled = on);
+}
+async function startField() {
+  const seed = $("#seed").value, r = nocRuns[seed];
+  $("#msgs").innerHTML = ""; busy(true, "Opening the job…");
+  try {
+    const res = await (await fetch("/api/field/start", {method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({seed: Number(seed), mode: $("#mode").value, model: $("#model").value, sam: $("#sam").value === "true", answer: r ? r.answer : null})})).json();
+    field = {session: res.session, seed};
+    busy(false); (res.events || []).forEach(renderField);
+    $("#fstart").textContent = "Restart session";
+  } catch (e) { busy(false); renderField({type: "error", message: String(e)}) }
+}
+async function say(fd, label) {
+  if (!field) await startField();
+  busy(true, label);
+  try {
+    const res = await fetch(`/api/field/${field.session}/say`, {method: "POST", body: fd});
+    const out = await res.json();
+    busy(false);
+    if (!res.ok) renderField({type: "error", message: out.detail || res.statusText});
+    else (out.events || []).forEach(renderField);
+  } catch (e) { busy(false); renderField({type: "error", message: String(e)}) }
+}
+$("#composer").onsubmit = e => { e.preventDefault(); const t = $("#ftext").value.trim(); if (!t) return; $("#ftext").value = ""; const fd = new FormData(); fd.append("text", t); say(fd) };
+$("#photo").onchange = e => { const f = e.target.files[0]; if (!f) return; const fd = new FormData(); fd.append("photo", f); fd.append("photo_label", "uploaded picture"); e.target.value = ""; say(fd, "SAM 3.1 is checking the picture…") };
+document.querySelectorAll("[data-inst]").forEach(b => b.onclick = () => {
+  const k = b.dataset.inst, fd = new FormData();
+  const ins = k === "power" ? {kind: "power", point: $("#ppoint").value} : k === "scope" ? {kind: "scope", element_id: $("#sconn").value}
+    : {kind: "otdr", wavelength_nm: Number($("#owl").value), from_site: $("#osite").value};
+  fd.append("instrument", JSON.stringify(ins));
+  say(fd, k === "scope" ? "SAM 3.1 is checking the end face…" : "Assistant is reading the result…");
+});
+$("#wact").innerHTML = Object.entries(WORK).map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join("");
+$("#wdone").onclick = () => {
+  const el = $("#wel").value || null, km = $("#wkm").value === "" ? null : Number($("#wkm").value);
+  const fd = new FormData(); fd.append("work_done", JSON.stringify({action: $("#wact").value, element_id: el, route_km: km})); say(fd);
+};
+$("#fstart").onclick = startField;
+
+let rec = null, chunks = [];
+$("#mic").onclick = async () => {
+  if (rec && rec.state === "recording") { rec.stop(); return }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    rec = new MediaRecorder(stream); chunks = [];
+    rec.ondataavailable = e => chunks.push(e.data);
+    rec.onstop = () => {
+      stream.getTracks().forEach(t => t.stop()); $("#mic").classList.remove("rec");
+      const type = rec.mimeType || "audio/webm", ext = type.includes("mp4") ? ".mp4" : type.includes("ogg") ? ".ogg" : ".webm";
+      const fd = new FormData(); fd.append("voice", new Blob(chunks, {type}), "note" + ext);
+      say(fd, "Muse Voice Transcribe is listening to the note…");
+    };
+    rec.start(); $("#mic").classList.add("rec");
+  } catch (e) { renderField({type: "error", message: "Microphone not available here: " + e.message}) }
+};
+
+/* ---------------------------------------------------------------- wiring */
+$("#tabNoc").onclick = () => setView("noc");
+$("#tabField").onclick = () => setView("field");
+$("#mode").onchange = async () => { await loadQueue(); await selectTicket() };
+$("#seed").onchange = selectTicket;
+$("#runBtn").onclick = async () => { await loadCase(); listen(`/api/run?seed=${$("#seed").value}&mode=${$("#mode").value}&model=${$("#model").value}&view=noc`) };
 $("#replay").onchange = async e => { const id = e.target.value; if (!id) return; const [seed, mode] = id.split("_"); $("#seed").value = seed; $("#mode").value = mode; await loadCase(); listen(`/api/replay/${encodeURIComponent(id)}`) };
 (async () => {
   const ms = await (await fetch("/api/models")).json();
   $("#model").innerHTML = ms.map(m => `<option value="${esc(m.id)}">${esc(m.label)}</option>`).join("");
-  await loadCase(); loadRuns();
+  await loadQueue();
+  const first = document.querySelector(".tk"); if (first) $("#seed").value = first.dataset.seed;
+  await selectTicket(); loadRuns();
 })();
 </script>
 </body>

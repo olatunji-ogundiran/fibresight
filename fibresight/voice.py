@@ -61,7 +61,8 @@ async def transcribe_pcm(pcm16: bytes, api_key: str, rate: int = 16000, keywords
             pass
         finally:
             task.cancel()
-    if last_partial:
+    # A trailing partial is kept only if it is new text (not a repeat of the last final).
+    if last_partial and not (finals and finals[-1].strip().startswith(last_partial.strip())):
         finals.append(last_partial)
     return {"model": MODEL, "segments": finals, "text": " ".join(s.strip() for s in finals if s.strip())}
 
@@ -75,5 +76,5 @@ def transcribe_file(path: str, api_key: str = None, keywords=None) -> dict:
     return asyncio.run(transcribe_pcm(pcm, api_key, 16000, keywords))
 
 
-FIBRE_KEYWORDS = ["OTDR", "ODF", "splice", "macrobend", "attenuator", "dBm", "Rx", "Tx", "1550", "1310",
+FIBRE_KEYWORDS = ["FibreSight", "OTDR", "ODF", "splice", "macrobend", "attenuator", "dBm", "Rx", "Tx", "1550", "1310",
                   "patch panel", "connector", "closure", "LOS", "pre-FEC"]

@@ -82,6 +82,24 @@ def grade(answer, case: Case) -> dict:
             "route_error_km": None if loc_err is None else round(loc_err, 3), "truth": truth}
 
 
+# Faults that send the same crew with the same kit. A NOC cannot see a
+# connector end face remotely, so dirty and damaged are one dispatch.
+DISPATCH_GROUP = {"dirty_connector": "connector", "damaged_connector": "connector"}
+
+
+def grade_dispatch(answer, case: Case) -> dict:
+    """NOC grading: is the right crew sent to the right place? Same strict
+    location rule as grade(); the fault type only has to match up to the
+    dispatch group (dirty and damaged connectors need the same visit)."""
+    g = grade(answer, case)
+    if not g["valid"]:
+        return {"score": 0.0, "crew_ok": False, "location_ok": False, "errors": g["errors"]}
+    grp = lambda f: DISPATCH_GROUP.get(f, f)
+    crew_ok = grp(answer["fault_type"]) == grp(case.truth["fault_type"])
+    return {"score": 1.0 if crew_ok and g["location_ok"] else 0.0, "crew_ok": crew_ok,
+            "location_ok": g["location_ok"], "route_error_km": g.get("route_error_km"), "errors": []}
+
+
 def _numbers(text: str) -> list:
     import re
     return re.findall(r"-?\d+(?:\.\d+)?", text)

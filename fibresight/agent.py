@@ -12,7 +12,7 @@ from typing import Optional
 
 from .sim import Case
 from .tools import TOOL_SPECS, ToolBox, ToolError
-from .verifier import ANSWER_SCHEMA, grade, grounding
+from .verifier import ANSWER_SCHEMA, grade, grade_dispatch, grounding
 
 SUBMIT_SPEC = {"name": "submit_diagnosis",
                "description": "Submit the final diagnosis. Call exactly once, when you are confident. This ends the investigation.",
@@ -48,6 +48,22 @@ Field procedure (follow it):
 5. Submit only one diagnosis."""
 
 
+NOC_PROMPT = """You are a NOC transmission engineer for a fibre network operator, working remotely. Nobody is on site yet.
+A 1550 nm service from site A to site B is degraded or down. Using only the remote tools (alarms, performance
+monitoring, the embedded in-service OTDR at each site, the link record and the field log), find the single root cause
+and exactly where it is, so the right crew can be sent to the right place with the right kit.
+Finish by calling submit_diagnosis with the fault type, its location and the corrective action.
+Location: give element_id for faults at a connector, splice closure, attenuator (B-ATT) or transmitter (A-TX);
+give route_km (distance from site A on the as-built route map) for a macrobend or a fibre break.
+Connector end faces cannot be inspected remotely. For a connector fault submit dirty_connector with clean_connector
+unless the evidence shows it is damaged: the crew inspects, cleans, and replaces it if it is damaged.
+Start by writing your plan with set_checklist and keep it updated with update_checklist.
+Every tool result carries a call_id. In submit_diagnosis, list the key measurements behind your diagnosis in
+evidence_refs, each with the call_id it came from and the exact value quoted from that result."""
+
+NOC_TICKET = "NOC ticket: alarm raised on the A to B 1550 nm service. Diagnose it remotely so we can dispatch."
+
+
 def _tool_list(tb):
     return [{"type": "function", "function": t} for t in tb.specs + [SUBMIT_SPEC]]
 
@@ -65,13 +81,13 @@ TICKET = "Ticket: customer reports problems on the A to B 1550 nm service. Find 
 
 def iter_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_PROMPT,
                max_steps: int = 30, images: bool = True, temperature: Optional[float] = None,
-               mode: str = "standard", vision_client=None, ticket: str = TICKET):
+               mode: str = "standard", vision_client=None, ticket: str = TICKET, remote_only: bool = False):
     """Run the agent and yield events as it works (used by the demo app).
 
     Events: {"type": "thinking"}, {"type": "tool"}, and a final {"type": "done"}
     carrying the answer, grade, grounding check, checklist and usage.
     """
-    tb = ToolBox(case, workdir, mode, vision_client=vision_client)
+    tb = ToolBox(case, workdir, mode, vision_client=vision_client, remote_only=remote_only)
     messages = [{"role": "system", "content": prompt}, {"role": "user", "content": ticket}]
     transcript, answer, usage = [], None, {"prompt_tokens": 0, "completion_tokens": 0}
     t0 = time.time()
@@ -132,16 +148,21 @@ def iter_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_
         if answer is not None:
             break
     yield {"type": "done", "seed": case.seed, "model": model, "mode": mode, "answer": answer,
-           "grade": grade(answer, case), "grounding": grounding(answer, tb.calls), "checklist": tb.checklist,
+           "view": "noc" if remote_only else "field",
+           "grade": grade(answer, case), "dispatch": grade_dispatch(answer, case),
+           "grounding": grounding(answer, tb.calls), "checklist": tb.checklist,
            "steps": len(transcript), "tool_calls": len(tb.calls), "seconds": round(time.time() - t0, 1),
            "usage": usage, "transcript": transcript}
 
 
 def run_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_PROMPT,
               max_steps: int = 30, images: bool = True, temperature: Optional[float] = None,
-              log_path: Optional[str] = None, mode: str = "standard", vision_client=None) -> dict:
+              log_path: Optional[str] = None, mode: str = "standard", vision_client=None,
+              remote_only: bool = False) -> dict:
     result = None
-    for ev in iter_agent(case, client, model, workdir, prompt, max_steps, images, temperature, mode, vision_client):
+    ticket = NOC_TICKET if remote_only else TICKET
+    for ev in iter_agent(case, client, model, workdir, prompt, max_steps, images, temperature, mode, vision_client,
+                         ticket, remote_only):
         if ev["type"] == "done":
             result = {k: v for k, v in ev.items() if k != "type"}
     if log_path:

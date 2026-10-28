@@ -230,3 +230,89 @@ def _link_diagnosis(tb, record, L, bidirectional, dual_wavelength, anchors_on, i
         eid = min((a for a in anchors if a[2].startswith("SC-")), key=lambda a: abs(a[1] - worst["pos"]))[2]
     return {"fault_type": "bad_splice", "element_id": eid, "route_km": None, "action": "resplice",
             "evidence": f"Non-reflective loss {worst['l1550']:.2f} dB at 1550 nm at closure {eid}."}
+
+
+def _rx_at(tb, when: str) -> float:
+    """Rx power at the time of the test: the last hourly sample for 'now', the
+    most recent 02:00 UTC sample for the night window (same temperature phase)."""
+    rows = tb.call("get_pm", {"metric": "rx_power_dbm", "resolution": "hourly", "last_hours": 48})["rows"]
+    if when == "night":
+        night = [r for r in rows if r["time"].endswith("02:00")]
+        return night[-1]["value"]
+    return rows[-1]["value"]
+
+
+def solve_remote(tb: ToolBox) -> dict:
+    """NOC expert: remote data only (alarms, PM, embedded 1625 nm OTDR from both
+    ends, link record). No one is on site, so connector end faces cannot be
+    inspected: a connector fault is dispatched as clean-first (inspect, clean,
+    re-inspect, replace if damaged)."""
+    record = tb.call("get_link_record", {})
+    L = record["elements_in_route_order"][-1]["route_km"]
+    design = float(record["service"]["B-ATT"].split("design value")[1].split("dB")[0])
+    alarms = tb.call("get_alarms", {})["alarms"]
+    active = {a["alarm"] for a in alarms if a["cleared"] == "active"}
+    low = [a for a in alarms if a["alarm"].startswith("RX_LOW")]
+    when = "night" if len(low) >= 3 and sum(a["cleared"] != "active" for a in low) >= 2 else "now"
+
+    txh = tb.call("get_pm", {"metric": "tx_power_dbm", "resolution": "daily"})["rows"]
+    bias = tb.call("get_pm", {"metric": "tx_bias_ma", "resolution": "daily"})["rows"]
+    tx_drop = txh[0]["avg"] - txh[-1]["min"]
+    if (txh[-1]["min"] < TX_SPEC[0] - 0.3 or tx_drop > 1.5) and bias[-1]["max"] - bias[0]["avg"] > 10.0:
+        return {"fault_type": "tx_degradation", "element_id": "A-TX", "route_km": None, "action": "replace_transmitter",
+                "evidence": f"Tx fell {tx_drop:.1f} dB while laser bias rose {bias[-1]['max'] - bias[0]['avg']:.1f} mA."}
+
+    rx_daily = tb.call("get_pm", {"metric": "rx_power_dbm", "resolution": "daily"})["rows"]
+    rx_before = (rx_daily[0]["avg"] + rx_daily[1]["avg"]) / 2
+    rx_now = _rx_at(tb, when)
+    attenuator = {"fault_type": "wrong_attenuator", "element_id": "B-ATT", "route_km": None,
+                  "action": "replace_attenuator"}
+    if rx_now > rx_before + 2.0:  # fibre faults cannot raise received power
+        return dict(attenuator, evidence=f"Rx rose from {rx_before:.1f} to {rx_now:.1f} dBm: less attenuation than the {design:.0f} dB design.")
+
+    tabs = {s: tb.call("embedded_otdr", {"from_site": s, "time": when}) for s in ("A", "B")}
+    end_a = tabs["A"]["events"][-1]["distance_km"]
+    end_b = tabs["B"]["events"][-1]["distance_km"]
+    if end_a + end_b < 1.5 * L:  # each end sees only its side of a break
+        anc_a = _anchors(record, "A", _event_positions([tabs["A"]]))
+        anc_a = [a for a in anc_a if a[1] < end_a - 0.02]
+        anc_b = _anchors(record, "B", _event_positions([tabs["B"]]))
+        anc_b = [a for a in anc_b if a[1] < end_b - 0.02]
+        r = 0.5 * (_fibre_to_route(anc_a, end_a, "A", L) + _fibre_to_route(anc_b, end_b, "B", L))
+        return {"fault_type": "fibre_break", "element_id": None, "route_km": round(r, 3), "action": "repair_break",
+                "evidence": f"Embedded OTDR ends at {end_a:.3f} km from A and {end_b:.3f} km from B."}
+
+    F = end_a - 1.0
+    def evs(s):
+        return [dict(ev, pos=ev["distance_km"] if s == "A" else F - ev["distance_km"])
+                for ev in tabs[s]["events"] if ev["type"] != "end"]
+    ea, eb = evs("A"), evs("B")
+    cands = []
+    for ev in ea:
+        m = [e for e in eb if abs(e["pos"] - ev["pos"]) < 0.06]
+        if not m:
+            continue
+        b = min(m, key=lambda e: abs(e["pos"] - ev["pos"]))
+        cands.append({"pos": ev["pos"], "loss": (ev["loss_db"] + b["loss_db"]) / 2,
+                      "reflective": ev["type"] == "reflective" or b["type"] == "reflective"})
+    worst = max(cands, key=lambda c: c["loss"])
+    drop = rx_before - rx_now
+    if "RX_LOS" in active or worst["loss"] < 0.6 * drop:  # fibre is fine end to end: loss is in site B equipment
+        return dict(attenuator, evidence=f"Rx down {drop:.1f} dB but the fibre shows no matching event (worst {worst['loss']:.2f} dB).")
+
+    positions = sorted(_event_positions([tabs["A"]]) + [F - p for p in _event_positions([tabs["B"]])])
+    anchors = _anchors(record, "A", positions, fibre_len=F)
+    eid, r_el = _element_at(anchors, worst["pos"], tol=0.04)
+    if worst["reflective"]:
+        if eid is None:
+            eid = min((a for a in anchors if a[2] in ("A-ODF", "MID-PP", "B-ODF")), key=lambda a: abs(a[1] - worst["pos"]))[2]
+        return {"fault_type": "dirty_connector", "element_id": eid, "route_km": None, "action": "clean_connector",
+                "evidence": f"Reflective event {worst['loss']:.2f} dB at {eid}; end face to be inspected on site."}
+    if worst["loss"] / max(drop, 0.1) > 1.3:  # bends lose far more at 1625 than at 1550
+        r = r_el if r_el is not None else _fibre_to_route(anchors, worst["pos"], "A", L)
+        return {"fault_type": "macrobend", "element_id": eid, "route_km": round(r, 3), "action": "relieve_bend",
+                "evidence": f"Event {worst['loss']:.2f} dB at 1625 nm vs {drop:.2f} dB Rx drop at 1550 nm."}
+    if eid is None:
+        eid = min((a for a in anchors if a[2].startswith("SC-")), key=lambda a: abs(a[1] - worst["pos"]))[2]
+    return {"fault_type": "bad_splice", "element_id": eid, "route_km": None, "action": "resplice",
+            "evidence": f"Event {worst['loss']:.2f} dB at 1625 nm matches the {drop:.2f} dB Rx drop: splice at {eid}."}
