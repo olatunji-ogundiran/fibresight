@@ -16,17 +16,27 @@ import subprocess
 import modal
 
 MODEL = "meta-models/Muse-Glimmer-30B"
-VLLM_IMAGE = "vllm/vllm-openai:v0.28.0"
+VLLM_VERSION = "0.28.0"   # first release with the muse_glimmer tool-call and reasoning parsers
 GPU = os.environ.get("GLIMMER_GPU", "H200")   # bf16 weights are about 60 GB
 PORT = 8000
 
-image = (modal.Image.from_registry(VLLM_IMAGE).entrypoint([])
-         .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"}))
+image = (modal.Image.debian_slim(python_version="3.12")
+         .uv_pip_install(f"vllm=={VLLM_VERSION}", "huggingface_hub[hf_xet]"))
+dl_image = modal.Image.debian_slim(python_version="3.12").uv_pip_install("huggingface_hub[hf_xet]")
 weights = modal.Volume.from_name("muse-glimmer-weights", create_if_missing=True)
 vllm_cache = modal.Volume.from_name("muse-glimmer-vllm-cache", create_if_missing=True)
 secret = modal.Secret.from_dict({"GLIMMER_API_KEY": os.environ.get("GLIMMER_API_KEY", "")})
 
 app = modal.App("fibresight-glimmer")
+
+
+@app.function(image=dl_image, volumes={"/root/.cache/huggingface": weights}, timeout=60 * 60)
+def download():
+    """Fetch the weights into the volume on a CPU container (no GPU time spent)."""
+    from huggingface_hub import snapshot_download
+    path = snapshot_download(MODEL)
+    weights.commit()
+    print("weights at", path)
 
 
 @app.function(image=image, gpu=GPU, timeout=60 * 60, scaledown_window=5 * 60,
