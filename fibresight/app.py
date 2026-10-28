@@ -113,8 +113,12 @@ def case_info(seed: int, mode: str = "standard"):
             "notes": tb.get_site_notes()["notes"], "service": rec["service"]}
 
 
+REVIEWERS = {"spark-1.3": ("muse-spark-1.3", "Muse Spark 1.3"), "wonder": ("muse-wonder-1.0", "Muse Wonder 1.0")}
+
+
 @app.get("/api/run")
-def run(seed: int, mode: str = "standard", model: str = "spark-open", sam: bool = True, view: str = "noc"):
+def run(seed: int, mode: str = "standard", model: str = "spark-open", sam: bool = True, view: str = "noc",
+        reviewer: str = "spark-1.3"):
     if model not in MODELS:
         raise HTTPException(400, "unknown model")
     if view not in ("noc", "field"):
@@ -126,6 +130,8 @@ def run(seed: int, mode: str = "standard", model: str = "spark-open", sam: bool 
     case = generate_case(seed, hard=(mode == "hard"))
     client, mid = make_client(provider, model_id)
     vision = make_client("meta")[0] if (sam and not noc) else None
+    rev = (make_client("meta", REVIEWERS[reviewer][0])[0], REVIEWERS[reviewer][0]) if reviewer in REVIEWERS else None
+    rev_label = REVIEWERS[reviewer][1] if rev else "off"
 
     def stream():
         log = open(os.path.join(WORK, run_id + ".jsonl"), "w")
@@ -135,10 +141,12 @@ def run(seed: int, mode: str = "standard", model: str = "spark-open", sam: bool 
             log.flush()
             return _sse(ev)
 
-        yield emit({"type": "start", "run_id": run_id, "seed": seed, "mode": mode, "view": view, "model": label})
+        yield emit({"type": "start", "run_id": run_id, "seed": seed, "mode": mode, "view": view, "model": label,
+                    "reviewer": rev_label})
         try:
             for ev in iter_agent(case, client, mid, workdir, NOC_PROMPT if noc else BASE_PROMPT, mode=mode,
-                                 vision_client=vision, ticket=NOC_TICKET if noc else TICKET, remote_only=noc):
+                                 vision_client=vision, ticket=NOC_TICKET if noc else TICKET, remote_only=noc,
+                                 verify=True, reviewer=rev):
                 if ev["type"] == "tool":
                     ev["image_url"] = _url(ev.pop("image_path"))
                 if ev["type"] == "done":
@@ -146,12 +154,27 @@ def run(seed: int, mode: str = "standard", model: str = "spark-open", sam: bool 
                     ev["truth"] = case.truth
                     rec = ToolBox(case, os.path.join(WORK, "_preview"), mode).get_link_record()
                     ev["work_order"] = work_order(ev.get("answer"), rec, f"FS-{seed}")
+                    ev["reviewer"] = rev_label
                 yield emit(ev)
         except Exception as e:  # surface provider errors in the UI
             yield emit({"type": "error", "message": f"{type(e).__name__}: {e}"})
         log.close()
 
     return StreamingResponse(stream(), media_type="text/event-stream")
+
+
+@app.post("/api/signoff")
+def signoff(payload: dict):
+    """The NOC engineer approves the work order before it is dispatched (human in the loop)."""
+    run_id = os.path.basename(str(payload.get("run_id", "")))
+    path = os.path.join(WORK, run_id + ".jsonl")
+    ev = {"type": "signoff", "run_id": run_id, "by": str(payload.get("by") or "NOC engineer")[:60],
+          "decision": "approved" if payload.get("approved", True) else "returned",
+          "time": time.strftime("%Y-%m-%d %H:%M:%S")}
+    if os.path.exists(path):
+        with open(path, "a") as f:
+            f.write(json.dumps(ev) + "\n")
+    return ev
 
 
 @app.get("/api/runs")

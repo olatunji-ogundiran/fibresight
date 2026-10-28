@@ -12,10 +12,11 @@ from typing import Optional
 
 from .sim import Case
 from .tools import TOOL_SPECS, ToolBox, ToolError
+from .gate import MAX_ATTEMPTS, deterministic_checks, review
 from .verifier import ANSWER_SCHEMA, grade, grade_dispatch, grounding
 
 SUBMIT_SPEC = {"name": "submit_diagnosis",
-               "description": "Submit the final diagnosis. Call exactly once, when you are confident. This ends the investigation.",
+               "description": "Submit the final diagnosis when you are confident. It is checked before it is accepted: it must be complete, cite at least two measurements that match the tool outputs, and every checklist item must be closed. A rejected submission lists the problems; fix them and submit again (3 attempts, then the ticket goes to a human engineer).",
                "parameters": ANSWER_SCHEMA}
 
 BASE_PROMPT = """You are a transmission engineer on call for a fibre network operator.
@@ -81,15 +82,21 @@ TICKET = "Ticket: customer reports problems on the A to B 1550 nm service. Find 
 
 def iter_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_PROMPT,
                max_steps: int = 30, images: bool = True, temperature: Optional[float] = None,
-               mode: str = "standard", vision_client=None, ticket: str = TICKET, remote_only: bool = False):
+               mode: str = "standard", vision_client=None, ticket: str = TICKET, remote_only: bool = False,
+               verify: bool = True, reviewer=None):
     """Run the agent and yield events as it works (used by the demo app).
 
     Events: {"type": "thinking"}, {"type": "tool"}, and a final {"type": "done"}
     carrying the answer, grade, grounding check, checklist and usage.
+
+    verify: run the runtime gate (gate.py) inside submit_diagnosis; rejected
+    submissions go back to the agent, and after MAX_ATTEMPTS the ticket is
+    escalated. reviewer: optional (client, model) for the second-model review.
     """
     tb = ToolBox(case, workdir, mode, vision_client=vision_client, remote_only=remote_only)
     messages = [{"role": "system", "content": prompt}, {"role": "user", "content": ticket}]
     transcript, answer, usage = [], None, {"prompt_tokens": 0, "completion_tokens": 0}
+    attempts, escalated, checks = 0, False, []
     t0 = time.time()
     for step in range(max_steps):
         kw = {"model": model, "messages": messages, "tools": _tool_list(tb), "tool_choice": "auto"}
@@ -121,9 +128,30 @@ def iter_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_
             except json.JSONDecodeError:
                 args = None
             image_path = None
-            if name == "submit_diagnosis":
+            if name == "submit_diagnosis" and not verify:
                 answer = args
                 result = {"status": "submitted"}
+            elif name == "submit_diagnosis":
+                problems = deterministic_checks(args, tb)
+                rev = None
+                if not problems and reviewer is not None:
+                    rev = review(reviewer[0], reviewer[1], args, tb)
+                    if rev["verdict"] == "reject":
+                        problems = ["reviewer: " + r for r in rev["reasons"]] or ["reviewer rejected the diagnosis"]
+                attempts += 1
+                checks.append({"attempt": attempts, "answer": args, "problems": problems, "review": rev})
+                yield {"type": "verification", "step": step, "attempt": attempts, "max_attempts": MAX_ATTEMPTS,
+                       "ok": not problems, "problems": problems, "review": rev, "answer": args}
+                if not problems:
+                    answer = args
+                    result = {"status": "accepted", "checks": "all passed"}
+                elif attempts >= MAX_ATTEMPTS:
+                    answer, escalated = args, True
+                    result = {"status": "escalated", "problems": problems,
+                              "note": "Still failing after 3 attempts: the ticket is escalated to a human engineer."}
+                else:
+                    result = {"status": "rejected", "attempt": attempts, "max_attempts": MAX_ATTEMPTS,
+                              "problems": problems, "note": "Fix these problems, then call submit_diagnosis again."}
             elif args is None:
                 result = {"error": "arguments were not valid JSON"}
             else:
@@ -151,6 +179,7 @@ def iter_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_
            "view": "noc" if remote_only else "field",
            "grade": grade(answer, case), "dispatch": grade_dispatch(answer, case),
            "grounding": grounding(answer, tb.calls), "checklist": tb.checklist,
+           "verification": {"enabled": verify, "attempts": attempts, "escalated": escalated, "history": checks},
            "steps": len(transcript), "tool_calls": len(tb.calls), "seconds": round(time.time() - t0, 1),
            "usage": usage, "transcript": transcript}
 
@@ -158,11 +187,11 @@ def iter_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_
 def run_agent(case: Case, client, model: str, workdir: str, prompt: str = BASE_PROMPT,
               max_steps: int = 30, images: bool = True, temperature: Optional[float] = None,
               log_path: Optional[str] = None, mode: str = "standard", vision_client=None,
-              remote_only: bool = False) -> dict:
+              remote_only: bool = False, verify: bool = True, reviewer=None) -> dict:
     result = None
     ticket = NOC_TICKET if remote_only else TICKET
     for ev in iter_agent(case, client, model, workdir, prompt, max_steps, images, temperature, mode, vision_client,
-                         ticket, remote_only):
+                         ticket, remote_only, verify, reviewer):
         if ev["type"] == "done":
             result = {k: v for k, v in ev.items() if k != "type"}
     if log_path:

@@ -129,6 +129,10 @@ details.raw pre { background: var(--code); padding: 8px; border-radius: 6px; ove
 .tk .link { font-size: 13.5px; font-weight: 600 }
 .tk .l3 { font-size: 12px; color: var(--muted) }
 .tk .done { font: 600 11px var(--mono) }
+.step.vpass { border-color: var(--ok) } .step.vfail { border-color: var(--warn) }
+.probs { margin: 6px 0 0; padding-left: 18px; font-size: 13px; display: grid; gap: 3px }
+.signoff { margin-top: 10px; padding: 8px 10px; border-radius: 6px; font-size: 13px; background: color-mix(in srgb, var(--warn) 12%, transparent); color: var(--ink) }
+.signoff.ok { background: color-mix(in srgb, var(--ok) 12%, transparent) }
 .hint { font-size: 12.5px; color: var(--muted); margin: 6px 0 0 }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px }
 .stat .v { font: 600 18px var(--mono) }
@@ -182,6 +186,7 @@ details.raw pre { background: var(--code); padding: 8px; border-radius: 6px; ove
     <label>Track <select id="mode"><option value="standard">Standard</option><option value="hard">Hard</option></select></label>
     <label>Model <select id="model"></select></label>
     <label class="fieldOnly" hidden>Connector vision <select id="sam"><option value="true">SAM 3.1 on</option><option value="false">Off</option></select></label>
+    <label class="nocOnly">Reviewer <select id="reviewer"><option value="spark-1.3">Muse Spark 1.3</option><option value="wonder">Muse Wonder 1.0</option><option value="off">Off</option></select></label>
     <label class="nocOnly">Ticket <input id="seed" type="number" value="1005" min="0"></label>
     <button class="btn nocOnly" id="runBtn">Diagnose remotely</button>
     <label class="nocOnly">Replay <select id="replay"><option value="">Saved runs</option></select></label>
@@ -250,7 +255,7 @@ const TOOL = {get_link_record:"Link record", get_alarms:"Alarm log", get_pm:"Per
   otdr_trace:"OTDR trace", otdr_trace_image:"OTDR trace plot", inspect_connector:"Connector inspection", segment_endface:"SAM 3.1 defect scan",
   measure_power:"Power meter", get_site_notes:"Field log", set_checklist:"Plan", update_checklist:"Checklist update",
   embedded_otdr:"Embedded OTDR (in service, 1625 nm)"};
-let caseData = null, es = null, toolCount = 0, view = "noc";
+let caseData = null, es = null, toolCount = 0, view = "noc", currentRun = null;
 const nocRuns = {};       // seed -> latest NOC "done" event (answer + work order)
 let field = null;         // {session, seed}
 
@@ -383,6 +388,16 @@ function addTool(ev) {
   $("#timeline").appendChild(div); toolCount++;
   div.scrollIntoView({block: "nearest", behavior: "smooth"});
 }
+function addVerification(ev) {
+  const rev = ev.review;
+  const d = document.createElement("div"); d.className = "step " + (ev.ok ? "vpass" : "vfail");
+  d.innerHTML = `<div class="top"><span class="tname">Submission check</span><span class="args">attempt ${ev.attempt} of ${ev.max_attempts}</span>
+      <span class="verdict-chip ${ev.ok ? "pass" : "fail"}">${ev.ok ? "ACCEPTED" : (ev.attempt >= ev.max_attempts ? "ESCALATED" : "SENT BACK")}</span></div>
+    <div class="result">${ev.ok ? `<div class="args">Complete answer · real location · right action for the fault · cited readings match the data · checklist closed</div>`
+      : `<ul class="probs">${(ev.problems || []).map(p => `<li>${esc(p)}</li>`).join("")}</ul>`}
+    ${rev ? `<div class="args" style="margin-top:6px">AI reviewer (${esc(rev.model)}): <b>${esc(rev.verdict)}</b>${rev.reasons && rev.reasons.length ? " · " + esc(rev.reasons.join("; ")) : ""}</div>` : ""}</div>`;
+  $("#timeline").appendChild(d); d.scrollIntoView({block: "nearest", behavior: "smooth"});
+}
 function whereText(loc) {
   if (!loc) return "";
   if (loc.element_id && !["macrobend", "fibre_break"].includes(loc.fault_type)) return loc.element_id;
@@ -395,7 +410,8 @@ function showDone(ev) {
   const ok = noc ? !!dp.score : !!g.score;
   const conn = noc && dp.score && !g.score && /connector/.test(ev.truth.fault_type);
   const err = (noc ? dp.route_error_km : g.route_error_km);
-  $("#diagnosis").innerHTML = `<div class="label">${noc ? "Remote diagnosis" : "Diagnosis"}</div>
+  const vf = ev.verification || {}, hist = vf.history || [], lastRev = hist.length ? hist[hist.length - 1].review : null;
+  $("#diagnosis").innerHTML = `<div class="label">${vf.escalated ? "Escalated to NOC engineer (failed checks 3 times)" : noc ? "Remote diagnosis" : "Diagnosis"}</div>
     <div class="big">${esc(PRETTY[a.fault_type] || a.fault_type)}</div><div class="where">${esc(whereText(a))}</div>
     <div class="action">${esc(ACTION[a.action] || a.action)}</div>
     <div class="ev">${esc(a.evidence || "")}</div>
@@ -406,6 +422,8 @@ function showDone(ev) {
       ${conn ? `<div class="row"><span>Dirty or damaged</span><span>confirmed on site with the scope</span></div>` : ""}
       ${err != null ? `<div class="row"><span>Location error</span><span class="mono">${(err * 1000).toFixed(0)} m</span></div>` : ""}
       <div class="row"><span>Citations grounded in tool outputs</span><span class="mono">${gr.rate == null ? "none cited" : `${gr.grounded}/${gr.refs}`}</span></div>
+      ${vf.enabled ? `<div class="row"><span>Checks before submit</span>${vf.escalated ? `<span class="verdict-chip fail">ESCALATED</span>` : `<span class="mono">passed, attempt ${vf.attempts}</span>`}</div>` : ""}
+      ${lastRev ? `<div class="row"><span>AI reviewer</span><span class="mono">${esc(lastRev.model)}: ${esc(lastRev.verdict)}</span></div>` : ""}
     </div>
     <div class="stats"><div class="stat"><div class="v">${ev.tool_calls}</div><div class="k">tool calls</div></div>
       <div class="stat"><div class="v">${ev.seconds}s</div><div class="k">time</div></div>
@@ -415,10 +433,19 @@ function showDone(ev) {
   const w = ev.work_order;
   if (w && w.ticket) {
     const text = `WORK ORDER ${w.ticket}  [${w.priority}]\nLink: ${caseData.site_a} to ${caseData.site_b}\nFault: ${PRETTY[w.fault] || w.fault}\nLocation: ${w.location}\nSend: ${w.send}\nCarry: ${w.carry.join(", ")}\nAction: ${ACTION[w.action] || w.action}\nVerify after fix: ${w.verify_after_fix}`;
-    $("#wo").innerHTML = woGrid(w) + `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn" id="toField">Send to field technician</button><button class="btn ghost" id="copyWo">Copy work order</button></div>`;
+    $("#wo").innerHTML = woGrid(w) + `<div class="signoff ${ev.signed ? "ok" : ""}" id="signoff">${ev.signed ? esc(ev.signed) : vf.escalated
+        ? "Escalated: the engineer must review the evidence before anything is dispatched." : "Awaiting NOC engineer sign-off before dispatch."}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn" id="approveWo" ${ev.signed ? "hidden" : ""}>Approve and dispatch</button>
+      <button class="btn ${ev.signed ? "" : "ghost"}" id="toField" ${ev.signed ? "" : "disabled"}>Send to field technician</button><button class="btn ghost" id="copyWo">Copy work order</button></div>`;
     $("#workorder").hidden = false;
     $("#copyWo").onclick = async () => { try { await navigator.clipboard.writeText(text); $("#copyWo").textContent = "Copied" } catch { $("#copyWo").textContent = "Copy failed" } };
     $("#toField").onclick = () => { setView("field"); startField() };
+    $("#approveWo").onclick = async () => {
+      let r = {time: new Date().toTimeString().slice(0, 5)};
+      try { r = await (await fetch("/api/signoff", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({run_id: ev.run_id, by: "NOC engineer"})})).json() } catch {}
+      ev.signed = `Approved and dispatched by NOC engineer · ${String(r.time || "").slice(-8, -3) || r.time}`;
+      showDone(ev);
+    };
   }
 }
 function woGrid(w) {
@@ -441,10 +468,12 @@ function listen(url) {
     if (ev.type === "start" && (!caseData || String(caseData.seed) !== String(ev.seed) || caseData.mode !== ev.mode)) {
       $("#seed").value = ev.seed; $("#mode").value = ev.mode; await loadCase(); loadQueue();
     }
-    if (ev.type === "start") $("#status").innerHTML = `<span class="pulse"></span>${esc(ev.model)} · ${ev.view === "noc" ? "remote diagnosis" : "full field toolkit"}${ev.replay ? " · replay" : ""}`;
+    if (ev.type === "start") { currentRun = ev.run_id; $("#status").innerHTML = `<span class="pulse"></span>${esc(ev.model)} · ${ev.view === "noc" ? "remote diagnosis" : "full field toolkit"}${ev.reviewer && ev.reviewer !== "off" ? " · reviewer " + esc(ev.reviewer) : ""}${ev.replay ? " · replay" : ""}` }
+    else if (ev.type === "verification") addVerification(ev);
+    else if (ev.type === "signoff") { const r = nocRuns[$("#seed").value]; if (r) { r.signed = `Approved and dispatched by ${ev.by} · ${ev.time.slice(11, 16)}`; showDone(r) } }
     else if (ev.type === "thinking") addThinking(ev);
     else if (ev.type === "tool") addTool(ev);
-    else if (ev.type === "done") { ev.view = ev.view || "field"; nocRuns[ev.seed] = ev; showDone(ev); finish(`Finished in ${ev.seconds}s with ${ev.tool_calls} tool calls`); loadQueue() }
+    else if (ev.type === "done") { ev.view = ev.view || "field"; ev.run_id = currentRun; nocRuns[ev.seed] = ev; showDone(ev); finish(`Finished in ${ev.seconds}s with ${ev.tool_calls} tool calls`); loadQueue() }
     else if (ev.type === "error") { $("#timeline").insertAdjacentHTML("beforeend", `<div class="err">${esc(ev.message)}</div>`); finish("Stopped with an error") }
   };
   es.onerror = () => finish($("#status").textContent.includes("Finished") ? $("#status").textContent : "Connection closed");
@@ -563,7 +592,7 @@ $("#tabNoc").onclick = () => setView("noc");
 $("#tabField").onclick = () => setView("field");
 $("#mode").onchange = async () => { await loadQueue(); await selectTicket() };
 $("#seed").onchange = selectTicket;
-$("#runBtn").onclick = async () => { await loadCase(); listen(`/api/run?seed=${$("#seed").value}&mode=${$("#mode").value}&model=${$("#model").value}&view=noc`) };
+$("#runBtn").onclick = async () => { await loadCase(); listen(`/api/run?seed=${$("#seed").value}&mode=${$("#mode").value}&model=${$("#model").value}&view=noc&reviewer=${$("#reviewer").value}`) };
 $("#replay").onchange = async e => { const id = e.target.value; if (!id) return; const [seed, mode] = id.split("_"); $("#seed").value = seed; $("#mode").value = mode; await loadCase(); listen(`/api/replay/${encodeURIComponent(id)}`) };
 (async () => {
   const ms = await (await fetch("/api/models")).json();

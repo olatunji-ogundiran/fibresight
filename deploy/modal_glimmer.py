@@ -20,11 +20,16 @@ VLLM_VERSION = "0.28.0"   # first release with the muse_glimmer tool-call and re
 GPU = os.environ.get("GLIMMER_GPU", "H200")   # bf16 weights are about 60 GB
 PORT = 8000
 
-image = (modal.Image.debian_slim(python_version="3.12")
-         .uv_pip_install(f"vllm=={VLLM_VERSION}", "huggingface_hub[hf_xet]"))
+# vLLM 0.28 ships torch for CUDA 13.0, and FlashInfer compiles kernels at start-up, so the image needs
+# the CUDA 13.0 toolkit (nvcc), not just the runtime.
+image = (modal.Image.from_registry("nvidia/cuda:13.0.2-devel-ubuntu24.04", add_python="3.12")
+         .entrypoint([])
+         .uv_pip_install(f"vllm=={VLLM_VERSION}", "huggingface_hub[hf_xet]")
+         .env({"CUDA_HOME": "/usr/local/cuda"}))
 dl_image = modal.Image.debian_slim(python_version="3.12").uv_pip_install("huggingface_hub[hf_xet]")
 weights = modal.Volume.from_name("muse-glimmer-weights", create_if_missing=True)
 vllm_cache = modal.Volume.from_name("muse-glimmer-vllm-cache", create_if_missing=True)
+jit_cache = modal.Volume.from_name("muse-glimmer-flashinfer-cache", create_if_missing=True)
 secret = modal.Secret.from_dict({"GLIMMER_API_KEY": os.environ.get("GLIMMER_API_KEY", "")})
 
 app = modal.App("fibresight-glimmer")
@@ -40,10 +45,11 @@ def download():
 
 
 @app.function(image=image, gpu=GPU, timeout=60 * 60, scaledown_window=5 * 60,
-              volumes={"/root/.cache/huggingface": weights, "/root/.cache/vllm": vllm_cache},
+              volumes={"/root/.cache/huggingface": weights, "/root/.cache/vllm": vllm_cache,
+                       "/root/.cache/flashinfer": jit_cache},
               secrets=[secret], max_containers=1)
 @modal.concurrent(max_inputs=16)
-@modal.web_server(port=PORT, startup_timeout=40 * 60)
+@modal.web_server(port=PORT, startup_timeout=25 * 60)
 def serve():
     key = os.environ["GLIMMER_API_KEY"]
     assert key, "deploy with GLIMMER_API_KEY set"
