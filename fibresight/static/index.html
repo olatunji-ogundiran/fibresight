@@ -230,7 +230,9 @@ details.raw pre { background: var(--code); padding: 8px; border-radius: 6px; ove
     </section>
   </div>
   <section class="panel chat" aria-label="Chat with the field assistant">
-    <div class="head"><span><span class="label">Field assistant</span> <span class="mono" id="fticket" style="font-size:12px"></span></span><button class="btn ghost" id="fstart">Start session</button></div>
+    <div class="head"><span><span class="label">Field assistant</span> <span class="mono" id="fticket" style="font-size:12px"></span></span>
+      <span style="display:flex;gap:8px;align-items:center"><select id="freplay" aria-label="Replay a saved field session" class="mono" style="max-width:190px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:12px"><option value="">Replay saved session</option></select>
+      <button class="btn ghost" id="fstart">Start session</button></span></div>
     <div class="msgs" id="msgs"><div class="empty">Start a session for the selected ticket. The technician can type, send a voice note or a connector picture.</div></div>
     <form class="composer" id="composer">
       <button type="button" class="round" id="mic" aria-label="Record voice note" title="Voice note (Muse Voice Transcribe)"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
@@ -475,10 +477,11 @@ function listen(url) {
     else if (ev.type === "signoff") { const r = nocRuns[$("#seed").value]; if (r) { r.signed = `Approved and dispatched by ${ev.by} · ${ev.time.slice(11, 16)}`; showDone(r) } }
     else if (ev.type === "thinking") addThinking(ev);
     else if (ev.type === "tool") addTool(ev);
-    else if (ev.type === "done") { ev.view = ev.view || "field"; ev.run_id = currentRun; nocRuns[ev.seed] = ev; showDone(ev); finish(`Finished in ${ev.seconds}s with ${ev.tool_calls} tool calls`); loadQueue() }
+    else if (ev.type === "done") { ev.view = ev.view || "field"; ev.run_id = currentRun; nocRuns[ev.seed] = ev; showDone(ev);
+      $("#status").textContent = `Finished in ${ev.seconds}s with ${ev.tool_calls} tool calls`; loadQueue() }
     else if (ev.type === "error") { $("#timeline").insertAdjacentHTML("beforeend", `<div class="err">${esc(ev.message)}</div>`); finish("Stopped with an error") }
   };
-  es.onerror = () => finish($("#status").textContent.includes("Finished") ? $("#status").textContent : "Connection closed");
+  es.onerror = () => finish($("#status").textContent.includes("Finished") ? $("#status").textContent : "Connection closed");  // stream ended
 }
 function finish(msg) { if (es) es.close(); es = null; $("#runBtn").disabled = false; $("#status").textContent = msg; loadRuns() }
 async function loadRuns() {
@@ -540,13 +543,13 @@ async function startField() {
   try {
     const res = await (await fetch("/api/field/start", {method: "POST", headers: {"Content-Type": "application/json"},
       body: JSON.stringify({seed: Number(seed), mode: $("#mode").value, model: $("#model").value, sam: $("#sam").value === "true", answer: r ? r.answer : null})})).json();
-    field = {session: res.session, seed};
+    field = {session: res.session, seed}; loadFieldSessions();
     busy(false); (res.events || []).forEach(renderField);
     $("#fstart").textContent = "Restart session";
   } catch (e) { busy(false); renderField({type: "error", message: String(e)}) }
 }
 async function say(fd, label) {
-  if (!field) await startField();
+  if (!field || !field.session) await startField();
   busy(true, label);
   try {
     const res = await fetch(`/api/field/${field.session}/say`, {method: "POST", body: fd});
@@ -571,6 +574,30 @@ $("#wdone").onclick = () => {
   const fd = new FormData(); fd.append("work_done", JSON.stringify({action: $("#wact").value, element_id: el, route_km: km})); say(fd);
 };
 $("#fstart").onclick = startField;
+
+async function loadFieldSessions() {
+  try {
+    const list = await (await fetch("/api/field/sessions")).json();
+    $("#freplay").innerHTML = `<option value="">Replay saved session</option>` + list.map(x =>
+      `<option value="${esc(x.id)}">FS-${esc(x.seed)} · ${esc(x.turns)} events${x.closed ? " · closed ✓" : ""}</option>`).join("");
+  } catch {}
+}
+$("#freplay").onchange = async e => {
+  const id = e.target.value; if (!id) return;
+  const data = await (await fetch(`/api/field/session/${encodeURIComponent(id)}`)).json();
+  const meta = data.meta || {};
+  if (meta.seed != null && String(meta.seed) !== $("#seed").value) { $("#seed").value = meta.seed; await loadCase() }
+  field = null; showFieldTicket(); field = {session: null, seed: $("#seed").value, replay: true};
+  if (meta.work_order && meta.work_order.ticket) $("#fwo").innerHTML = woGrid(meta.work_order);
+  $("#msgs").innerHTML = "";
+  for (const ev of data.events) {
+    const wait = ev.type === "assistant" ? 1800 : ev.type === "photo" ? 1500 : 1000;
+    busy(true, ev.type === "assistant" ? "Assistant is thinking…" : "…");
+    await new Promise(r => setTimeout(r, wait));
+    busy(false); renderField(ev);
+  }
+  e.target.value = "";
+};
 
 let rec = null, chunks = [];
 $("#mic").onclick = async () => {
@@ -601,7 +628,7 @@ $("#replay").onchange = async e => { const id = e.target.value; if (!id) return;
   $("#model").innerHTML = ms.map(m => `<option value="${esc(m.id)}">${esc(m.label)}</option>`).join("");
   await loadQueue();
   const first = document.querySelector(".tk"); if (first) $("#seed").value = first.dataset.seed;
-  await selectTicket(); loadRuns();
+  await selectTicket(); loadRuns(); loadFieldSessions();
 })();
 </script>
 </body>

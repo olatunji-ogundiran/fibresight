@@ -11,6 +11,7 @@ Every run is saved and can be replayed offline.
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import time
@@ -29,6 +30,23 @@ from .field import FieldSession
 ROOT = os.path.dirname(os.path.abspath(__file__))
 WORK = os.path.abspath(os.path.join(os.getcwd(), "results", "demo"))
 os.makedirs(WORK, exist_ok=True)
+DEMO_RUNS = os.path.join(os.path.dirname(ROOT), "demo_runs")
+
+
+def _seed_demo_runs() -> None:
+    """Copy the curated demo runs shipped with the repo into the run folder, so they can be
+    replayed on any machine without API keys."""
+    import shutil
+    if not os.path.isdir(DEMO_RUNS):
+        return
+    for name in os.listdir(DEMO_RUNS):
+        src, dst = os.path.join(DEMO_RUNS, name), os.path.join(WORK, name)
+        if os.path.exists(dst):
+            continue
+        (shutil.copytree if os.path.isdir(src) else shutil.copy2)(src, dst)
+
+
+_seed_demo_runs()
 
 MODELS = {
     "spark-open": ("baseten", None, "Muse Spark Open (open weights, Baseten)"),
@@ -179,7 +197,7 @@ def signoff(payload: dict):
 
 @app.get("/api/runs")
 def runs():
-    files = sorted((f for f in os.listdir(WORK) if f.endswith(".jsonl")), reverse=True)
+    files = sorted((f for f in os.listdir(WORK) if f.endswith(".jsonl") and not f.startswith("field_")), reverse=True)
     out = []
     for f in files[:40]:
         try:
@@ -223,6 +241,36 @@ def _field_events(events: list) -> list:
     return out
 
 
+def _field_log(fs, events: list, meta: dict = None) -> None:
+    """Append a field session's events to results/demo/<session>.jsonl so it can be replayed."""
+    path = os.path.join(WORK, os.path.basename(fs.workdir) + ".jsonl")
+    with open(path, "a") as f:
+        if meta:
+            f.write(json.dumps(dict(meta, type="field_start"), default=str) + "\n")
+        for ev in events:
+            f.write(json.dumps(ev, default=str) + "\n")
+
+
+@app.get("/api/field/sessions")
+def field_sessions():
+    out = []
+    for name in sorted((n for n in os.listdir(WORK) if n.startswith("field_") and n.endswith(".jsonl")), reverse=True)[:40]:
+        lines = [json.loads(l) for l in open(os.path.join(WORK, name))]
+        closed = any(e.get("type") == "close" and e.get("ok") for e in lines)
+        seed = lines[0].get("seed") if lines else None
+        out.append({"id": name[:-6], "seed": seed, "closed": closed, "turns": len(lines) - 1})
+    return out
+
+
+@app.get("/api/field/session/{name}")
+def field_session(name: str):
+    path = os.path.join(WORK, os.path.basename(name) + ".jsonl")
+    if not os.path.exists(path):
+        raise HTTPException(404, "session not found")
+    lines = [json.loads(l) for l in open(path)]
+    return {"meta": lines[0] if lines else {}, "events": lines[1:]}
+
+
 @app.post("/api/field/start")
 def field_start(payload: dict):
     """Open a technician session for a ticket, with the NOC's diagnosis if there is one."""
@@ -241,7 +289,9 @@ def field_start(payload: dict):
         events = fs.start()
     except Exception as e:
         events = [{"type": "error", "message": f"{type(e).__name__}: {e}"}]
-    return {"session": fs.id, "work_order": fs.work_order, "model": label, "events": _field_events(events)}
+    out = _field_events(events)
+    _field_log(fs, out, {"seed": seed, "mode": mode, "session": fs.id, "work_order": fs.work_order, "model": label})
+    return {"session": fs.id, "work_order": fs.work_order, "model": label, "events": out}
 
 
 @app.post("/api/field/{sid}/say")
@@ -256,7 +306,7 @@ async def field_say(sid: str, text: str = Form(None), instrument: str = Form(Non
         path = os.path.join(fs.workdir, f"voice_{uuid.uuid4().hex[:6]}{os.path.splitext(voice.filename or '')[1] or '.webm'}")
         open(path, "wb").write(await voice.read())
         try:
-            heard = transcribe_file(path, keywords=FIBRE_KEYWORDS)["text"]
+            heard = (await asyncio.to_thread(transcribe_file, path, None, FIBRE_KEYWORDS))["text"]
         except Exception as e:
             return {"events": [{"type": "error", "message": f"Transcription failed: {e}"}]}
         if not heard.strip():
@@ -266,12 +316,14 @@ async def field_say(sid: str, text: str = Form(None), instrument: str = Form(Non
         photo_path = os.path.join(fs.workdir, f"upload_{uuid.uuid4().hex[:6]}{os.path.splitext(photo.filename or '')[1] or '.jpg'}")
         open(photo_path, "wb").write(await photo.read())
     try:
-        events = fs.technician(text=text, photo_path=photo_path, photo_label=photo_label,
-                               instrument=json.loads(instrument) if instrument else None,
-                               work_done=json.loads(work_done) if work_done else None, voice=is_voice)
+        events = await asyncio.to_thread(fs.technician, text=text, photo_path=photo_path, photo_label=photo_label,
+                                         instrument=json.loads(instrument) if instrument else None,
+                                         work_done=json.loads(work_done) if work_done else None, voice=is_voice)
     except Exception as e:
         events = [{"type": "error", "message": f"{type(e).__name__}: {e}"}]
-    return {"events": _field_events(pre + events), "closed": fs.closed}
+    out = _field_events(pre + events)
+    _field_log(fs, out)
+    return {"events": out, "closed": fs.closed}
 
 
 @app.get("/api/fault_types")
