@@ -122,6 +122,24 @@ python -m fibresight.bench --solver agent --provider baseten --n 21
 python -m fibresight.bench --solver agent --provider baseten --view noc --n 14   # NOC: remote data only
 ```
 
+## Run it on Windows (WSL Ubuntu)
+
+```
+sudo apt update && sudo apt install -y ffmpeg python3-venv git
+git clone https://github.com/olatunji-ogundiran/fibresight.git
+cd fibresight
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python -m fibresight.app
+```
+
+Open http://localhost:8000 in Chrome or Edge on Windows. The saved FS-1002 demo runs replay with no API keys. For live runs, create a file named `.env` in the `fibresight` folder:
+
+```
+BASETEN_API_KEY=your Baseten key
+META_API_KEY=your Meta Model API key
+```
+
 ## Demo app
 
 ```
