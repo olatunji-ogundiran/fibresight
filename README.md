@@ -7,7 +7,13 @@ It serves the two people who fix a fibre fault:
 - **NOC engineer (remote).** From alarms, performance history and the OTDR built into the line equipment, FibreSight finds the fault and its exact location without anyone on site, then writes the dispatch work order: who to send, where exactly (distance from the nearest closure), what to carry and how to verify the fix.
 - **Field technician (on site).** A chat assistant on the phone. The technician sends voice notes (Muse Voice Transcribe), connector end-face pictures (checked by SAM 3.1) and instrument readings; the assistant guides one step at a time and can close the ticket only when a live reading after the repair is back in range.
 
-> Work in progress during the hackathon build week. Full documentation, results and demo come before submission.
+![NOC console: remote diagnosis of ticket FS-1002, with the agent's checklist and its pin on the route map](docs/noc_console.png)
+
+![Field assistant: voice notes, SAM 3.1 end-face checks and a ticket closed only after a live reading proves the fix](docs/field_assistant.png)
+
+## Built during the hackathon
+
+Everything in this repository was written during the Meta Global AI Developer Hackathon, 27 October to 4 November 2026 (the first commit is 27 October): the fibre link and fault simulator, the OTDR and performance models, the instrument tools, the strict verifier and citation check, the reference expert solvers, the agent loop, the runtime gate and AI reviewer, the route mapper, simulated repairs, the NOC console and field assistant, the SAM 3.1 and Muse Voice Transcribe integrations, and the Muse Glimmer deployment on Modal. Only open-source libraries from `requirements.txt` are used. Licence: Apache 2.0.
 
 ## What it does
 
@@ -106,8 +112,13 @@ fibresight/repair.py    simulated repairs (only the right fix works)
 fibresight/field.py     field assistant session (voice, pictures, readings, verified close)
 fibresight/vision.py    connector end-face defect detection with SAM 3.1
 fibresight/voice.py     speech to text with Muse Voice Transcribe (realtime)
+fibresight/gate.py      runtime checks inside submit_diagnosis and the AI reviewer
 fibresight/agent.py     tool-calling agent loop (OpenAI-compatible endpoints)
 fibresight/bench.py     benchmark runner
+fibresight/app.py       demo app: NOC console and field assistant (FastAPI)
+deploy/modal_glimmer.py Muse Glimmer 30B served with vLLM on Modal
+demo_runs/              saved FS-1002 runs that replay without API keys
+results/                benchmark summaries and per-case logs
 tests/                  test suite
 ```
 
